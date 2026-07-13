@@ -478,7 +478,14 @@ function acquireLock(): void {
 }
 
 function releaseLock(): void {
-  if (lockFd !== undefined) closeSync(lockFd);
+  if (lockFd !== undefined) {
+    try {
+      closeSync(lockFd);
+    } catch {
+      // fd may already be closed by a prior releaseLock call
+    }
+    lockFd = undefined;
+  }
   if (existsSync(lockPath)) unlinkSync(lockPath);
 }
 
@@ -835,6 +842,46 @@ function sameOptions(field: ProjectField, desired: string[]): boolean {
   return current.length === desired.length && current.every((value, index) => value === desired[index]);
 }
 
+const SINGLE_SELECT_OPTION_COLORS = [
+  "GRAY",
+  "BLUE",
+  "YELLOW",
+  "ORANGE",
+  "GREEN",
+  "PURPLE",
+  "RED",
+  "PINK",
+] as const;
+
+function updateSingleSelectFieldOptions(field: ProjectField, desired: string[]): void {
+  const existingByName = new Map((field.options ?? []).map((option) => [option.name, option.id]));
+  const options = desired.map((name, index) => {
+    const option: { id?: string; name: string; color: string; description: string } = {
+      name,
+      color: SINGLE_SELECT_OPTION_COLORS[index % SINGLE_SELECT_OPTION_COLORS.length],
+      description: "",
+    };
+    const existingId = existingByName.get(name);
+    if (existingId) option.id = existingId;
+    return option;
+  });
+  const payload = JSON.stringify({
+    query: `mutation($fieldId: ID!, $options: [ProjectV2SingleSelectFieldOptionInput!]!) {
+      updateProjectV2Field(input: { fieldId: $fieldId, singleSelectOptions: $options }) {
+        projectV2Field {
+          ... on ProjectV2SingleSelectField {
+            id
+            name
+            options { id name }
+          }
+        }
+      }
+    }`,
+    variables: { fieldId: field.id, options },
+  });
+  runJson(["api", "graphql", "--input", "-"], { input: payload });
+}
+
 function ensureProjectFields(plan: Plan, project: ProjectDetails): Map<string, ProjectField> {
   if (dryRun) {
     for (const field of plan.project.fields) log(`[dry-run] Reconcile Project field ${field.name}.`);
@@ -844,17 +891,26 @@ function ensureProjectFields(plan: Plan, project: ProjectDetails): Map<string, P
   let fields = listProjectFields(plan, project.number);
   for (const definition of plan.project.fields) {
     const current = fields.find((field) => field.name === definition.name);
-    const incompatible =
+    const incompatible = Boolean(
       current &&
-      (current.type !== definition.type ||
-        (definition.type === "SINGLE_SELECT" &&
-          !sameOptions(current, definition.options ?? [])));
+        (current.type !== definition.type ||
+          (definition.type === "SINGLE_SELECT" &&
+            !sameOptions(current, definition.options ?? []))),
+    );
 
-    if (incompatible) {
-      run(["project", "field-delete", "--id", current.id]);
-      fields = fields.filter((field) => field.id !== current.id);
+    let needsCreate = !current;
+    if (current && incompatible) {
+      // Status is a built-in Project field and cannot be deleted; reconcile options in place.
+      if (definition.name === "Status" && definition.type === "SINGLE_SELECT") {
+        log(`Updating built-in Status options on Project.`);
+        updateSingleSelectFieldOptions(current, definition.options ?? []);
+      } else {
+        run(["project", "field-delete", "--id", current.id]);
+        fields = fields.filter((field) => field.id !== current.id);
+        needsCreate = true;
+      }
     }
-    if (!current || incompatible) {
+    if (needsCreate) {
       const args = [
         "project",
         "field-create",
@@ -882,31 +938,63 @@ function ensureProjectFields(plan: Plan, project: ProjectDetails): Map<string, P
   return map;
 }
 
+function viewMatches(
+  item: { name: string; layout: string },
+  view: { name: string; layout: string },
+): boolean {
+  const normalizedLayout = item.layout
+    .toLowerCase()
+    .replace(/_layout$/, "")
+    .replace(/^project_v2_view_layout_/, "");
+  return item.name === view.name && normalizedLayout === view.layout;
+}
+
 function ensureProjectViews(plan: Plan, project: ProjectDetails): void {
   if (dryRun) {
     for (const view of plan.project.views) log(`[dry-run] Reconcile Project view ${view.name}.`);
     return;
   }
   const userId = run(["api", "user", "--jq", ".id"]);
-  const current = getProjectDetails(plan.project.owner, project.number).views;
+  let current = getProjectDetails(plan.project.owner, project.number).views;
+  let viewsApiUnavailable = false;
   for (const view of plan.project.views) {
-    if (
-      current.some((item) => {
-        const normalizedLayout = item.layout
-          .toLowerCase()
-          .replace(/_layout$/, "")
-          .replace(/^project_v2_view_layout_/, "");
-        return item.name === view.name && normalizedLayout === view.layout;
-      })
-    ) {
-      continue;
-    }
-    api(
+    if (current.some((item) => viewMatches(item, view))) continue;
+    const created = api<unknown>(
       `users/${userId}/projectsV2/${project.number}/views`,
       "POST",
       { name: view.name, layout: view.layout, filter: view.filter ?? "" },
+      true,
     );
+    if (!created) {
+      viewsApiUnavailable = true;
+      log(
+        `Warning: could not create Project view "${view.name}" via REST ` +
+          `(users/${userId}/projectsV2/${project.number}/views returned failure). ` +
+          "Continuing import; create this view in the GitHub Project UI if it remains missing.",
+      );
+      continue;
+    }
     sleep(180);
+    current = getProjectDetails(plan.project.owner, project.number).views;
+  }
+  current = getProjectDetails(plan.project.owner, project.number).views;
+  const missing = plan.project.views.filter(
+    (view) => !current.some((item) => viewMatches(item, view)),
+  );
+  if (missing.length && viewsApiUnavailable) {
+    log(
+      `Warning: Project views still missing after REST attempts: ${missing
+        .map((view) => `${view.name} (${view.layout})`)
+        .join(", ")}. ` +
+        "GitHub returned 404 for the documented views API on this token; " +
+        "issues and Project items will still be imported.",
+    );
+  } else if (missing.length) {
+    fail(
+      `Failed to create required Project views: ${missing
+        .map((view) => `${view.name} (${view.layout})`)
+        .join(", ")}.`,
+    );
   }
 }
 
@@ -1166,7 +1254,7 @@ function ensureProjectItems(
       "Architecture References": node.architectureReferences.join(", "),
       "Plan Key": node.key,
     };
-    if (isNew) values.Status = "Backlog";
+    values.Status = "Backlog";
 
     for (const [fieldName, value] of Object.entries(values)) {
       const field = fields.get(fieldName);
