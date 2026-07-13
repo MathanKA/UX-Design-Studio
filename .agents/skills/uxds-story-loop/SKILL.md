@@ -2,7 +2,7 @@
 name: uxds-story-loop
 description: >-
   Canonical UX Design Studio story execution loop: readiness, branch, implement,
-  verify, signed commit, PR, CI, gated squash merge, Project updates, and optional
+  verify, signed commit, PR, CI, gated merge commit, Project updates, and optional
   E1-only autonomous chaining. Use for repository-aware story delivery.
 ---
 
@@ -11,7 +11,7 @@ description: >-
 ## Purpose
 
 Execute one approved GitHub user story end to end with independent verification,
-signed commits, CI gates, Project status updates, and squash merge into `staging`.
+signed commits, CI gates, Project status updates, and merge-commit into `staging`.
 
 Autonomous next-story chaining is allowed only for Epic E1 (`#1`) while that epic
 remains open and not Blocked, covering stories `#2`, `#5`, and `#8` only.
@@ -166,7 +166,7 @@ Do not reset counters by restarting the agent. Exhausted budget => Block and sto
 
 Before merge, confirm GitHub remote verification reports the feature commit verified.
 
-## Automatic squash merge
+## Automatic merge commit
 
 Merge automatically only when every merge gate passes, and only when authorized:
 
@@ -177,7 +177,10 @@ Gates include: targets `staging`, mergeable, required checks PASS, verifier PASS
 signed local and remote verification, no unresolved review threads, no conflicts,
 no unexpected files, complete PR body, no AI attribution.
 
-Use squash merge and delete the remote feature branch after merge.
+Use a merge commit (`gh pr merge --merge`) so personally signed feature commits
+remain on `staging` history with the author's Verified signature. Do not squash.
+Do not delete the remote feature branch after merge (no `--delete-branch`; keep
+repo `delete_branch_on_merge` false).
 Never bypass branch protection. Never push directly to `staging` or `main`.
 
 ## Issue and Project updates
