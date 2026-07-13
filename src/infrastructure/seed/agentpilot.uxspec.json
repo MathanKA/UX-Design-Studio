@@ -1,0 +1,831 @@
+{
+  "id": "spec-agentpilot",
+  "projectId": "project-agentpilot",
+  "version": "1.0.0",
+  "baselineVersion": "1.0.0",
+  "title": "AgentPilot",
+  "description": "Deterministic AgentPilot UX specification baseline for UX Design Studio POC.",
+  "personas": [
+    {
+      "id": "persona-alex",
+      "name": "Alex",
+      "role": "Product Owner",
+      "technicalProficiency": "moderate",
+      "goals": [
+        "Approve screens before planning",
+        "Understand journey coverage"
+      ],
+      "frustrations": [
+        "Text-only UX specs",
+        "Unclear per-screen status"
+      ],
+      "devicePreferences": [
+        "desktop",
+        "tablet"
+      ]
+    },
+    {
+      "id": "persona-jordan",
+      "name": "Jordan",
+      "role": "Frontend Lead",
+      "technicalProficiency": "high",
+      "goals": [
+        "Validate structure and navigation",
+        "Assess implementation readiness"
+      ],
+      "frustrations": [
+        "Page-specific one-off screens",
+        "Ambiguous component inventory"
+      ],
+      "devicePreferences": [
+        "desktop"
+      ]
+    },
+    {
+      "id": "persona-taylor",
+      "name": "Taylor",
+      "role": "Compliance Officer",
+      "technicalProficiency": "moderate",
+      "goals": [
+        "Inspect accessibility evidence",
+        "Confirm compliance concerns"
+      ],
+      "frustrations": [
+        "Missing a11y metadata",
+        "Inaccessible review tooling"
+      ],
+      "devicePreferences": [
+        "desktop",
+        "mobile"
+      ]
+    }
+  ],
+  "journeys": [
+    {
+      "id": "journey-onboarding",
+      "name": "Sign in and land on dashboard",
+      "personaId": "persona-alex",
+      "steps": [
+        {
+          "id": "onboarding-1",
+          "order": 1,
+          "screenId": "screen-login",
+          "title": "Authenticate",
+          "description": "Sign in with organization credentials",
+          "targetNodeId": "login-submit"
+        },
+        {
+          "id": "onboarding-2",
+          "order": 2,
+          "screenId": "screen-dashboard",
+          "title": "Review operations",
+          "description": "Scan metrics and recent tasks",
+          "targetNodeId": "dashboard-metrics"
+        }
+      ]
+    },
+    {
+      "id": "journey-task-ops",
+      "name": "Inspect and update a task",
+      "personaId": "persona-jordan",
+      "steps": [
+        {
+          "id": "task-ops-1",
+          "order": 1,
+          "screenId": "screen-dashboard",
+          "title": "Select a task",
+          "description": "Open a task from the dashboard table",
+          "targetNodeId": "dashboard-table"
+        },
+        {
+          "id": "task-ops-2",
+          "order": 2,
+          "screenId": "screen-task-detail",
+          "title": "Update task fields",
+          "description": "Edit title and assignee",
+          "targetNodeId": "task-form"
+        }
+      ]
+    },
+    {
+      "id": "journey-compliance-export",
+      "name": "Validate workflows and export evidence",
+      "personaId": "persona-taylor",
+      "steps": [
+        {
+          "id": "compliance-1",
+          "order": 1,
+          "screenId": "screen-workflow-templates",
+          "title": "Review templates",
+          "description": "Confirm workflow coverage",
+          "targetNodeId": "workflow-grid"
+        },
+        {
+          "id": "compliance-2",
+          "order": 2,
+          "screenId": "screen-reports-export",
+          "title": "Export report",
+          "description": "Produce an auditable export",
+          "targetNodeId": "reports-export"
+        }
+      ]
+    }
+  ],
+  "screens": [
+    {
+      "id": "screen-dashboard",
+      "name": "Dashboard",
+      "routeKey": "dashboard",
+      "description": "AgentPilot operational overview",
+      "root": {
+        "id": "dashboard-root",
+        "type": "stack",
+        "props": {
+          "gap": "md"
+        },
+        "children": [
+          {
+            "id": "dashboard-nav",
+            "type": "navigation",
+            "props": {
+              "orientation": "horizontal",
+              "items": [
+                {
+                  "label": "Overview",
+                  "screenId": "screen-dashboard"
+                },
+                {
+                  "label": "Tasks",
+                  "screenId": "screen-task-detail"
+                }
+              ]
+            },
+            "children": []
+          },
+          {
+            "id": "dashboard-header",
+            "type": "panel",
+            "props": {
+              "title": "Dashboard"
+            },
+            "children": [
+              {
+                "id": "dashboard-title",
+                "type": "text",
+                "props": {
+                  "content": "Operations dashboard",
+                  "variant": "heading"
+                },
+                "children": []
+              },
+              {
+                "id": "dashboard-subtitle",
+                "type": "text",
+                "props": {
+                  "content": "Monitor agents, tasks, and workflow health."
+                },
+                "children": []
+              }
+            ]
+          },
+          {
+            "id": "dashboard-metrics",
+            "type": "grid",
+            "props": {
+              "columns": 3
+            },
+            "children": [
+              {
+                "id": "dashboard-metric-agents",
+                "type": "statusBadge",
+                "props": {
+                  "label": "Active agents",
+                  "value": "12",
+                  "tone": "success"
+                },
+                "children": []
+              },
+              {
+                "id": "dashboard-metric-tasks",
+                "type": "statusBadge",
+                "props": {
+                  "label": "Open tasks",
+                  "value": "27",
+                  "tone": "warning"
+                },
+                "children": []
+              },
+              {
+                "id": "dashboard-metric-sla",
+                "type": "chart",
+                "props": {
+                  "chartType": "sparkline",
+                  "title": "SLA trend"
+                },
+                "children": []
+              }
+            ]
+          },
+          {
+            "id": "dashboard-table",
+            "type": "dataTable",
+            "props": {
+              "caption": "Recent tasks",
+              "columns": [
+                "Task",
+                "Owner",
+                "Status"
+              ]
+            },
+            "children": []
+          },
+          {
+            "id": "dashboard-cta",
+            "type": "button",
+            "props": {
+              "label": "Create task",
+              "action": {
+                "type": "navigate",
+                "screenId": "screen-task-detail"
+              }
+            },
+            "children": []
+          }
+        ],
+        "accessibility": [
+          {
+            "type": "aria",
+            "role": "main",
+            "label": "Dashboard"
+          }
+        ]
+      },
+      "personaTouchpoints": [
+        {
+          "personaId": "persona-alex",
+          "goals": [
+            "See approval-ready progress"
+          ],
+          "frustrations": [
+            "Buried status"
+          ]
+        },
+        {
+          "personaId": "persona-jordan",
+          "goals": [
+            "Spot structural gaps early"
+          ]
+        }
+      ],
+      "responsive": {
+        "mobile": {
+          "layoutHint": "stack-metrics"
+        },
+        "desktop": {
+          "layoutHint": "sidebar-content"
+        }
+      },
+      "accessibility": [
+        {
+          "type": "keyboard",
+          "note": "Primary CTA is reachable in tab order"
+        }
+      ]
+    },
+    {
+      "id": "screen-login",
+      "name": "Login",
+      "routeKey": "login",
+      "description": "AgentPilot authentication entry",
+      "root": {
+        "id": "login-root",
+        "type": "panel",
+        "props": {
+          "title": "Sign in"
+        },
+        "children": [
+          {
+            "id": "login-title",
+            "type": "text",
+            "props": {
+              "content": "Sign in to AgentPilot",
+              "variant": "heading"
+            },
+            "children": []
+          },
+          {
+            "id": "login-email",
+            "type": "input",
+            "props": {
+              "label": "Email",
+              "inputType": "email",
+              "name": "email"
+            },
+            "children": [],
+            "accessibility": [
+              {
+                "type": "aria",
+                "label": "Email"
+              }
+            ]
+          },
+          {
+            "id": "login-password",
+            "type": "input",
+            "props": {
+              "label": "Password",
+              "inputType": "password",
+              "name": "password"
+            },
+            "children": []
+          },
+          {
+            "id": "login-remember",
+            "type": "select",
+            "props": {
+              "label": "Session",
+              "options": [
+                "Stay signed in",
+                "Sign out when idle"
+              ]
+            },
+            "children": []
+          },
+          {
+            "id": "login-submit",
+            "type": "button",
+            "props": {
+              "label": "Sign in",
+              "action": {
+                "type": "navigate",
+                "screenId": "screen-dashboard"
+              }
+            },
+            "children": []
+          },
+          {
+            "id": "login-feedback",
+            "type": "feedback",
+            "props": {
+              "tone": "info",
+              "message": "Use your organization credentials."
+            },
+            "children": []
+          }
+        ]
+      },
+      "personaTouchpoints": [
+        {
+          "personaId": "persona-taylor",
+          "goals": [
+            "Confirm accessible auth controls"
+          ]
+        }
+      ],
+      "responsive": {
+        "mobile": {
+          "layoutHint": "single-column"
+        },
+        "desktop": {
+          "layoutHint": "centered-card"
+        }
+      },
+      "accessibility": [
+        {
+          "type": "contrast",
+          "status": "pass",
+          "ratio": 7.2
+        }
+      ]
+    },
+    {
+      "id": "screen-task-detail",
+      "name": "Task Detail",
+      "routeKey": "task-detail",
+      "description": "Inspect and update a single AgentPilot task",
+      "root": {
+        "id": "task-root",
+        "type": "stack",
+        "props": {
+          "gap": "md"
+        },
+        "children": [
+          {
+            "id": "task-header",
+            "type": "text",
+            "props": {
+              "content": "Task detail",
+              "variant": "heading"
+            },
+            "children": []
+          },
+          {
+            "id": "task-status",
+            "type": "statusBadge",
+            "props": {
+              "label": "Status",
+              "value": "In review",
+              "tone": "warning"
+            },
+            "children": []
+          },
+          {
+            "id": "task-form",
+            "type": "panel",
+            "props": {
+              "title": "Task fields"
+            },
+            "children": [
+              {
+                "id": "task-title-input",
+                "type": "input",
+                "props": {
+                  "label": "Title",
+                  "name": "title"
+                },
+                "children": []
+              },
+              {
+                "id": "task-assignee",
+                "type": "select",
+                "props": {
+                  "label": "Assignee",
+                  "options": [
+                    "Alex",
+                    "Jordan",
+                    "Taylor"
+                  ]
+                },
+                "children": []
+              }
+            ]
+          },
+          {
+            "id": "task-actions",
+            "type": "stack",
+            "props": {
+              "direction": "row"
+            },
+            "children": [
+              {
+                "id": "task-save",
+                "type": "button",
+                "props": {
+                  "label": "Save"
+                },
+                "children": []
+              },
+              {
+                "id": "task-back",
+                "type": "button",
+                "props": {
+                  "label": "Back to dashboard",
+                  "action": {
+                    "type": "navigate",
+                    "screenId": "screen-dashboard"
+                  }
+                },
+                "children": []
+              }
+            ]
+          }
+        ]
+      },
+      "personaTouchpoints": [
+        {
+          "personaId": "persona-jordan",
+          "goals": [
+            "Validate form structure"
+          ]
+        },
+        {
+          "personaId": "persona-alex",
+          "goals": [
+            "Confirm task state clarity"
+          ]
+        }
+      ],
+      "responsive": {
+        "mobile": {
+          "layoutHint": "stacked-actions"
+        },
+        "desktop": {
+          "layoutHint": "two-column"
+        }
+      }
+    },
+    {
+      "id": "screen-workflow-templates",
+      "name": "Workflow Templates",
+      "routeKey": "workflow-templates",
+      "description": "Browse reusable AgentPilot workflow templates",
+      "root": {
+        "id": "workflow-root",
+        "type": "stack",
+        "props": {
+          "gap": "md"
+        },
+        "children": [
+          {
+            "id": "workflow-title",
+            "type": "text",
+            "props": {
+              "content": "Workflow templates",
+              "variant": "heading"
+            },
+            "children": []
+          },
+          {
+            "id": "workflow-filters",
+            "type": "select",
+            "props": {
+              "label": "Category",
+              "options": [
+                "All",
+                "Intake",
+                "Review",
+                "Export"
+              ]
+            },
+            "children": []
+          },
+          {
+            "id": "workflow-grid",
+            "type": "grid",
+            "props": {
+              "columns": 2
+            },
+            "children": [
+              {
+                "id": "workflow-card-intake",
+                "type": "panel",
+                "props": {
+                  "title": "Intake triage"
+                },
+                "children": [
+                  {
+                    "id": "workflow-card-intake-text",
+                    "type": "text",
+                    "props": {
+                      "content": "Route new requests to the right queue."
+                    },
+                    "children": []
+                  }
+                ]
+              },
+              {
+                "id": "workflow-card-review",
+                "type": "panel",
+                "props": {
+                  "title": "Design review"
+                },
+                "children": [
+                  {
+                    "id": "workflow-card-review-text",
+                    "type": "text",
+                    "props": {
+                      "content": "Collect structured screen feedback."
+                    },
+                    "children": []
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "personaTouchpoints": [
+        {
+          "personaId": "persona-alex",
+          "goals": [
+            "Choose a template quickly"
+          ]
+        }
+      ],
+      "responsive": {
+        "mobile": {
+          "layoutHint": "one-column-cards"
+        },
+        "desktop": {
+          "layoutHint": "two-column-cards"
+        }
+      }
+    },
+    {
+      "id": "screen-reports-export",
+      "name": "Reports Export",
+      "routeKey": "reports-export",
+      "description": "Export AgentPilot operational reports",
+      "root": {
+        "id": "reports-root",
+        "type": "stack",
+        "props": {
+          "gap": "md"
+        },
+        "children": [
+          {
+            "id": "reports-title",
+            "type": "text",
+            "props": {
+              "content": "Reports export",
+              "variant": "heading"
+            },
+            "children": []
+          },
+          {
+            "id": "reports-chart",
+            "type": "chart",
+            "props": {
+              "chartType": "bar",
+              "title": "Approvals by week"
+            },
+            "children": []
+          },
+          {
+            "id": "reports-format",
+            "type": "select",
+            "props": {
+              "label": "Format",
+              "options": [
+                "CSV",
+                "PDF"
+              ]
+            },
+            "children": []
+          },
+          {
+            "id": "reports-feedback",
+            "type": "feedback",
+            "props": {
+              "tone": "success",
+              "message": "Exports respect role visibility rules."
+            },
+            "children": []
+          },
+          {
+            "id": "reports-export",
+            "type": "button",
+            "props": {
+              "label": "Export report"
+            },
+            "children": []
+          }
+        ]
+      },
+      "personaTouchpoints": [
+        {
+          "personaId": "persona-taylor",
+          "goals": [
+            "Confirm export auditability"
+          ]
+        },
+        {
+          "personaId": "persona-jordan",
+          "goals": [
+            "Validate chart and form composition"
+          ]
+        }
+      ],
+      "responsive": {
+        "mobile": {
+          "layoutHint": "stack-chart"
+        },
+        "desktop": {
+          "layoutHint": "chart-sidebar"
+        }
+      },
+      "accessibility": [
+        {
+          "type": "screenReader",
+          "note": "Chart has a text summary equivalent"
+        }
+      ]
+    }
+  ],
+  "navigation": {
+    "desktop": {
+      "placement": "sidebar",
+      "items": [
+        {
+          "id": "nav-dashboard",
+          "label": "Dashboard",
+          "screenId": "screen-dashboard",
+          "icon": "home"
+        },
+        {
+          "id": "nav-tasks",
+          "label": "Tasks",
+          "screenId": "screen-task-detail",
+          "icon": "tasks"
+        },
+        {
+          "id": "nav-workflows",
+          "label": "Workflows",
+          "screenId": "screen-workflow-templates",
+          "icon": "workflow"
+        },
+        {
+          "id": "nav-reports",
+          "label": "Reports",
+          "screenId": "screen-reports-export",
+          "icon": "reports"
+        },
+        {
+          "id": "nav-login",
+          "label": "Login",
+          "screenId": "screen-login",
+          "icon": "user"
+        }
+      ]
+    },
+    "mobile": {
+      "placement": "compact",
+      "items": [
+        {
+          "id": "nav-dashboard-mobile",
+          "label": "Dashboard",
+          "screenId": "screen-dashboard",
+          "icon": "home"
+        },
+        {
+          "id": "nav-tasks-mobile",
+          "label": "Tasks",
+          "screenId": "screen-task-detail",
+          "icon": "tasks"
+        },
+        {
+          "id": "nav-workflows-mobile",
+          "label": "Workflows",
+          "screenId": "screen-workflow-templates",
+          "icon": "workflow"
+        },
+        {
+          "id": "nav-reports-mobile",
+          "label": "Reports",
+          "screenId": "screen-reports-export",
+          "icon": "reports"
+        },
+        {
+          "id": "nav-login-mobile",
+          "label": "Login",
+          "screenId": "screen-login",
+          "icon": "user"
+        }
+      ]
+    }
+  },
+  "designTokens": {
+    "color": {
+      "primary": "#C8102E",
+      "primaryContrast": "#FFFFFF",
+      "surface": "#FFFFFF",
+      "surfaceMuted": "#F7F7F7",
+      "text": "#1A1A1A",
+      "textMuted": "#5C5C5C",
+      "border": "#D6D6D6",
+      "success": "#0B6E4F",
+      "warning": "#B8860B",
+      "danger": "#C8102E"
+    },
+    "typography": {
+      "fontFamily": "Segoe UI",
+      "baseSize": "16px",
+      "headingWeight": 600,
+      "bodyWeight": 400,
+      "lineHeight": 1.5
+    },
+    "spacing": {
+      "xs": "4px",
+      "sm": "8px",
+      "md": "16px",
+      "lg": "24px",
+      "xl": "32px"
+    },
+    "radius": {
+      "sm": "4px",
+      "md": "8px",
+      "lg": "12px"
+    }
+  },
+  "accessibilityRequirements": [
+    {
+      "id": "a11y-focus",
+      "description": "Visible focus indicators on all interactive controls",
+      "wcagCriteria": "2.4.7"
+    },
+    {
+      "id": "a11y-name",
+      "description": "Accessible names for form controls and buttons",
+      "wcagCriteria": "4.1.2"
+    },
+    {
+      "id": "a11y-contrast",
+      "description": "Text and UI contrast meet WCAG AA",
+      "wcagCriteria": "1.4.3"
+    }
+  ],
+  "performanceConsiderations": [
+    "Validate and normalize the UXSpec once at load time",
+    "Render only the active screen through the shared composer"
+  ]
+}
