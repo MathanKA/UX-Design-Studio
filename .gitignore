@@ -1,0 +1,8 @@
+node_modules/
+dist/
+coverage/
+.env
+.env.*
+!.env.example
+.github/import/.uxds-import.lock
+.github/import/import-report.json

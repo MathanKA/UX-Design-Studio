@@ -1,0 +1,2077 @@
+{
+  "schemaVersion": 1,
+  "planId": "uxds-poc-v1",
+  "title": "UX Design Studio POC",
+  "description": "Spec-driven visual preview and per-screen approval workbench concept extension for InsaneSDD 2.0.",
+  "repository": {
+    "owner": "MathanKA",
+    "name": "UX-Design-Studio",
+    "fullName": "MathanKA/UX-Design-Studio",
+    "defaultBranch": "main",
+    "integrationBranch": "staging",
+    "featureBaseBranch": "staging",
+    "releaseFlow": "staging -> main",
+    "mergeMethod": "squash"
+  },
+  "project": {
+    "owner": "MathanKA",
+    "title": "UX Design Studio POC",
+    "visibility": "PRIVATE",
+    "managedMarker": "<!-- uxds-importer: uxds-poc-v1 -->",
+    "description": "50-hour UX Design Studio proof-of-work backlog and delivery board.",
+    "fields": [
+      {
+        "name": "Status",
+        "type": "SINGLE_SELECT",
+        "options": [
+          "Backlog",
+          "Ready",
+          "In Progress",
+          "Verify",
+          "Done",
+          "Cut",
+          "Blocked"
+        ]
+      },
+      {
+        "name": "Work Type",
+        "type": "SINGLE_SELECT",
+        "options": [
+          "Epic",
+          "Story",
+          "Task"
+        ]
+      },
+      {
+        "name": "Scope",
+        "type": "SINGLE_SELECT",
+        "options": [
+          "Mandatory",
+          "Cut 1",
+          "Cut 2",
+          "Cut 3",
+          "Cut 4",
+          "Documentation"
+        ]
+      },
+      {
+        "name": "Increment",
+        "type": "SINGLE_SELECT",
+        "options": [
+          "A - Walking Skeleton",
+          "B - Governance and Release"
+        ]
+      },
+      {
+        "name": "Priority",
+        "type": "SINGLE_SELECT",
+        "options": [
+          "P0",
+          "P1",
+          "P2"
+        ]
+      },
+      {
+        "name": "Area",
+        "type": "SINGLE_SELECT",
+        "options": [
+          "Foundation",
+          "Domain",
+          "Renderer",
+          "Theming",
+          "Workbench",
+          "Governance",
+          "Persistence",
+          "Provider",
+          "Accessibility",
+          "Quality",
+          "Deployment"
+        ]
+      },
+      {
+        "name": "Estimate Hours",
+        "type": "NUMBER"
+      },
+      {
+        "name": "PRD References",
+        "type": "TEXT"
+      },
+      {
+        "name": "Architecture References",
+        "type": "TEXT"
+      },
+      {
+        "name": "Plan Key",
+        "type": "TEXT"
+      }
+    ],
+    "views": [
+      {
+        "name": "Delivery Board",
+        "layout": "board",
+        "filter": "is:issue is:open"
+      },
+      {
+        "name": "Backlog Table",
+        "layout": "table",
+        "filter": "is:issue"
+      }
+    ]
+  },
+  "milestone": {
+    "title": "v0.1.0 POC",
+    "description": "UX Design Studio interview POC, capped at 50 build hours.",
+    "dueOn": "2026-07-17T23:59:59Z"
+  },
+  "workflow": {
+    "statuses": [
+      "Backlog",
+      "Ready",
+      "In Progress",
+      "Verify",
+      "Done",
+      "Cut",
+      "Blocked"
+    ],
+    "wipLimit": 1,
+    "definitionOfReady": [
+      "Acceptance criteria are testable.",
+      "UXSpec input and required registry types are identified.",
+      "Dependencies are known.",
+      "Mandatory or cut-line classification is explicit.",
+      "Estimate fits the remaining 50-hour budget."
+    ],
+    "definitionOfDone": [
+      "Acceptance criteria are verified.",
+      "Relevant unit, contract, integration, accessibility, lint, type and build checks pass.",
+      "No frozen Source of Truth, PRD or architecture rule is weakened.",
+      "PR references its issue and targets staging.",
+      "Documentation and screenshots are updated when applicable."
+    ],
+    "hardGates": [
+      {
+        "id": "G1",
+        "name": "Plan and architecture baseline",
+        "passCondition": "Source of Truth, PRD, architecture, development plan, ticket structure and cut-line are approved before implementation."
+      },
+      {
+        "id": "G2",
+        "name": "Rendering walking skeleton",
+        "passCondition": "All five screens render through one validated registry/composer path with runtime tokens and generated navigation."
+      },
+      {
+        "id": "G3",
+        "name": "Governance end to end",
+        "passCondition": "Approval, revision, role policy, append-only audit and valid reload persistence work together."
+      },
+      {
+        "id": "G4",
+        "name": "Version-bound regeneration",
+        "passCondition": "Mock regeneration creates a validated new current version and prior approval does not approve it."
+      },
+      {
+        "id": "G5",
+        "name": "Release-ready demo",
+        "passCondition": "CI, production build, static deployment, accessibility checks, reset flow, complete demo and release acceptance pass."
+      }
+    ]
+  },
+  "cutLine": {
+    "ordered": [
+      {
+        "order": 1,
+        "feature": "Journey walkthrough",
+        "retain": "Core screen navigation"
+      },
+      {
+        "order": 2,
+        "feature": "Screen-version history UI",
+        "retain": "Current-version regeneration and reapproval semantics"
+      },
+      {
+        "order": 3,
+        "feature": "Full accessibility overlay",
+        "retain": "Minimum contrast badges"
+      },
+      {
+        "order": 4,
+        "feature": "Tablet preview",
+        "retain": "Mobile and desktop"
+      }
+    ],
+    "neverCut": [
+      "Specification-driven rendering engine",
+      "Runtime design-token theming",
+      "Per-screen approval",
+      "Audit log",
+      "AgentPilot seed-data fidelity"
+    ]
+  },
+  "labels": [
+    {
+      "name": "uxds:managed",
+      "color": "5319E7",
+      "description": "Managed by the UXDS backlog importer"
+    },
+    {
+      "name": "type:epic",
+      "color": "8250DF",
+      "description": "Epic"
+    },
+    {
+      "name": "type:story",
+      "color": "1D76DB",
+      "description": "User or enabler story"
+    },
+    {
+      "name": "type:task",
+      "color": "0E8A16",
+      "description": "Engineering task"
+    },
+    {
+      "name": "scope:mandatory",
+      "color": "B60205",
+      "description": "Must not be cut"
+    },
+    {
+      "name": "scope:cut-1",
+      "color": "FBCA04",
+      "description": "First cut-line item"
+    },
+    {
+      "name": "scope:cut-2",
+      "color": "F9D0C4",
+      "description": "Second cut-line item"
+    },
+    {
+      "name": "scope:cut-3",
+      "color": "FEF2C0",
+      "description": "Third cut-line item"
+    },
+    {
+      "name": "scope:cut-4",
+      "color": "C2E0C6",
+      "description": "Fourth cut-line item"
+    },
+    {
+      "name": "increment:a",
+      "color": "0052CC",
+      "description": "Increment A, walking skeleton"
+    },
+    {
+      "name": "increment:b",
+      "color": "006B75",
+      "description": "Increment B, governance and release"
+    },
+    {
+      "name": "priority:p0",
+      "color": "D73A4A",
+      "description": "Critical path"
+    },
+    {
+      "name": "priority:p1",
+      "color": "FBCA04",
+      "description": "High priority"
+    },
+    {
+      "name": "priority:p2",
+      "color": "C5DEF5",
+      "description": "Optional or lower priority"
+    },
+    {
+      "name": "area:foundation",
+      "color": "BFDADC",
+      "description": "Application foundation"
+    },
+    {
+      "name": "area:domain",
+      "color": "D4C5F9",
+      "description": "Domain and contracts"
+    },
+    {
+      "name": "area:renderer",
+      "color": "7057FF",
+      "description": "Spec renderer"
+    },
+    {
+      "name": "area:theming",
+      "color": "A2EEEF",
+      "description": "Runtime token theming"
+    },
+    {
+      "name": "area:workbench",
+      "color": "C2E0C6",
+      "description": "Review workbench"
+    },
+    {
+      "name": "area:governance",
+      "color": "E99695",
+      "description": "Approval and revision domain"
+    },
+    {
+      "name": "area:persistence",
+      "color": "BFD4F2",
+      "description": "Browser persistence and audit"
+    },
+    {
+      "name": "area:provider",
+      "color": "D876E3",
+      "description": "Design agent provider"
+    },
+    {
+      "name": "area:accessibility",
+      "color": "F9D0C4",
+      "description": "Accessibility and resilient states"
+    },
+    {
+      "name": "area:quality",
+      "color": "0E8A16",
+      "description": "Tests and CI"
+    },
+    {
+      "name": "area:deployment",
+      "color": "006B75",
+      "description": "Docs, deployment and release"
+    }
+  ],
+  "epics": [
+    {
+      "key": "E1",
+      "title": "Application Foundation and UXSpec Contracts",
+      "objective": "Establish the reproducible SPA foundation, immutable domain contracts, runtime validation, and AgentPilot seed baseline.",
+      "hours": 6,
+      "increment": "A - Walking Skeleton",
+      "area": "Foundation",
+      "scope": "Mandatory",
+      "priority": "P0",
+      "prdReferences": [
+        "FR-001–004",
+        "FR-010",
+        "FR-015",
+        "SC-001",
+        "SC-011"
+      ],
+      "architectureReferences": [
+        "§8",
+        "§10–13",
+        "§28",
+        "ADR-001",
+        "ADR-003"
+      ],
+      "dependsOn": [],
+      "stories": [
+        {
+          "key": "US-1.1",
+          "title": "Bootstrap the frontend engineering foundation",
+          "hours": 1.5,
+          "userStory": "As an engineer, I need a strict, reproducible React and TypeScript workspace so that every later capability is built and verified consistently.",
+          "acceptanceCriteria": [
+            "Vite, React 18, strict TypeScript, React Router, CSS Modules, Vitest, and React Testing Library are configured.",
+            "The application exposes /overview, /review/:screenId, and /audit routes.",
+            "Lint, type-check, test, build, and preview commands are documented and executable.",
+            "Application and route error boundaries prevent an unhandled shell failure."
+          ],
+          "tasks": [
+            {
+              "key": "T-1.1.1",
+              "title": "Initialize Vite, React, TypeScript and quality tooling",
+              "hours": 0.75,
+              "outcome": "A reproducible pnpm workspace with strict compiler and quality checks.",
+              "acceptanceCriteria": [
+                "One lockfile is used.",
+                "Strict TypeScript is enabled.",
+                "Core scripts execute from a clean install."
+              ],
+              "dependsOn": [],
+              "area": "Foundation",
+              "scope": "Mandatory",
+              "priority": "P0",
+              "increment": "A - Walking Skeleton",
+              "prdReferences": [
+                "FR-001",
+                "FR-004",
+                "FR-015",
+                "NFR 16.5",
+                "SC-011"
+              ],
+              "architectureReferences": [
+                "§8",
+                "§10",
+                "§11",
+                "§24",
+                "§28"
+              ]
+            },
+            {
+              "key": "T-1.1.2",
+              "title": "Create application shell, routes and root boundaries",
+              "hours": 0.75,
+              "outcome": "A navigable shell with isolated route failure handling.",
+              "acceptanceCriteria": [
+                "All required routes resolve.",
+                "Unknown routes return a controlled fallback.",
+                "The shell remains available after a feature error."
+              ],
+              "dependsOn": [],
+              "area": "Foundation",
+              "scope": "Mandatory",
+              "priority": "P0",
+              "increment": "A - Walking Skeleton",
+              "prdReferences": [
+                "FR-001",
+                "FR-004",
+                "FR-015",
+                "NFR 16.5",
+                "SC-011"
+              ],
+              "architectureReferences": [
+                "§8",
+                "§10",
+                "§11",
+                "§24",
+                "§28"
+              ]
+            }
+          ],
+          "area": "Foundation",
+          "scope": "Mandatory",
+          "priority": "P0",
+          "increment": "A - Walking Skeleton",
+          "prdReferences": [
+            "FR-001",
+            "FR-004",
+            "FR-015",
+            "NFR 16.5",
+            "SC-011"
+          ],
+          "architectureReferences": [
+            "§8",
+            "§10",
+            "§11",
+            "§24",
+            "§28"
+          ],
+          "dependsOn": [],
+          "branchType": "feat"
+        },
+        {
+          "key": "US-1.2",
+          "title": "Define and validate immutable UXSpec contracts",
+          "hours": 2.0,
+          "userStory": "As the rendering system, I need a typed and runtime-validated UX specification so that generated data cannot bypass domain and safety constraints.",
+          "acceptanceCriteria": [
+            "UXSpec, ScreenSpec, ComponentNode, Persona, Journey, DesignTokens, navigation, responsive, and accessibility contracts are defined.",
+            "Runtime schemas validate raw specification data and reject unsafe or malformed values.",
+            "Cross-reference invariants verify unique IDs and valid persona, journey, navigation, and screen references.",
+            "Validated source data is exposed as readonly and is not used to store governance state."
+          ],
+          "tasks": [
+            {
+              "key": "T-1.2.1",
+              "title": "Implement UXSpec TypeScript models and runtime schemas",
+              "hours": 1.0,
+              "outcome": "Compile-time and runtime contracts for every required UXSpec entity.",
+              "acceptanceCriteria": [
+                "Schema and model names stay aligned.",
+                "Unknown executable content is not accepted.",
+                "Safe defaults are explicit."
+              ],
+              "dependsOn": [],
+              "area": "Domain",
+              "scope": "Mandatory",
+              "priority": "P0",
+              "increment": "A - Walking Skeleton",
+              "prdReferences": [
+                "FR-010",
+                "FR-013",
+                "FR-015",
+                "BR-003",
+                "NFR 16.3",
+                "NFR 16.4"
+              ],
+              "architectureReferences": [
+                "§5.1–5.3",
+                "§12",
+                "§13",
+                "ADR-003",
+                "ADR-004"
+              ]
+            },
+            {
+              "key": "T-1.2.2",
+              "title": "Implement normalization, invariants and specification loader",
+              "hours": 1.0,
+              "outcome": "A single validated readonly input boundary for the application.",
+              "acceptanceCriteria": [
+                "Duplicate IDs fail validation.",
+                "Broken references fail with diagnostics.",
+                "Valid documents become readonly application state."
+              ],
+              "dependsOn": [],
+              "area": "Domain",
+              "scope": "Mandatory",
+              "priority": "P0",
+              "increment": "A - Walking Skeleton",
+              "prdReferences": [
+                "FR-010",
+                "FR-013",
+                "FR-015",
+                "BR-003",
+                "NFR 16.3",
+                "NFR 16.4"
+              ],
+              "architectureReferences": [
+                "§5.1–5.3",
+                "§12",
+                "§13",
+                "ADR-003",
+                "ADR-004"
+              ]
+            }
+          ],
+          "area": "Domain",
+          "scope": "Mandatory",
+          "priority": "P0",
+          "increment": "A - Walking Skeleton",
+          "prdReferences": [
+            "FR-010",
+            "FR-013",
+            "FR-015",
+            "BR-003",
+            "NFR 16.3",
+            "NFR 16.4"
+          ],
+          "architectureReferences": [
+            "§5.1–5.3",
+            "§12",
+            "§13",
+            "ADR-003",
+            "ADR-004"
+          ],
+          "dependsOn": [
+            "US-1.1"
+          ],
+          "branchType": "feat"
+        },
+        {
+          "key": "US-1.3",
+          "title": "Author and verify the AgentPilot seed baseline",
+          "hours": 2.5,
+          "userStory": "As a reviewer, I need the POC to use a faithful AgentPilot UXSpec so that the demo represents the same personas, journeys, screens, navigation, and design system shown in the source workflow.",
+          "acceptanceCriteria": [
+            "Seed data contains three personas, three journeys, five screens, navigation rules, design tokens, accessibility metadata, and approximately 30 composed nodes.",
+            "Dashboard and Login are authored first, followed by Task Detail, Workflow Templates, and Reports Export.",
+            "The seed passes the same runtime validation used for future API or AI input.",
+            "No screen depends on a page-specific React implementation."
+          ],
+          "tasks": [
+            {
+              "key": "T-1.3.1",
+              "title": "Create AgentPilot personas, journeys, tokens and navigation seed",
+              "hours": 1.0,
+              "outcome": "A validated shared baseline containing non-screen UX context.",
+              "acceptanceCriteria": [
+                "Alex, Jordan, and Taylor are present.",
+                "Navigation reflects desktop sidebar and mobile compact behavior.",
+                "Baseline and spec versions are explicit."
+              ],
+              "dependsOn": [],
+              "area": "Domain",
+              "scope": "Mandatory",
+              "priority": "P0",
+              "increment": "A - Walking Skeleton",
+              "prdReferences": [
+                "FR-002",
+                "FR-004",
+                "FR-012–014",
+                "SC-001",
+                "SC-012"
+              ],
+              "architectureReferences": [
+                "§12–14",
+                "§27.3",
+                "§33"
+              ]
+            },
+            {
+              "key": "T-1.3.2",
+              "title": "Create five screen trees and seed contract tests",
+              "hours": 1.5,
+              "outcome": "Five valid screen definitions ready for the common renderer.",
+              "acceptanceCriteria": [
+                "All required screens exist.",
+                "Every node ID is unique per screen.",
+                "Every known node type maps to the planned registry."
+              ],
+              "dependsOn": [],
+              "area": "Domain",
+              "scope": "Mandatory",
+              "priority": "P0",
+              "increment": "A - Walking Skeleton",
+              "prdReferences": [
+                "FR-002",
+                "FR-004",
+                "FR-012–014",
+                "SC-001",
+                "SC-012"
+              ],
+              "architectureReferences": [
+                "§12–14",
+                "§27.3",
+                "§33"
+              ]
+            }
+          ],
+          "area": "Domain",
+          "scope": "Mandatory",
+          "priority": "P0",
+          "increment": "A - Walking Skeleton",
+          "prdReferences": [
+            "FR-002",
+            "FR-004",
+            "FR-012–014",
+            "SC-001",
+            "SC-012"
+          ],
+          "architectureReferences": [
+            "§12–14",
+            "§27.3",
+            "§33"
+          ],
+          "dependsOn": [
+            "US-1.2"
+          ],
+          "branchType": "feat"
+        }
+      ]
+    },
+    {
+      "key": "E2",
+      "title": "Spec-Driven Rendering and Runtime Theming",
+      "objective": "Prove the highest-risk technical capability: safely compose every screen through one renderer and apply one runtime token source.",
+      "hours": 16,
+      "increment": "A - Walking Skeleton",
+      "area": "Renderer",
+      "scope": "Mandatory",
+      "priority": "P0",
+      "prdReferences": [
+        "FR-010–023",
+        "FR-030–033",
+        "SC-001",
+        "SC-002"
+      ],
+      "architectureReferences": [
+        "§14–15",
+        "§21",
+        "§24–27",
+        "ADR-002",
+        "ADR-008"
+      ],
+      "dependsOn": [
+        "E1"
+      ],
+      "stories": [
+        {
+          "key": "US-2.1",
+          "title": "Implement the allowlisted component registry",
+          "hours": 4.0,
+          "userStory": "As the composer, I need an immutable registry of reusable primitives so that UXSpec nodes resolve safely without arbitrary imports or executable content.",
+          "acceptanceCriteria": [
+            "Approximately 12 to 15 component types cover layout, forms, navigation, data display, feedback, and chart placeholders.",
+            "Every registry entry owns a prop validator and declares whether it accepts children.",
+            "Unknown types and invalid props return accessible fallbacks.",
+            "Registry components consume render context and scoped tokens without importing governance state."
+          ],
+          "tasks": [
+            {
+              "key": "T-2.1.1",
+              "title": "Define registry contracts and core layout, content and form primitives",
+              "hours": 2.0,
+              "outcome": "A typed immutable registry with the foundational reusable component set.",
+              "acceptanceCriteria": [
+                "Registry lookup is O(1).",
+                "Each entry has a validator.",
+                "Components do not evaluate spec-provided code."
+              ],
+              "dependsOn": [],
+              "area": "Renderer",
+              "scope": "Mandatory",
+              "priority": "P0",
+              "increment": "A - Walking Skeleton",
+              "prdReferences": [
+                "FR-011",
+                "FR-012",
+                "FR-015",
+                "SC-001"
+              ],
+              "architectureReferences": [
+                "§14.2",
+                "§14.5–14.6",
+                "§24",
+                "§26"
+              ]
+            },
+            {
+              "key": "T-2.1.2",
+              "title": "Add navigation, data, feedback and chart primitives with fallbacks",
+              "hours": 2.0,
+              "outcome": "The complete capped registry required by all five seed screens.",
+              "acceptanceCriteria": [
+                "The registry stays within the cap.",
+                "Unsupported nodes remain visible and accessible.",
+                "All seed types resolve."
+              ],
+              "dependsOn": [],
+              "area": "Renderer",
+              "scope": "Mandatory",
+              "priority": "P0",
+              "increment": "A - Walking Skeleton",
+              "prdReferences": [
+                "FR-011",
+                "FR-012",
+                "FR-015",
+                "SC-001"
+              ],
+              "architectureReferences": [
+                "§14.2",
+                "§14.5–14.6",
+                "§24",
+                "§26"
+              ]
+            }
+          ],
+          "area": "Renderer",
+          "scope": "Mandatory",
+          "priority": "P0",
+          "increment": "A - Walking Skeleton",
+          "prdReferences": [
+            "FR-011",
+            "FR-012",
+            "FR-015",
+            "SC-001"
+          ],
+          "architectureReferences": [
+            "§14.2",
+            "§14.5–14.6",
+            "§24",
+            "§26"
+          ],
+          "dependsOn": [
+            "US-1.3"
+          ],
+          "branchType": "feat"
+        },
+        {
+          "key": "US-2.2",
+          "title": "Implement recursive composition and safe actions",
+          "hours": 4.0,
+          "userStory": "As a reviewer, I need every selected screen recursively composed from UXSpec data so that the POC proves a single rendering path rather than hard-coded pages.",
+          "acceptanceCriteria": [
+            "The composer recursively renders nested children through registry lookup.",
+            "A depth guard, node boundary, invalid-prop placeholder, and unknown-type placeholder isolate failures.",
+            "Only declarative allowlisted actions such as navigate, open dialog, submit demo form, and no-op are supported.",
+            "All five screens render without page-specific branches."
+          ],
+          "tasks": [
+            {
+              "key": "T-2.2.1",
+              "title": "Build recursive composer, render context and node isolation",
+              "hours": 2.0,
+              "outcome": "A safe recursive screen renderer with bounded failure scope.",
+              "acceptanceCriteria": [
+                "Maximum depth is enforced.",
+                "Stable node IDs are used as keys.",
+                "One node failure does not blank the screen."
+              ],
+              "dependsOn": [],
+              "area": "Renderer",
+              "scope": "Mandatory",
+              "priority": "P0",
+              "increment": "A - Walking Skeleton",
+              "prdReferences": [
+                "FR-010",
+                "FR-013–015",
+                "FR-032",
+                "SC-001",
+                "SC-010"
+              ],
+              "architectureReferences": [
+                "§14.1–14.5",
+                "§24",
+                "§27.1"
+              ]
+            },
+            {
+              "key": "T-2.2.2",
+              "title": "Implement declarative action resolver and renderer tests",
+              "hours": 2.0,
+              "outcome": "Controlled screen interactions with verified renderer invariants.",
+              "acceptanceCriteria": [
+                "Unknown actions become safe no-ops.",
+                "Known navigation actions resolve.",
+                "Nested, invalid and unknown nodes are covered by tests."
+              ],
+              "dependsOn": [],
+              "area": "Renderer",
+              "scope": "Mandatory",
+              "priority": "P0",
+              "increment": "A - Walking Skeleton",
+              "prdReferences": [
+                "FR-010",
+                "FR-013–015",
+                "FR-032",
+                "SC-001",
+                "SC-010"
+              ],
+              "architectureReferences": [
+                "§14.1–14.5",
+                "§24",
+                "§27.1"
+              ]
+            }
+          ],
+          "area": "Renderer",
+          "scope": "Mandatory",
+          "priority": "P0",
+          "increment": "A - Walking Skeleton",
+          "prdReferences": [
+            "FR-010",
+            "FR-013–015",
+            "FR-032",
+            "SC-001",
+            "SC-010"
+          ],
+          "architectureReferences": [
+            "§14.1–14.5",
+            "§24",
+            "§27.1"
+          ],
+          "dependsOn": [
+            "US-2.1"
+          ],
+          "branchType": "feat"
+        },
+        {
+          "key": "US-2.3",
+          "title": "Apply safe runtime design tokens",
+          "hours": 3.0,
+          "userStory": "As a design reviewer, I need specification tokens to reskin the preview instantly so that visual consistency can be evaluated across every screen.",
+          "acceptanceCriteria": [
+            "Semantic color, typography, spacing, radius, and layout tokens map to --uxds-* CSS variables.",
+            "Token values are allowlisted and validated before assignment.",
+            "Tokens are scoped to the preview root and never restyle the studio shell.",
+            "A preview token override updates the active screen without page reload or source mutation."
+          ],
+          "tasks": [
+            {
+              "key": "T-2.3.1",
+              "title": "Implement semantic token validation and CSS variable mapper",
+              "hours": 1.5,
+              "outcome": "A safe deterministic token-to-variable boundary.",
+              "acceptanceCriteria": [
+                "Arbitrary CSS keys are rejected.",
+                "Unsafe url or expression values are rejected.",
+                "Every required token category maps."
+              ],
+              "dependsOn": [],
+              "area": "Theming",
+              "scope": "Mandatory",
+              "priority": "P0",
+              "increment": "A - Walking Skeleton",
+              "prdReferences": [
+                "FR-020–023",
+                "SC-002"
+              ],
+              "architectureReferences": [
+                "§15",
+                "§26",
+                "ADR-008"
+              ]
+            },
+            {
+              "key": "T-2.3.2",
+              "title": "Apply scoped theme and live preview overrides",
+              "hours": 1.5,
+              "outcome": "One effective token source visibly updates all registered components.",
+              "acceptanceCriteria": [
+                "The studio chrome is unaffected.",
+                "Overrides do not mutate UXSpec.",
+                "Token updates occur without reload."
+              ],
+              "dependsOn": [],
+              "area": "Theming",
+              "scope": "Mandatory",
+              "priority": "P0",
+              "increment": "A - Walking Skeleton",
+              "prdReferences": [
+                "FR-020–023",
+                "SC-002"
+              ],
+              "architectureReferences": [
+                "§15",
+                "§26",
+                "ADR-008"
+              ]
+            }
+          ],
+          "area": "Theming",
+          "scope": "Mandatory",
+          "priority": "P0",
+          "increment": "A - Walking Skeleton",
+          "prdReferences": [
+            "FR-020–023",
+            "SC-002"
+          ],
+          "architectureReferences": [
+            "§15",
+            "§26",
+            "ADR-008"
+          ],
+          "dependsOn": [
+            "US-2.2"
+          ],
+          "branchType": "feat"
+        },
+        {
+          "key": "US-2.4",
+          "title": "Render five screens with generated navigation",
+          "hours": 5.0,
+          "userStory": "As a Product Owner, I need to move through all five rendered AgentPilot screens so that complete product flow can be evaluated before Agile planning.",
+          "acceptanceCriteria": [
+            "Dashboard, Task Detail, Workflow Templates, Reports Export, and Login render through the same composer.",
+            "Desktop navigation uses the seeded sidebar model and mobile uses the compact model.",
+            "Valid generated navigation changes the /review/:screenId route and identifies the active destination.",
+            "Screen switching feels immediate and does not reload the application."
+          ],
+          "tasks": [
+            {
+              "key": "T-2.4.1",
+              "title": "Complete screen composition fidelity and responsive node rules",
+              "hours": 2.5,
+              "outcome": "All five wireframes render with intentional structure, content, states and reusable primitives.",
+              "acceptanceCriteria": [
+                "No hard-coded screen component is introduced.",
+                "Required data, forms, feedback and charts are represented.",
+                "Desktop and mobile rules are present."
+              ],
+              "dependsOn": [],
+              "area": "Renderer",
+              "scope": "Mandatory",
+              "priority": "P0",
+              "increment": "A - Walking Skeleton",
+              "prdReferences": [
+                "FR-004",
+                "FR-013",
+                "FR-030–033",
+                "SC-001",
+                "SC-003"
+              ],
+              "architectureReferences": [
+                "§10",
+                "§14",
+                "§21",
+                "§27"
+              ]
+            },
+            {
+              "key": "T-2.4.2",
+              "title": "Integrate generated navigation, routing and rendering gate tests",
+              "hours": 2.5,
+              "outcome": "A complete navigable walking skeleton and evidence for Hard Gate 2.",
+              "acceptanceCriteria": [
+                "Every valid navigation target opens.",
+                "The active screen is highlighted.",
+                "A contract test proves all screens use the registry and composer."
+              ],
+              "dependsOn": [],
+              "area": "Renderer",
+              "scope": "Mandatory",
+              "priority": "P0",
+              "increment": "A - Walking Skeleton",
+              "prdReferences": [
+                "FR-004",
+                "FR-013",
+                "FR-030–033",
+                "SC-001",
+                "SC-003"
+              ],
+              "architectureReferences": [
+                "§10",
+                "§14",
+                "§21",
+                "§27"
+              ]
+            }
+          ],
+          "area": "Renderer",
+          "scope": "Mandatory",
+          "priority": "P0",
+          "increment": "A - Walking Skeleton",
+          "prdReferences": [
+            "FR-004",
+            "FR-013",
+            "FR-030–033",
+            "SC-001",
+            "SC-003"
+          ],
+          "architectureReferences": [
+            "§10",
+            "§14",
+            "§21",
+            "§27"
+          ],
+          "dependsOn": [
+            "US-2.3"
+          ],
+          "branchType": "feat"
+        }
+      ]
+    },
+    {
+      "key": "E3",
+      "title": "Review Workbench and Contextual Lenses",
+      "objective": "Turn the renderer into a review experience with overview, persona, responsive, and optional journey context.",
+      "hours": 6,
+      "increment": "A - Walking Skeleton",
+      "area": "Workbench",
+      "scope": "Mandatory",
+      "priority": "P1",
+      "prdReferences": [
+        "FR-001–004",
+        "FR-040–053",
+        "FR-034",
+        "SC-003"
+      ],
+      "architectureReferences": [
+        "§10",
+        "§21–24",
+        "§32"
+      ],
+      "dependsOn": [
+        "E2"
+      ],
+      "stories": [
+        {
+          "key": "US-3.1",
+          "title": "Deliver specification overview and review workbench",
+          "hours": 2.0,
+          "userStory": "As a Product Owner, I need a summary and screen review workspace so that I can understand the UXSpec and enter any screen's decision flow.",
+          "acceptanceCriteria": [
+            "Overview displays three personas, three journeys, five screens, component count, design-system summary, and approval progress placeholder.",
+            "Every screen card exposes its current review status and opens the review route.",
+            "Workbench separates screen navigation, preview canvas, lens controls, and decision panel.",
+            "Loading, empty, partial, and route error states preserve the application shell."
+          ],
+          "tasks": [
+            {
+              "key": "T-3.1.1",
+              "title": "Build UXSpec overview and screen status entry points",
+              "hours": 1.0,
+              "outcome": "A concise project-level summary with direct screen access.",
+              "acceptanceCriteria": [
+                "All required counts are derived from seed data.",
+                "Each screen is selectable.",
+                "Status presentation accepts governance selectors."
+              ],
+              "dependsOn": [],
+              "area": "Workbench",
+              "scope": "Mandatory",
+              "priority": "P1",
+              "increment": "A - Walking Skeleton",
+              "prdReferences": [
+                "FR-001–004",
+                "FR-015",
+                "US-1.1",
+                "US-1.2"
+              ],
+              "architectureReferences": [
+                "§7",
+                "§10–11",
+                "§24"
+              ]
+            },
+            {
+              "key": "T-3.1.2",
+              "title": "Build screen review workbench layout and shell states",
+              "hours": 1.0,
+              "outcome": "A stable workspace around the renderer.",
+              "acceptanceCriteria": [
+                "Preview and studio controls are visually distinct.",
+                "Core regions are keyboard reachable.",
+                "Failure states do not obscure navigation."
+              ],
+              "dependsOn": [],
+              "area": "Workbench",
+              "scope": "Mandatory",
+              "priority": "P1",
+              "increment": "A - Walking Skeleton",
+              "prdReferences": [
+                "FR-001–004",
+                "FR-015",
+                "US-1.1",
+                "US-1.2"
+              ],
+              "architectureReferences": [
+                "§7",
+                "§10–11",
+                "§24"
+              ]
+            }
+          ],
+          "area": "Workbench",
+          "scope": "Mandatory",
+          "priority": "P1",
+          "increment": "A - Walking Skeleton",
+          "prdReferences": [
+            "FR-001–004",
+            "FR-015",
+            "US-1.1",
+            "US-1.2"
+          ],
+          "architectureReferences": [
+            "§7",
+            "§10–11",
+            "§24"
+          ],
+          "dependsOn": [
+            "US-2.4"
+          ],
+          "branchType": "feat"
+        },
+        {
+          "key": "US-3.2",
+          "title": "Add persona review lens",
+          "hours": 2.0,
+          "userStory": "As a stakeholder, I need to review a screen as Alex, Jordan, or Taylor so that goals, frustrations, and journey touchpoints inform the decision.",
+          "acceptanceCriteria": [
+            "Alex, Jordan, and Taylor can be selected.",
+            "Current-screen goals, frustrations, and touchpoints are derived from UXSpec.",
+            "Annotations appear in a side panel or separate layer and do not mutate component props.",
+            "The underlying preview remains pointer and keyboard accessible."
+          ],
+          "tasks": [
+            {
+              "key": "T-3.2.1",
+              "title": "Implement persona selectors and current-screen context resolution",
+              "hours": 1.0,
+              "outcome": "Deterministic persona context derived from the immutable specification.",
+              "acceptanceCriteria": [
+                "Selection is ephemeral UI state.",
+                "Missing touchpoints produce a clear empty state.",
+                "No UXSpec mutation occurs."
+              ],
+              "dependsOn": [],
+              "area": "Workbench",
+              "scope": "Mandatory",
+              "priority": "P1",
+              "increment": "B - Governance and Release",
+              "prdReferences": [
+                "FR-040–042",
+                "SC-003"
+              ],
+              "architectureReferences": [
+                "§22",
+                "§23"
+              ]
+            },
+            {
+              "key": "T-3.2.2",
+              "title": "Build accessible persona lens presentation",
+              "hours": 1.0,
+              "outcome": "A review annotation layer distinct from the product wireframe.",
+              "acceptanceCriteria": [
+                "The selected persona is announced.",
+                "Annotations remain readable at required breakpoints.",
+                "Preview interaction remains available."
+              ],
+              "dependsOn": [],
+              "area": "Workbench",
+              "scope": "Mandatory",
+              "priority": "P1",
+              "increment": "B - Governance and Release",
+              "prdReferences": [
+                "FR-040–042",
+                "SC-003"
+              ],
+              "architectureReferences": [
+                "§22",
+                "§23"
+              ]
+            }
+          ],
+          "area": "Workbench",
+          "scope": "Mandatory",
+          "priority": "P1",
+          "increment": "B - Governance and Release",
+          "prdReferences": [
+            "FR-040–042",
+            "SC-003"
+          ],
+          "architectureReferences": [
+            "§22",
+            "§23"
+          ],
+          "dependsOn": [
+            "US-3.1"
+          ],
+          "branchType": "feat"
+        },
+        {
+          "key": "US-3.3",
+          "title": "Add responsive preview and optional journey walkthrough",
+          "hours": 2.0,
+          "userStory": "As a design reviewer, I need mobile, tablet, and desktop simulation, with an optional guided journey, so that layout and flow can be evaluated without page reload.",
+          "acceptanceCriteria": [
+            "Mobile, tablet, and desktop widths update the preview frame and render context.",
+            "Mobile stacks and larger breakpoints use seeded multi-column rules.",
+            "One guided journey can move forward and backward through related screens while in scope.",
+            "Journey is Cut 1 and tablet is Cut 4, each removable without changing the renderer."
+          ],
+          "tasks": [
+            {
+              "key": "T-3.3.1",
+              "title": "Implement breakpoint preview context and recomposition",
+              "hours": 1.25,
+              "outcome": "Responsive screen review across the required device modes.",
+              "acceptanceCriteria": [
+                "No iframe or page reload is required.",
+                "Mobile and desktop remain mandatory.",
+                "Tablet behavior is isolated by configuration."
+              ],
+              "dependsOn": [],
+              "area": "Workbench",
+              "scope": "Cut 1",
+              "priority": "P2",
+              "increment": "B - Governance and Release",
+              "prdReferences": [
+                "FR-034",
+                "FR-050–053",
+                "SC-003",
+                "BR-010"
+              ],
+              "architectureReferences": [
+                "§21",
+                "§28",
+                "§32"
+              ]
+            },
+            {
+              "key": "T-3.3.2",
+              "title": "Implement isolated guided journey module and feature flags",
+              "hours": 0.75,
+              "outcome": "A delete-safe optional walkthrough controlled by the cut-line configuration.",
+              "acceptanceCriteria": [
+                "One seeded journey is navigable.",
+                "Current step is visible.",
+                "Disabling the flag removes the feature without core changes."
+              ],
+              "dependsOn": [],
+              "area": "Workbench",
+              "scope": "Cut 1",
+              "priority": "P2",
+              "increment": "B - Governance and Release",
+              "prdReferences": [
+                "FR-034",
+                "FR-050–053",
+                "SC-003",
+                "BR-010"
+              ],
+              "architectureReferences": [
+                "§21",
+                "§28",
+                "§32"
+              ]
+            }
+          ],
+          "area": "Workbench",
+          "scope": "Cut 1",
+          "priority": "P2",
+          "increment": "B - Governance and Release",
+          "prdReferences": [
+            "FR-034",
+            "FR-050–053",
+            "SC-003",
+            "BR-010"
+          ],
+          "architectureReferences": [
+            "§21",
+            "§28",
+            "§32"
+          ],
+          "dependsOn": [
+            "US-3.1"
+          ],
+          "branchType": "feat"
+        }
+      ]
+    },
+    {
+      "key": "E4",
+      "title": "Screen-Level Governance, Roles and Audit",
+      "objective": "Deliver version-bound approvals, structured revisions, append-only audit truth, browser recovery, and mocked role enforcement.",
+      "hours": 8,
+      "increment": "B - Governance and Release",
+      "area": "Governance",
+      "scope": "Mandatory",
+      "priority": "P0",
+      "prdReferences": [
+        "FR-070–083",
+        "FR-100–112",
+        "SC-004",
+        "SC-005",
+        "SC-007–009"
+      ],
+      "architectureReferences": [
+        "§12.6–12.7",
+        "§16–18",
+        "§20",
+        "§27",
+        "ADR-004–006"
+      ],
+      "dependsOn": [
+        "E2"
+      ],
+      "stories": [
+        {
+          "key": "US-4.1",
+          "title": "Implement event-driven governance domain",
+          "hours": 2.0,
+          "userStory": "As the application, I need pure commands, events, reducer transitions, and selectors so that visible status and audit evidence cannot diverge.",
+          "acceptanceCriteria": [
+            "Approval, revision-request, regeneration-started, regenerated, and regeneration-failed events share stable baseline and version metadata.",
+            "Reducer operations are pure, deterministic, immutable, and reject duplicate event IDs.",
+            "Status, current screen version, progress, and gate completion are derived through selectors.",
+            "Clock and ID generation are injected outside the reducer."
+          ],
+          "tasks": [
+            {
+              "key": "T-4.1.1",
+              "title": "Define governance commands, events, policies and reducer",
+              "hours": 1.0,
+              "outcome": "A stable append-only governance contract independent of React and browser APIs.",
+              "acceptanceCriteria": [
+                "Every event identifies project, spec, baseline, screen, version, actor and time.",
+                "Duplicate IDs are rejected.",
+                "State updates are immutable."
+              ],
+              "dependsOn": [],
+              "area": "Governance",
+              "scope": "Mandatory",
+              "priority": "P0",
+              "increment": "B - Governance and Release",
+              "prdReferences": [
+                "FR-070",
+                "FR-074–075",
+                "FR-101–103",
+                "BR-001–003",
+                "BR-007"
+              ],
+              "architectureReferences": [
+                "§12.6–12.7",
+                "§16",
+                "§27.1",
+                "ADR-004"
+              ]
+            },
+            {
+              "key": "T-4.1.2",
+              "title": "Implement current-version status and gate selectors with unit tests",
+              "hours": 1.0,
+              "outcome": "One derivation path for review status, progress and gate truth.",
+              "acceptanceCriteria": [
+                "Later revision or regeneration invalidates prior effective approval.",
+                "Other screens remain unchanged.",
+                "Gate completes only for all current versions."
+              ],
+              "dependsOn": [],
+              "area": "Governance",
+              "scope": "Mandatory",
+              "priority": "P0",
+              "increment": "B - Governance and Release",
+              "prdReferences": [
+                "FR-070",
+                "FR-074–075",
+                "FR-101–103",
+                "BR-001–003",
+                "BR-007"
+              ],
+              "architectureReferences": [
+                "§12.6–12.7",
+                "§16",
+                "§27.1",
+                "ADR-004"
+              ]
+            }
+          ],
+          "area": "Governance",
+          "scope": "Mandatory",
+          "priority": "P0",
+          "increment": "B - Governance and Release",
+          "prdReferences": [
+            "FR-070",
+            "FR-074–075",
+            "FR-101–103",
+            "BR-001–003",
+            "BR-007"
+          ],
+          "architectureReferences": [
+            "§12.6–12.7",
+            "§16",
+            "§27.1",
+            "ADR-004"
+          ],
+          "dependsOn": [
+            "US-2.4"
+          ],
+          "branchType": "feat"
+        },
+        {
+          "key": "US-4.2",
+          "title": "Approve current screen versions and complete the UX gate",
+          "hours": 2.0,
+          "userStory": "As an Approver, I need to approve one current screen version independently so that accepted work remains traceable and the gate completes only at the correct time.",
+          "acceptanceCriteria": [
+            "Approval applies only to the active screen and version.",
+            "Actor, action, screen, spec, baseline, version, timestamp, and optional comment are recorded.",
+            "Overview and workbench update immediately without affecting other screens.",
+            "The final approval displays readiness for Agile plan generation."
+          ],
+          "tasks": [
+            {
+              "key": "T-4.2.1",
+              "title": "Implement approve-screen use case and decision UI",
+              "hours": 1.0,
+              "outcome": "A validated application command and accessible approval interaction.",
+              "acceptanceCriteria": [
+                "Stale versions cannot be approved.",
+                "Only the active screen changes.",
+                "The event is appended exactly once."
+              ],
+              "dependsOn": [],
+              "area": "Governance",
+              "scope": "Mandatory",
+              "priority": "P0",
+              "increment": "B - Governance and Release",
+              "prdReferences": [
+                "FR-070–075",
+                "US-4.1",
+                "US-4.5",
+                "SC-004",
+                "SC-009"
+              ],
+              "architectureReferences": [
+                "§16.3–16.5",
+                "§20"
+              ]
+            },
+            {
+              "key": "T-4.2.2",
+              "title": "Integrate progress and final gate-completion presentation",
+              "hours": 1.0,
+              "outcome": "Consistent screen and project-level approval feedback.",
+              "acceptanceCriteria": [
+                "Remaining-screen count is correct.",
+                "Completion is unavailable early.",
+                "Completion is announced after the final approval."
+              ],
+              "dependsOn": [],
+              "area": "Governance",
+              "scope": "Mandatory",
+              "priority": "P0",
+              "increment": "B - Governance and Release",
+              "prdReferences": [
+                "FR-070–075",
+                "US-4.1",
+                "US-4.5",
+                "SC-004",
+                "SC-009"
+              ],
+              "architectureReferences": [
+                "§16.3–16.5",
+                "§20"
+              ]
+            }
+          ],
+          "area": "Governance",
+          "scope": "Mandatory",
+          "priority": "P0",
+          "increment": "B - Governance and Release",
+          "prdReferences": [
+            "FR-070–075",
+            "US-4.1",
+            "US-4.5",
+            "SC-004",
+            "SC-009"
+          ],
+          "architectureReferences": [
+            "§16.3–16.5",
+            "§20"
+          ],
+          "dependsOn": [
+            "US-4.1"
+          ],
+          "branchType": "feat"
+        },
+        {
+          "key": "US-4.3",
+          "title": "Request structured revisions with role enforcement",
+          "hours": 2.0,
+          "userStory": "As an Approver, I need to submit component-specific revision evidence, while Reviewer and Viewer remain read-only, so that feedback is actionable and the permission model is demonstrable.",
+          "acceptanceCriteria": [
+            "Revision form captures affected node IDs, category, and required description.",
+            "The request references active screen, screen version, spec version, baseline, actor, and timestamp.",
+            "Approver can approve, revise, and regenerate; Reviewer and Viewer cannot invoke those commands.",
+            "The role switcher is explicitly identified as a POC demonstration mechanism."
+          ],
+          "tasks": [
+            {
+              "key": "T-4.3.1",
+              "title": "Build revision form, validation and request use case",
+              "hours": 1.0,
+              "outcome": "Structured screen-level feedback recorded as a governance event.",
+              "acceptanceCriteria": [
+                "Required fields block invalid submission.",
+                "Affected nodes resolve to the active screen.",
+                "The event appears in screen history."
+              ],
+              "dependsOn": [],
+              "area": "Governance",
+              "scope": "Mandatory",
+              "priority": "P0",
+              "increment": "B - Governance and Release",
+              "prdReferences": [
+                "FR-080–083",
+                "FR-110–112",
+                "BR-006",
+                "SC-005"
+              ],
+              "architectureReferences": [
+                "§16.3",
+                "§18",
+                "§20"
+              ]
+            },
+            {
+              "key": "T-4.3.2",
+              "title": "Implement role capabilities and dual-layer enforcement",
+              "hours": 1.0,
+              "outcome": "Mocked role behavior enforced in both UI and application commands.",
+              "acceptanceCriteria": [
+                "Restricted actions are hidden or disabled.",
+                "Command bypass attempts are rejected.",
+                "All roles can view allowed content."
+              ],
+              "dependsOn": [],
+              "area": "Governance",
+              "scope": "Mandatory",
+              "priority": "P0",
+              "increment": "B - Governance and Release",
+              "prdReferences": [
+                "FR-080–083",
+                "FR-110–112",
+                "BR-006",
+                "SC-005"
+              ],
+              "architectureReferences": [
+                "§16.3",
+                "§18",
+                "§20"
+              ]
+            }
+          ],
+          "area": "Governance",
+          "scope": "Mandatory",
+          "priority": "P0",
+          "increment": "B - Governance and Release",
+          "prdReferences": [
+            "FR-080–083",
+            "FR-110–112",
+            "BR-006",
+            "SC-005"
+          ],
+          "architectureReferences": [
+            "§16.3",
+            "§18",
+            "§20"
+          ],
+          "dependsOn": [
+            "US-4.2"
+          ],
+          "branchType": "feat"
+        },
+        {
+          "key": "US-4.4",
+          "title": "Persist governance state and expose the audit log",
+          "hours": 2.0,
+          "userStory": "As a reviewer, I need governance history to survive reload and remain inspectable chronologically so that the POC demonstrates traceable decisions against the frozen baseline.",
+          "acceptanceCriteria": [
+            "A versioned localStorage repository persists only governance events and screen versions.",
+            "Stored data is validated against project, spec, and baseline before rehydration.",
+            "Corrupted or unavailable storage degrades to clean in-memory state with a visible notice.",
+            "Audit view lists events chronologically and supports per-screen inspection and reset-demo-state."
+          ],
+          "tasks": [
+            {
+              "key": "T-4.4.1",
+              "title": "Implement versioned localStorage repository and recovery path",
+              "hours": 1.0,
+              "outcome": "Validated, bounded browser persistence isolated behind a port.",
+              "acceptanceCriteria": [
+                "Valid state round-trips.",
+                "Mismatched or corrupt data is rejected.",
+                "Storage failure does not prevent use."
+              ],
+              "dependsOn": [],
+              "area": "Persistence",
+              "scope": "Mandatory",
+              "priority": "P0",
+              "increment": "B - Governance and Release",
+              "prdReferences": [
+                "FR-100–105",
+                "NFR 16.3",
+                "SC-007–008"
+              ],
+              "architectureReferences": [
+                "§17",
+                "§24",
+                "§27.3",
+                "ADR-006"
+              ]
+            },
+            {
+              "key": "T-4.4.2",
+              "title": "Build chronological audit view, filters and reset action",
+              "hours": 1.0,
+              "outcome": "Persistent governance evidence suitable for the demo flow.",
+              "acceptanceCriteria": [
+                "All required event metadata is shown.",
+                "Per-screen filtering works.",
+                "Reset removes only the managed storage key."
+              ],
+              "dependsOn": [],
+              "area": "Persistence",
+              "scope": "Mandatory",
+              "priority": "P0",
+              "increment": "B - Governance and Release",
+              "prdReferences": [
+                "FR-100–105",
+                "NFR 16.3",
+                "SC-007–008"
+              ],
+              "architectureReferences": [
+                "§17",
+                "§24",
+                "§27.3",
+                "ADR-006"
+              ]
+            }
+          ],
+          "area": "Persistence",
+          "scope": "Mandatory",
+          "priority": "P0",
+          "increment": "B - Governance and Release",
+          "prdReferences": [
+            "FR-100–105",
+            "NFR 16.3",
+            "SC-007–008"
+          ],
+          "architectureReferences": [
+            "§17",
+            "§24",
+            "§27.3",
+            "ADR-006"
+          ],
+          "dependsOn": [
+            "US-4.3"
+          ],
+          "branchType": "feat"
+        }
+      ]
+    },
+    {
+      "key": "E5",
+      "title": "Mock Regeneration and Review Hardening",
+      "objective": "Demonstrate replaceable AI regeneration, version invalidation, accessibility evidence, studio states, and InsaneSDD-aligned polish.",
+      "hours": 6,
+      "increment": "B - Governance and Release",
+      "area": "Provider",
+      "scope": "Mandatory",
+      "priority": "P1",
+      "prdReferences": [
+        "FR-060–062",
+        "FR-090–095",
+        "SC-006",
+        "SC-010"
+      ],
+      "architectureReferences": [
+        "§19",
+        "§23–26",
+        "§32",
+        "ADR-007"
+      ],
+      "dependsOn": [
+        "E4"
+      ],
+      "stories": [
+        {
+          "key": "US-5.1",
+          "title": "Regenerate one screen through the provider boundary",
+          "hours": 2.5,
+          "userStory": "As an Approver, I need a structured revision to produce a deterministic new screen version through DesignAgentProvider so that future AI replacement is proven without external service risk.",
+          "acceptanceCriteria": [
+            "The UI depends only on DesignAgentProvider, not the mock implementation.",
+            "Mock provider returns a deterministic pre-authored variant after visible simulated latency.",
+            "Provider result passes the same runtime screen validation before activation.",
+            "Regeneration can be cancelled, can show one controlled failure, and never requires a real LLM."
+          ],
+          "tasks": [
+            {
+              "key": "T-5.1.1",
+              "title": "Define provider port and deterministic mock adapter",
+              "hours": 1.25,
+              "outcome": "A transport-agnostic regeneration boundary with pre-authored variants.",
+              "acceptanceCriteria": [
+                "Request carries baseline, version, revision and optional persona context.",
+                "AbortSignal is honored.",
+                "No network or secret is required."
+              ],
+              "dependsOn": [],
+              "area": "Provider",
+              "scope": "Mandatory",
+              "priority": "P0",
+              "increment": "B - Governance and Release",
+              "prdReferences": [
+                "FR-090–095",
+                "SC-006"
+              ],
+              "architectureReferences": [
+                "§19",
+                "§24",
+                "ADR-007"
+              ]
+            },
+            {
+              "key": "T-5.1.2",
+              "title": "Implement regeneration use case, loading, validation and failure flow",
+              "hours": 1.25,
+              "outcome": "A complete safe mocked regeneration sequence.",
+              "acceptanceCriteria": [
+                "Start and result events are appended.",
+                "Invalid output is not activated.",
+                "Current version remains intact on failure."
+              ],
+              "dependsOn": [],
+              "area": "Provider",
+              "scope": "Mandatory",
+              "priority": "P0",
+              "increment": "B - Governance and Release",
+              "prdReferences": [
+                "FR-090–095",
+                "SC-006"
+              ],
+              "architectureReferences": [
+                "§19",
+                "§24",
+                "ADR-007"
+              ]
+            }
+          ],
+          "area": "Provider",
+          "scope": "Mandatory",
+          "priority": "P0",
+          "increment": "B - Governance and Release",
+          "prdReferences": [
+            "FR-090–095",
+            "SC-006"
+          ],
+          "architectureReferences": [
+            "§19",
+            "§24",
+            "ADR-007"
+          ],
+          "dependsOn": [
+            "US-4.4"
+          ],
+          "branchType": "feat"
+        },
+        {
+          "key": "US-5.2",
+          "title": "Enforce reapproval and finish accessibility and studio states",
+          "hours": 3.5,
+          "userStory": "As a reviewer, I need regenerated output to require fresh approval and the studio to communicate accessibility, loading, empty, error, and partial states clearly so that the demo is trustworthy.",
+          "acceptanceCriteria": [
+            "Regeneration creates a new current version and any prior-version approval does not approve it.",
+            "A minimal prior/current version comparison remains while version-history UI is in scope.",
+            "Accessibility overlay presents seeded contrast, ARIA, screen-reader, and keyboard notes; contrast badges remain if the overlay is cut.",
+            "Studio controls meet the primary WCAG 2.1 AA keyboard, focus, naming, live-region, and reduced-motion expectations.",
+            "Visual treatment aligns with the demonstrated light chrome, red accent, and sidebar language without claiming pixel-perfect fidelity."
+          ],
+          "tasks": [
+            {
+              "key": "T-5.2.1",
+              "title": "Implement version activation, reapproval rule and optional history panel",
+              "hours": 1.5,
+              "outcome": "Correct version-bound governance and evidence for Hard Gate 4.",
+              "acceptanceCriteria": [
+                "New version status is ready for review.",
+                "Old approval remains historical only.",
+                "History UI is isolated as Cut 2."
+              ],
+              "dependsOn": [],
+              "area": "Accessibility",
+              "scope": "Cut 2",
+              "priority": "P1",
+              "increment": "B - Governance and Release",
+              "prdReferences": [
+                "FR-015",
+                "FR-060–062",
+                "FR-093–094",
+                "NFR 16.1–16.3",
+                "SC-010"
+              ],
+              "architectureReferences": [
+                "§12.7",
+                "§23–26",
+                "§32"
+              ]
+            },
+            {
+              "key": "T-5.2.2",
+              "title": "Implement accessibility evidence, resilient states and visual polish",
+              "hours": 2.0,
+              "outcome": "A presentable, keyboard-usable and failure-aware review experience.",
+              "acceptanceCriteria": [
+                "Full overlay is Cut 3 while contrast badges remain.",
+                "Focus and live announcements work on critical flow.",
+                "All required UI states are demonstrated."
+              ],
+              "dependsOn": [],
+              "area": "Accessibility",
+              "scope": "Cut 2",
+              "priority": "P1",
+              "increment": "B - Governance and Release",
+              "prdReferences": [
+                "FR-015",
+                "FR-060–062",
+                "FR-093–094",
+                "NFR 16.1–16.3",
+                "SC-010"
+              ],
+              "architectureReferences": [
+                "§12.7",
+                "§23–26",
+                "§32"
+              ]
+            }
+          ],
+          "area": "Accessibility",
+          "scope": "Cut 2",
+          "priority": "P1",
+          "increment": "B - Governance and Release",
+          "prdReferences": [
+            "FR-015",
+            "FR-060–062",
+            "FR-093–094",
+            "NFR 16.1–16.3",
+            "SC-010"
+          ],
+          "architectureReferences": [
+            "§12.7",
+            "§23–26",
+            "§32"
+          ],
+          "dependsOn": [
+            "US-5.1"
+          ],
+          "branchType": "feat"
+        }
+      ]
+    },
+    {
+      "key": "E6",
+      "title": "Quality, Documentation, Deployment and Demonstration",
+      "objective": "Produce verifiable engineering evidence, reproducible delivery, static deployment, release traceability, and a rehearsed interview workflow.",
+      "hours": 8,
+      "increment": "B - Governance and Release",
+      "area": "Quality",
+      "scope": "Mandatory",
+      "priority": "P0",
+      "prdReferences": [
+        "NFR 16.1–16.6",
+        "SC-010–012",
+        "Release acceptance checklist"
+      ],
+      "architectureReferences": [
+        "§27–30",
+        "§35–38"
+      ],
+      "dependsOn": [
+        "E5"
+      ],
+      "stories": [
+        {
+          "key": "US-6.1",
+          "title": "Automate critical quality gates and CI",
+          "hours": 4.0,
+          "userStory": "As an engineering lead, I need targeted automated evidence so that renderer safety, governance correctness, persistence, provider contracts, and the production build are continuously verified.",
+          "acceptanceCriteria": [
+            "Renderer unit tests cover known, nested, unknown, invalid, depth-guard, and declarative-action cases.",
+            "Governance tests cover independence, duplicate events, revision invalidation, regeneration, reapproval, gate completion, role rejection, and chronology.",
+            "Contract tests validate seed, registry coverage, provider output, and persistence round trips.",
+            "One critical RTL integration flow covers overview to review, revision, regeneration, approval, reload, and role restriction.",
+            "CI runs install, lint, type-check, tests, and production build for pull requests targeting staging and main."
+          ],
+          "tasks": [
+            {
+              "key": "T-6.1.1",
+              "title": "Complete unit, contract and critical integration test suite",
+              "hours": 2.5,
+              "outcome": "Focused regression evidence for the core technical and product proof.",
+              "acceptanceCriteria": [
+                "Mandatory invariants are asserted directly.",
+                "No broad snapshot or pixel regression scope is added.",
+                "Tests run deterministically offline."
+              ],
+              "dependsOn": [],
+              "area": "Quality",
+              "scope": "Mandatory",
+              "priority": "P0",
+              "increment": "B - Governance and Release",
+              "prdReferences": [
+                "NFR 16.5–16.6",
+                "SC-010–011"
+              ],
+              "architectureReferences": [
+                "§27",
+                "§28"
+              ]
+            },
+            {
+              "key": "T-6.1.2",
+              "title": "Configure minimal GitHub Actions quality pipeline",
+              "hours": 1.5,
+              "outcome": "Repeatable checks for staging and release pull requests.",
+              "acceptanceCriteria": [
+                "pnpm lockfile is honored.",
+                "Failures block the quality gate.",
+                "The production build artifact is reproducible."
+              ],
+              "dependsOn": [],
+              "area": "Quality",
+              "scope": "Mandatory",
+              "priority": "P0",
+              "increment": "B - Governance and Release",
+              "prdReferences": [
+                "NFR 16.5–16.6",
+                "SC-010–011"
+              ],
+              "architectureReferences": [
+                "§27",
+                "§28"
+              ]
+            }
+          ],
+          "area": "Quality",
+          "scope": "Mandatory",
+          "priority": "P0",
+          "increment": "B - Governance and Release",
+          "prdReferences": [
+            "NFR 16.5–16.6",
+            "SC-010–011"
+          ],
+          "architectureReferences": [
+            "§27",
+            "§28"
+          ],
+          "dependsOn": [
+            "US-5.2"
+          ],
+          "branchType": "test"
+        },
+        {
+          "key": "US-6.2",
+          "title": "Document, deploy, rehearse and release the POC",
+          "hours": 4.0,
+          "userStory": "As an evaluator, I need a deployed, explainable and correctly positioned artifact so that product judgment and Lead Frontend engineering can be reviewed end to end.",
+          "acceptanceCriteria": [
+            "README explains setup, architecture, demo reset, scope, exclusions, concept-extension positioning, and production path.",
+            "ADR records accepted architecture decisions and explicitly excludes real AI, backend, auth, and Module Federation.",
+            "Static deployment works through direct and deep-linked routes without secrets or external services.",
+            "The complete demo flow is rehearsed, timed, and validated against release acceptance.",
+            "All feature work merges to staging by squash PR; final staging to main release PR is tagged v0.1.0-poc."
+          ],
+          "tasks": [
+            {
+              "key": "T-6.2.1",
+              "title": "Complete README, ADR, traceability and deployment configuration",
+              "hours": 2.0,
+              "outcome": "A self-contained repository and static preview suitable for interview review.",
+              "acceptanceCriteria": [
+                "Concept-extension wording is explicit.",
+                "PRD-to-issue-to-test evidence is documented.",
+                "Direct route refresh works."
+              ],
+              "dependsOn": [],
+              "area": "Deployment",
+              "scope": "Mandatory",
+              "priority": "P0",
+              "increment": "B - Governance and Release",
+              "prdReferences": [
+                "SC-010–012",
+                "Release acceptance checklist",
+                "BR-009–010"
+              ],
+              "architectureReferences": [
+                "§28",
+                "§34–39"
+              ]
+            },
+            {
+              "key": "T-6.2.2",
+              "title": "Run release acceptance, demo rehearsal and staging-to-main release",
+              "hours": 2.0,
+              "outcome": "A stable presentation build and controlled v0.1.0-poc release.",
+              "acceptanceCriteria": [
+                "Reset and prepared demo states are verified.",
+                "All hard gates pass.",
+                "Cut-line decisions are recorded.",
+                "Release PR targets main from staging."
+              ],
+              "dependsOn": [],
+              "area": "Deployment",
+              "scope": "Mandatory",
+              "priority": "P0",
+              "increment": "B - Governance and Release",
+              "prdReferences": [
+                "SC-010–012",
+                "Release acceptance checklist",
+                "BR-009–010"
+              ],
+              "architectureReferences": [
+                "§28",
+                "§34–39"
+              ]
+            }
+          ],
+          "area": "Deployment",
+          "scope": "Mandatory",
+          "priority": "P0",
+          "increment": "B - Governance and Release",
+          "prdReferences": [
+            "SC-010–012",
+            "Release acceptance checklist",
+            "BR-009–010"
+          ],
+          "architectureReferences": [
+            "§28",
+            "§34–39"
+          ],
+          "dependsOn": [
+            "US-6.1"
+          ],
+          "branchType": "docs"
+        }
+      ]
+    }
+  ]
+}
