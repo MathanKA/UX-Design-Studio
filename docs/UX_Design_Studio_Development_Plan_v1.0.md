@@ -75,7 +75,7 @@ staging    Integration and merge base for every implementation branch
 - Default pattern: `<type>/uxds-<github-issue-number>-<slug>`.
 - Examples: `feat/uxds-21-recursive-composer`, `test/uxds-54-governance-tests`, `docs/uxds-59-release-readme`.
 - Every working pull request targets `staging`.
-- Use squash merge after verification.
+- Use a merge commit after verification (preserve personally signed feature commits; do not squash; retain the feature branch).
 - Do not merge implementation branches directly to `main`.
 - Final release uses one pull request from `staging` to `main`, followed by tag `v0.1.0-poc`.
 
@@ -649,7 +649,7 @@ As an evaluator, I need a deployed, explainable and correctly positioned artifac
 - [ ] ADR records accepted architecture decisions and explicitly excludes real AI, backend, auth, and Module Federation.
 - [ ] Static deployment works through direct and deep-linked routes without secrets or external services.
 - [ ] The complete demo flow is rehearsed, timed, and validated against release acceptance.
-- [ ] All feature work merges to staging by squash PR; final staging to main release PR is tagged v0.1.0-poc.
+- [ ] All feature work merges to staging by merge-commit PR (feature branches retained); final staging to main release PR is tagged v0.1.0-poc.
 
 **Engineering tasks**
 

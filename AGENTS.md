@@ -172,7 +172,7 @@ This narrowly scoped exception applies only while GitHub issue `#1` (Epic E1) re
 
 Authorization covered by this exception:
 - Automatic chaining of the E1 story queue only: `#2` (US-1.1), `#5` (US-1.2), and `#8` (US-1.3).
-- Automatic squash merge of the corresponding story pull requests into `staging` only after every merge gate passes.
+- Automatic merge-commit of the corresponding story pull requests into `staging` only after every merge gate passes.
 - Use of the installed independent verifier in `.agents/verifiers/uxds-story-verifier.md` as the independent verification gate for those E1 stories.
 
 Still mandatory under this exception:
@@ -258,7 +258,7 @@ Implementation is a hard stop unless all are true:
 - Use `<type>/uxds-<github-issue-number>-<slug>`.
 - Use Conventional Commit style with the issue: `feat(renderer): compose nested UXSpec nodes [#21]`, `fix(governance): invalidate approval after regeneration [#38]`, `test(governance): cover current-version gate rules [#54]`, or `docs(release): add POC setup and demo guide [#59]`.
 - Use signed commits with `git commit -S`; stop if signing or verification fails.
-- Squash merge only after verification.
+- Merge commit only after verification (preserve personally signed feature commits; do not squash; do not delete the feature branch).
 - Release through a final `staging` to `main` PR and tag `v0.1.0-poc`.
 - Never push directly to `staging` or `main`, change protections, weaken CI, or delete required tests.
 - Never merge your own PR or start another story without approval, except under the active E1 Autonomous Loop Exception.

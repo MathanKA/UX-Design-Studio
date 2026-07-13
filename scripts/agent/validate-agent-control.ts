@@ -63,7 +63,7 @@ const requiredSkillSections = [
   "## PR creation",
   "## CI monitoring",
   "## Remote signature verification",
-  "## Automatic squash merge",
+  "## Automatic merge commit",
   "## Issue and Project updates",
   "## Next-story selection",
   "## Recovery after interruption",

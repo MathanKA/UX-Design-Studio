@@ -59,7 +59,7 @@ Unknown routes render a controlled not-found fallback. Application and route err
 ```text
 feature/test/docs branch from staging
   -> pull request to staging
-      -> squash merge
+      -> merge commit (retain feature branch)
           -> final release pull request from staging to main
               -> tag v0.1.0-poc
 ```
