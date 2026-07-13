@@ -1,0 +1,19 @@
+# Read-only independent verifier for UX Design Studio story delivery.
+# Canonical contract: .agents/verifiers/uxds-story-verifier.md
+
+name = "uxds-e1-verifier"
+description = "Independent read-only verifier for UX Design Studio E1 stories"
+model = "inherit"
+readonly = true
+
+[instructions]
+path = ".agents/verifiers/uxds-story-verifier.md"
+
+[capabilities]
+modify_files = false
+commit = false
+push = false
+open_pull_requests = false
+merge_pull_requests = false
+update_issues = false
+update_project = false
