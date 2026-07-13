@@ -2,41 +2,57 @@
 
 A proof-of-work concept extension for InsaneSDD 2.0 that deepens UX review into a visual, per-screen approval workbench.
 
-## Development planning package
-
-- Detailed plan: `docs/UX_Design_Studio_Development_Plan_v1.0.md`
-- Import source: `.github/import/development-plan.json`
-- Idempotent importer: `scripts/import-github-project.ts`
-
-## Automated GitHub setup
-
-The downloadable `UXDS_Bootstrap_And_Import.ps1` script performs the repository and GitHub setup from an isolated temporary clone. It pushes the managed package to `main`, installs dependencies, validates the plan, performs a dry run, and then creates the `staging` branch, Project, views, fields, labels, milestone, issues, sub-issues, dependencies, and Project metadata.
-
-Run from Windows PowerShell:
-
-```powershell
-powershell -ExecutionPolicy Bypass -File .\UXDS_Bootstrap_And_Import.ps1
-```
-
-GitHub authentication or scope authorization is the only unavoidable interactive step.
-
-## Direct importer usage
-
-Prerequisites:
+## Prerequisites
 
 - Node.js 22 or newer
 - pnpm through Corepack
-- GitHub CLI
-- GitHub CLI authenticated as `MathanKA` with repository and Project access
+- GitHub CLI (for planning/import and agent helpers)
+
+```bash
+corepack enable
+corepack pnpm install
+```
+
+## Application scripts
+
+| Script | Purpose |
+|---|---|
+| `pnpm run dev` | Start the Vite development server |
+| `pnpm run lint` | Run ESLint |
+| `pnpm run typecheck` | Run strict TypeScript checks |
+| `pnpm run test` | Run Vitest suite |
+| `pnpm run build` | Type-check and create the production build |
+| `pnpm run preview` | Preview the production build locally |
+
+## Planning and agent scripts
+
+| Script | Purpose |
+|---|---|
+| `pnpm run plan:validate` | Validate `.github/import/development-plan.json` |
+| `pnpm run github:import:dry` | Dry-run GitHub Project import |
+| `pnpm run github:import` | Execute GitHub Project import |
+| `pnpm run agent:validate` | Validate the agent-control layer |
+| `pnpm run agent:project-status` | Update one GitHub Project status item |
+
+Import commands can mutate GitHub; run them only when explicitly authorized.
 
 ```bash
 gh auth login -h github.com
-gh auth refresh -h github.com -s repo,project
-corepack pnpm install
+gh auth refresh -h github.com -s repo,project,workflow
 corepack pnpm run plan:validate
 corepack pnpm run github:import:dry
-corepack pnpm run github:import
 ```
+
+## Studio routes
+
+```text
+/                 -> redirect to /overview
+/overview         -> specification overview placeholder
+/review/:screenId -> screen review placeholder
+/audit            -> audit log placeholder
+```
+
+Unknown routes render a controlled not-found fallback. Application and route error boundaries keep the shell available after feature failures.
 
 ## Branch policy
 
@@ -48,4 +64,8 @@ feature/test/docs branch from staging
               -> tag v0.1.0-poc
 ```
 
-The importer never force-updates a diverged `staging` branch and never adopts an unmanaged same-name Project or same-title issue.
+## Development planning package
+
+- Detailed plan: `docs/UX_Design_Studio_Development_Plan_v1.0.md`
+- Import source: `.github/import/development-plan.json`
+- Idempotent importer: `scripts/import-github-project.ts`
