@@ -7,7 +7,9 @@
     "plan:validate": "tsx scripts/import-github-project.ts --validate-only",
     "github:import:dry": "tsx scripts/import-github-project.ts --dry-run",
     "github:import": "tsx scripts/import-github-project.ts",
-    "github:import:verbose": "tsx scripts/import-github-project.ts --verbose"
+    "github:import:verbose": "tsx scripts/import-github-project.ts --verbose",
+    "agent:validate": "tsx scripts/agent/validate-agent-control.ts",
+    "agent:project-status": "tsx scripts/agent/project-status.ts"
   },
   "devDependencies": {
     "@types/node": "^24.0.0",

@@ -72,11 +72,12 @@ Do not implement:
 Production paths may be documented only where the architecture permits them.
 
 ## Current repository state
-- The repository currently contains planning documentation, GitHub import automation, and planning validation tooling.
-- Before running anything, inspect `package.json`; scripts change over time.
-- Currently defined scripts are `pnpm run plan:validate`, `pnpm run github:import:dry`, `pnpm run github:import`, and `pnpm run github:import:verbose`.
+- Inspect `package.json` before running any script; available scripts change as stories land.
+- Do not assume application scripts such as `dev`, `lint`, `typecheck`, `test`, `build`, or `preview` exist until they appear in `package.json`.
+- Planning and GitHub import tooling may coexist with the application; preserve those scripts unless an approved story changes them.
 - Import commands can mutate GitHub; run them only when the task explicitly authorizes that external change.
 - Never claim a command, check, or test passed unless it was executed successfully.
+- Agent-control canonical files live under `.agents/**`. Validate them with the repository's agent-control validation script when present.
 
 ## Approved target application state
 The bootstrap story targets:
@@ -160,11 +161,38 @@ Dependency direction:
 - Work from one explicitly approved user story at a time.
 - Include only that story and its listed engineering tasks.
 - Treat task issues as traceability units within the approved story.
-- Do not begin the next story automatically.
+- Do not begin the next story automatically, except under the active E1 Autonomous Loop Exception below.
 - Do not perform bonus refactors or modify unrelated files.
 - Before editing, confirm acceptance criteria, dependencies, requirement IDs, architecture references, and scope classification.
 - Stop when a ticket is ambiguous, incomplete, blocked, or inconsistent with controlling documents.
 - Preserve the work-in-progress limit of one implementation story.
+
+## E1 Autonomous Loop Exception
+This narrowly scoped exception applies only while GitHub issue `#1` (Epic E1) remains open and is not marked Blocked.
+
+Authorization covered by this exception:
+- Automatic chaining of the E1 story queue only: `#2` (US-1.1), `#5` (US-1.2), and `#8` (US-1.3).
+- Automatic squash merge of the corresponding story pull requests into `staging` only after every merge gate passes.
+- Use of the installed independent verifier in `.agents/verifiers/uxds-story-verifier.md` as the independent verification gate for those E1 stories.
+
+Still mandatory under this exception:
+- WIP limit of one implementation story.
+- One story, one branch, and one pull request at a time.
+- Signed commits and `git verify-commit` before push and merge.
+- No direct pushes to `staging` or `main`.
+- No branch-protection weakening.
+- No test, type-safety, accessibility, or security weakening.
+- All other hard stops in this file.
+
+This exception does not authorize:
+- Automatic chaining or self-merge for E2 or any later epic.
+- Merging with failing, pending, or skipped-required checks.
+- Bypassing the independent verifier.
+- Starting another story before the current story is Done and its PR is merged.
+
+Expiration:
+- This exception expires automatically when issue `#1` is closed or marked Blocked.
+- Outside this exception, human review remains the independent gate when no other authorized verifier path applies, and the next story must not start automatically.
 
 ## Definition of Ready
 Implementation is a hard stop unless all are true:
@@ -232,13 +260,15 @@ Implementation is a hard stop unless all are true:
 - Use signed commits with `git commit -S`; stop if signing or verification fails.
 - Squash merge only after verification.
 - Release through a final `staging` to `main` PR and tag `v0.1.0-poc`.
-- Never merge your own PR, push directly to `staging` or `main`, change protections, weaken CI, delete required tests, or start another story without approval.
+- Never push directly to `staging` or `main`, change protections, weaken CI, or delete required tests.
+- Never merge your own PR or start another story without approval, except under the active E1 Autonomous Loop Exception.
 
 ## Independent verification
 - When verifier infrastructure exists, use an independent read-only review of story scope, architecture, acceptance criteria, tests, accessibility, and security before commit.
 - The verifier must not modify files, implement fixes, commit, push, or open a PR.
 - The implementer must not mark its own work independently verified.
-- Until such infrastructure exists, human review is the required independent gate.
+- For Epic E1 stories covered by the E1 Autonomous Loop Exception, the installed verifier at `.agents/verifiers/uxds-story-verifier.md` is the required independent gate.
+- Outside that exception, human review remains the required independent gate until another verifier path is explicitly authorized.
 - Allow at most one verifier-driven repair attempt before escalation.
 
 ## Hard stops
@@ -250,7 +280,8 @@ Stop and report rather than bypassing the condition when:
 - Story-caused tests, validation, or build failures remain unresolved within scope.
 - A real backend, LLM, authentication system, or Module Federation becomes necessary.
 - A dependency or architecture change lacks approval.
-- Commit signing fails or the next story would start automatically.
+- Commit signing fails.
+- The next story would start automatically outside the active E1 Autonomous Loop Exception.
 
 ## Maintaining this file
 - Keep only durable repository-wide instructions here.

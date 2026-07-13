@@ -1,26 +1,48 @@
-## Linked work
+## Summary
 
-Closes #
+A concise description of the completed story and user or engineering outcome.
 
-- Plan key:
-- PRD references:
-- Architecture references:
+## What changed
 
-## Change
+- Concrete implementation change
+- Concrete implementation change
 
-Describe the implementation and its user or system outcome.
+## Acceptance criteria
+
+- [x] Criterion
+- [x] Criterion
+
+## Tasks completed
+
+- [x] #<task>
+- [x] #<task>
 
 ## Verification
 
-- [ ] Acceptance criteria verified
-- [ ] Relevant tests pass
-- [ ] Type-check passes
-- [ ] Production build passes
-- [ ] Screenshots attached for visible changes
-- [ ] No Source of Truth, PRD, architecture, or cut-line rule was weakened
-- [ ] Base branch is `staging` unless this is the final `staging` to `main` release PR
+| Check | Result |
+|---|---|
+| Focused tests | PASS |
+| Type check | PASS |
+| Lint | PASS |
+| Full tests | PASS |
+| Production build | PASS |
+| Independent verifier | PASS |
+| Signed commit verification | PASS |
 
-## Scope
+## Architecture and scope
 
-- Classification: Mandatory / Cut 1 / Cut 2 / Cut 3 / Cut 4
-- Cut-line impact: None / describe
+- PRD:
+- Architecture:
+- Scope classification:
+- Dependency additions:
+- Scope deviations:
+
+## Visual evidence
+
+Screenshot or `Not applicable`, with an honest reason.
+
+## Issues
+
+- Story: #<story>
+- Tasks: #<task>, #<task>
+- Epic: #1
