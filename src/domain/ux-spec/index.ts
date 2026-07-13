@@ -1,0 +1,40 @@
+export type {
+  AccessibilityAnnotation,
+  AccessibilityRequirement,
+  ComponentNode,
+  ComponentType,
+  DesignTokens,
+  Journey,
+  JourneyStep,
+  NavigationItem,
+  NavigationSpec,
+  Persona,
+  PersonaTouchpoint,
+  ResponsiveScreenSpec,
+  ScreenSpec,
+  UXSpec,
+  UXSpecLoadResult,
+  UXSpecValidationIssue,
+  VisibilityRule,
+} from "./model";
+
+export {
+  ALLOWED_URL_PROTOCOLS,
+  KNOWN_COMPONENT_TYPES,
+  UX_SPEC_LIMITS,
+} from "./model";
+
+export {
+  accessibilityRequirementSchema,
+  componentNodeSchema,
+  designTokensSchema,
+  journeySchema,
+  navigationSpecSchema,
+  personaSchema,
+  screenSpecSchema,
+  uxSpecSchema,
+} from "./schemas";
+
+export { collectInvariantIssues } from "./invariants";
+export { normalizeUXSpec } from "./normalize";
+export { loadUXSpec } from "./load-ux-spec";
