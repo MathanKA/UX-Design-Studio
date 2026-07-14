@@ -119,6 +119,70 @@ walkthrough work.
 - journey can be removed without rewriting core rendering
 - journey does not mutate UXSpec
 
+## When E4 work is in scope
+
+Apply these E4-specific checks only when the active story, epic mode, or changed
+diff includes governance domain, approval, revision, roles, persistence, or audit
+work.
+
+### Governance domain
+
+- domain modules do not import React
+- domain modules do not import localStorage or other browser storage APIs
+- event types share stable baseline, screen, version, actor, and timestamp metadata
+- event IDs are unique
+- reducer rejects duplicate event IDs
+- reducer is deterministic and immutable
+- selectors are the only source of visible status truth
+- current-version approval semantics are correct
+- other screens remain unchanged when one screen receives an event
+- gate completion uses current required versions only
+- clock and ID services are injected outside the reducer
+
+### Approval and gate completion
+
+- stale versions are rejected
+- approval applies to one current screen and version
+- approval event is appended exactly once
+- actor, role, time, baseline, spec, screen, and version metadata are retained
+- overview and workbench update from the same selector path
+- final gate readiness is unavailable before every required current version is approved
+- final readiness is announced after the last required approval
+- UXSpec remains immutable
+- no Agile plan generation is implemented
+
+### Revision and role enforcement
+
+- affected node IDs resolve against the active screen component tree
+- revision category is allowlisted
+- description is required and bounded
+- revision event stores active-version metadata
+- Approver can approve and request revision
+- Reviewer and Viewer remain read-only for governance writes
+- UI restrictions exist for restricted controls
+- command-level restrictions exist and reject bypass attempts
+- unauthorized attempts append no event
+- role switcher is marked demo-only and is not production authentication
+- demo roles are not UX personas
+- `screen.regenerate` capability may be modeled for Approver
+- provider-backed regeneration orchestration, DesignAgentProvider, and generated variants remain absent
+
+### Persistence and audit
+
+- persistence is behind a port
+- storage envelope is versioned
+- persisted data is schema-validated
+- project/spec/baseline mismatches are rejected
+- corrupted or unavailable storage falls back safely
+- fallback notice is visible and non-blocking
+- only governance events and screen-version records are persisted
+- audit events derive from the same event source
+- audit ordering is deterministic with a stable tie-breaker
+- per-screen filtering works without mutating history
+- reset removes only the managed governance key
+- `localStorage.clear()` is absent
+- immutable AgentPilot specification, personas, journeys, tokens, and feature flags remain unchanged
+
 ## Verdict rules
 
 - `PASS` is valid only when `SAFE_TO_COMMIT: YES`

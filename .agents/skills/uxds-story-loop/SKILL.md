@@ -50,6 +50,9 @@ Also inspect `package.json` dynamically before selecting scripts.
 - Autonomy requires exactly one valid active manifest at execution time
 - Inactive historical manifests provide evidence only and never authorize execution
 - Determine the active epic, ordered story queue, tasks, branches, dependencies, retry budgets, merge method, branch retention, workspace mode, finalization, and final release action from the manifest
+- Recognize optional manifest `roles` policy metadata when present (default role, allowed options, demo-only flag, persona separation)
+- Recognize optional manifest `resetPolicy` metadata when present (managed-key-only reset, preserved seed surfaces, prohibition of `localStorage.clear()`)
+- Recognize optional manifest `scopeBoundary` metadata when present and enforce declared epic-boundary exclusions (for example provider-backed regeneration owned by a later epic)
 - Manifest `branch` is authoritative for execution
 - When manifest branch and ticket-suggested branch match, proceed
 - When they differ, require `ticketSuggestedBranch`, `branchOverrideReason`, and explicit human authorization represented by the reviewed active manifest; missing override evidence is a hard stop
@@ -113,8 +116,11 @@ and the current story is Done.
 - Smallest coherent vertical slice
 - No unrelated refactoring, speculative frameworks, or unapproved dependencies
 - No excluded capabilities (real LLM, production backend/auth, Module Federation)
+- Honor manifest `scopeBoundary` exclusions; do not implement provider-backed regeneration, DesignAgentProvider adapters, or generated screen variants when the active run declares those false
 - No test deletion or type-safety / lint / accessibility / security weakening
 - Domain modules remain framework-independent
+- When `roles` metadata is present, keep demo roles separate from UX personas and label role switching as demonstration-only
+- When `resetPolicy` metadata is present, reset only the managed governance persistence key and preserve declared seed and configuration surfaces
 
 ## Focused verification
 
