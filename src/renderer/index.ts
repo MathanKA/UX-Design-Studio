@@ -24,3 +24,12 @@ export {
 
 export { UnknownComponent } from "./fallbacks/UnknownComponent";
 export { InvalidPropsFallback } from "./fallbacks/InvalidPropsFallback";
+
+export { RecursiveComposer } from "./composer/RecursiveComposer";
+export { ScreenComposer } from "./composer/ScreenComposer";
+export { NodeErrorBoundary } from "./composer/NodeErrorBoundary";
+export { createActionResolver } from "./actions/create-action-resolver";
+export type {
+  ActionResolver,
+  ActionResolverHandlers,
+} from "./actions/create-action-resolver";
