@@ -4,7 +4,7 @@ import styles from "./AppShell.module.css";
 
 const navItems = [
   { to: "/overview", label: "Overview" },
-  { to: "/review/dashboard", label: "Review" },
+  { to: "/review/screen-dashboard", label: "Review" },
   { to: "/audit", label: "Audit" },
 ] as const;
 
