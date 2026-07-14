@@ -1,13 +1,14 @@
 import type { ReactNode } from "react";
+import { GovernanceProvider } from "../features/governance";
 
 type AppProvidersProps = {
   children: ReactNode;
 };
 
 /**
- * Application provider seam. Persistence, design-agent, and host adapters
- * will mount here in later stories without changing route ownership.
+ * Application provider seam. Governance session mounts here; persistence,
+ * design-agent, and host adapters will join in later stories.
  */
 export function AppProviders({ children }: AppProvidersProps) {
-  return <>{children}</>;
+  return <GovernanceProvider>{children}</GovernanceProvider>;
 }
