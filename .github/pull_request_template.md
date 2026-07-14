@@ -22,12 +22,16 @@ A concise description of the completed story and user or engineering outcome.
 | Check | Result |
 |---|---|
 | Focused tests | PASS |
+| Plan validation | PASS |
+| Agent-control validation | PASS |
 | Type check | PASS |
 | Lint | PASS |
 | Full tests | PASS |
 | Production build | PASS |
+| Visual/manual verification | PASS / NOT APPLICABLE |
 | Independent verifier | PASS |
-| Signed commit verification | PASS |
+| Local signed commit | PASS |
+| Remote signature verification | PASS |
 
 ## Architecture and scope
 
@@ -45,4 +49,4 @@ Screenshot or `Not applicable`, with an honest reason.
 
 - Story: #<story>
 - Tasks: #<task>, #<task>
-- Epic: #1
+- Epic: #<epic>
