@@ -37,6 +37,10 @@ export type ScreenRegeneratedEvent = GovernanceEventMetadata & {
     newVersionId: ScreenVersionId;
     revisionEventId: AuditEventId;
     provider: "mock" | "production";
+    contentRef: string;
+    providerRequestId?: string;
+    /** Optional provider explanation lines; omitted when the provider did not supply them. */
+    explanation?: readonly string[];
   };
 };
 

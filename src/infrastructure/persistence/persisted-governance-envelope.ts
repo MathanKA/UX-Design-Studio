@@ -33,9 +33,36 @@ export const persistedGovernanceEnvelopeSchema = z
   })
   .strict()
   .superRefine((envelope, ctx) => {
-    const seen = new Set<string>();
+    const seenEventIds = new Set<string>();
+    const versionIds = new Set<string>();
+
+    for (const [screenId, versions] of Object.entries(
+      envelope.state.screenVersions,
+    )) {
+      for (const version of versions) {
+        if (versionIds.has(version.id)) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: `Duplicate screen version id "${version.id}".`,
+            path: ["state", "screenVersions", screenId],
+          });
+          return;
+        }
+        versionIds.add(version.id);
+
+        if (version.source === "regenerated" && !version.contentRef) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: `Regenerated version "${version.id}" is missing contentRef.`,
+            path: ["state", "screenVersions", screenId],
+          });
+          return;
+        }
+      }
+    }
+
     for (const event of envelope.state.events) {
-      if (seen.has(event.id)) {
+      if (seenEventIds.has(event.id)) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
           message: `Duplicate governance event id "${event.id}".`,
@@ -43,7 +70,7 @@ export const persistedGovernanceEnvelopeSchema = z
         });
         return;
       }
-      seen.add(event.id);
+      seenEventIds.add(event.id);
 
       if (
         event.projectId !== envelope.projectId ||
@@ -56,6 +83,43 @@ export const persistedGovernanceEnvelopeSchema = z
           path: ["state", "events"],
         });
         return;
+      }
+
+      if (event.type === "screen.regenerated") {
+        if (!event.payload.contentRef) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: `Regenerated event "${event.id}" is missing contentRef.`,
+            path: ["state", "events"],
+          });
+          return;
+        }
+
+        if (!versionIds.has(event.payload.newVersionId)) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: `Regenerated event "${event.id}" references missing version "${event.payload.newVersionId}".`,
+            path: ["state", "events"],
+          });
+          return;
+        }
+
+        const revision = envelope.state.events.find(
+          (entry) => entry.id === event.payload.revisionEventId,
+        );
+        if (
+          !revision ||
+          revision.type !== "screen.revision_requested" ||
+          revision.screenId !== event.screenId ||
+          revision.screenVersionId !== event.payload.previousVersionId
+        ) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: `Regenerated event "${event.id}" has an invalid revisionEventId.`,
+            path: ["state", "events"],
+          });
+          return;
+        }
       }
     }
   });

@@ -1,0 +1,106 @@
+schemaVersion: 1
+runId: uxds-e5
+active: false
+
+epic:
+  key: E5
+  issue: 47
+  title: Mock Regeneration and Review Hardening
+  estimateHours: 6
+
+baseBranch: staging
+
+workspace:
+  mode: single-checkout
+  useWorktrees: false
+
+merge:
+  method: merge
+  retainFeatureBranch: true
+
+autonomy:
+  sequentialStories: true
+  automaticStoryMerge: true
+  automaticNextStory: true
+  finalReleasePR:
+    base: main
+    head: staging
+    open: true
+    merge: false
+
+retryBudget:
+  implementationRepair: 1
+  verifierRerun: 1
+  transientCiRerun: 1
+
+provider:
+  port: DesignAgentProvider
+  implementation: deterministic-mock
+  targetScreenId: screen-dashboard
+  simulatedLatencyMs: 900
+  supportsAbortSignal: true
+  controlledFailure: true
+  externalNetwork: false
+  requiresSecrets: false
+  realLlm: false
+
+regenerationPolicy:
+  requireLatestCurrentVersionRevision: true
+  providerOutputRuntimeValidation: true
+  rejectDuplicateVersionIds: true
+  atomicEventAndVersionActivation: true
+  validateRevisionCrossReferences: true
+  validateProviderScreenIdentity: true
+  rejectStaleAsyncCompletion: true
+  persistContentReference: true
+  preserveCurrentVersionOnFailure: true
+  preserveCurrentVersionOnCancellation: true
+
+scope:
+  activateCutLine: false
+  completeVersionHistory: true
+  completeAccessibilityOverlay: true
+  contrastBadges: true
+  resilientStates: true
+  reducedMotion: true
+  visualPolish: true
+
+featureFlags:
+  enableVersionHistory: true
+  enableAccessibilityOverlay: true
+  enableContrastBadges: true
+  enableControlledProviderFailure: true
+
+stories:
+  - key: US-5.1
+    issue: 48
+    tasks: [49, 50]
+    branch: feat/uxds-48-regenerate-one-screen-through-design-agent-provider
+    ticketSuggestedBranch: feat/uxds-48-regenerate-one-screen-through-the-provider-bound
+    branchOverrideReason: Human-approved complete readable branch name replacing an importer-truncated suggestion
+    dependsOn: [44]
+
+  - key: US-5.2
+    issue: 51
+    tasks: [52, 53]
+    branch: feat/uxds-51-enforce-reapproval-accessibility-and-review-hardening
+    ticketSuggestedBranch: feat/uxds-51-enforce-reapproval-and-finish-accessibility-and-
+    branchOverrideReason: Human-approved complete readable branch name replacing an importer-truncated suggestion
+    dependsOn: [48]
+    authorizedCutScope:
+      versionHistory: true
+      accessibilityOverlay: true
+      contrastBadges: true
+      activateCutLine: false
+
+finalization:
+  deactivateManifest: true
+  closureBranch: chore/uxds-close-e5-autonomous-run
+  automaticClosureMerge: true
+
+stopAfter:
+  epic: 47
+  openReleasePR: true
+  mergeReleasePR: false
+
+authorizationExpiry: epic-done-or-blocked

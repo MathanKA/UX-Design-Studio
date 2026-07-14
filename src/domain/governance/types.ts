@@ -62,6 +62,8 @@ export type ScreenVersionRecord = {
   source: ScreenVersionSource;
   createdAt: string;
   previousVersionId?: ScreenVersionId;
+  /** Required for regenerated versions; resolves content via content registry. */
+  contentRef?: string;
 };
 
 export type GovernanceState = {
@@ -79,6 +81,7 @@ export const GOVERNANCE_LIMITS = {
   maxFailureMessageLength: 500,
   maxFailureCodeLength: 64,
   maxIdLength: 128,
+  maxContentRefLength: 128,
   maxDisplayLabelLength: 120,
   maxAffectedNodes: 50,
   maxStringLength: 2_000,

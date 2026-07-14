@@ -63,3 +63,19 @@
   color: #5c5c5c;
   font-size: 0.8rem;
 }
+
+.previewStack {
+  position: relative;
+}
+
+.previewStack[data-accessibility-overlay-active="true"] {
+  box-shadow: inset 0 0 0 2px rgba(200, 16, 46, 0.22);
+  border-radius: 0.35rem;
+  transition: box-shadow 160ms ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .previewStack[data-accessibility-overlay-active="true"] {
+    transition: none;
+  }
+}

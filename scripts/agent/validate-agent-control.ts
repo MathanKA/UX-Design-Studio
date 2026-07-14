@@ -27,6 +27,49 @@ type RunStory = {
   ticketSuggestedBranch?: string;
   branchOverrideReason?: string;
   authorizedScope?: Record<string, unknown>;
+  authorizedCutScope?: Record<string, unknown>;
+};
+
+type ProviderConfig = {
+  port: string;
+  implementation: string;
+  targetScreenId: string;
+  simulatedLatencyMs: number;
+  supportsAbortSignal: boolean;
+  controlledFailure: boolean;
+  externalNetwork: boolean;
+  requiresSecrets: boolean;
+  realLlm: boolean;
+};
+
+type RegenerationPolicy = {
+  requireLatestCurrentVersionRevision: boolean;
+  providerOutputRuntimeValidation: boolean;
+  rejectDuplicateVersionIds: boolean;
+  atomicEventAndVersionActivation: boolean;
+  validateRevisionCrossReferences: boolean;
+  validateProviderScreenIdentity: boolean;
+  rejectStaleAsyncCompletion: boolean;
+  persistContentReference: boolean;
+  preserveCurrentVersionOnFailure: boolean;
+  preserveCurrentVersionOnCancellation: boolean;
+};
+
+type RunScope = {
+  activateCutLine: boolean;
+  completeVersionHistory: boolean;
+  completeAccessibilityOverlay: boolean;
+  contrastBadges: boolean;
+  resilientStates: boolean;
+  reducedMotion: boolean;
+  visualPolish: boolean;
+};
+
+type FeatureFlags = {
+  enableVersionHistory: boolean;
+  enableAccessibilityOverlay: boolean;
+  enableContrastBadges: boolean;
+  enableControlledProviderFailure: boolean;
 };
 
 type RunManifest = {
@@ -87,6 +130,10 @@ type RunManifest = {
     preserveFeatureFlags: boolean;
     prohibitLocalStorageClear: boolean;
   };
+  provider?: ProviderConfig;
+  regenerationPolicy?: RegenerationPolicy;
+  scope?: RunScope;
+  featureFlags?: FeatureFlags;
   stories: RunStory[];
   finalization?: {
     deactivateManifest: boolean;
@@ -359,6 +406,13 @@ function normalizeManifest(raw: Record<string, unknown>): RunManifest {
         );
       }
 
+      if (story.authorizedCutScope !== undefined) {
+        normalized.authorizedCutScope = asRecord(
+          story.authorizedCutScope,
+          `stories[${index}].authorizedCutScope`,
+        );
+      }
+
       return normalized;
     },
   );
@@ -469,6 +523,121 @@ function normalizeManifest(raw: Record<string, unknown>): RunManifest {
     };
   }
 
+  let provider: RunManifest["provider"];
+  if (raw.provider !== undefined) {
+    const providerRaw = asRecord(raw.provider, "provider");
+    provider = {
+      port: asString(providerRaw.port, "provider.port"),
+      implementation: asString(providerRaw.implementation, "provider.implementation"),
+      targetScreenId: asString(providerRaw.targetScreenId, "provider.targetScreenId"),
+      simulatedLatencyMs: asNumber(
+        providerRaw.simulatedLatencyMs,
+        "provider.simulatedLatencyMs",
+      ),
+      supportsAbortSignal: asBoolean(
+        providerRaw.supportsAbortSignal,
+        "provider.supportsAbortSignal",
+      ),
+      controlledFailure: asBoolean(
+        providerRaw.controlledFailure,
+        "provider.controlledFailure",
+      ),
+      externalNetwork: asBoolean(providerRaw.externalNetwork, "provider.externalNetwork"),
+      requiresSecrets: asBoolean(providerRaw.requiresSecrets, "provider.requiresSecrets"),
+      realLlm: asBoolean(providerRaw.realLlm, "provider.realLlm"),
+    };
+  }
+
+  let regenerationPolicy: RunManifest["regenerationPolicy"];
+  if (raw.regenerationPolicy !== undefined) {
+    const policyRaw = asRecord(raw.regenerationPolicy, "regenerationPolicy");
+    regenerationPolicy = {
+      requireLatestCurrentVersionRevision: asBoolean(
+        policyRaw.requireLatestCurrentVersionRevision,
+        "regenerationPolicy.requireLatestCurrentVersionRevision",
+      ),
+      providerOutputRuntimeValidation: asBoolean(
+        policyRaw.providerOutputRuntimeValidation,
+        "regenerationPolicy.providerOutputRuntimeValidation",
+      ),
+      rejectDuplicateVersionIds: asBoolean(
+        policyRaw.rejectDuplicateVersionIds,
+        "regenerationPolicy.rejectDuplicateVersionIds",
+      ),
+      atomicEventAndVersionActivation: asBoolean(
+        policyRaw.atomicEventAndVersionActivation,
+        "regenerationPolicy.atomicEventAndVersionActivation",
+      ),
+      validateRevisionCrossReferences: asBoolean(
+        policyRaw.validateRevisionCrossReferences,
+        "regenerationPolicy.validateRevisionCrossReferences",
+      ),
+      validateProviderScreenIdentity: asBoolean(
+        policyRaw.validateProviderScreenIdentity,
+        "regenerationPolicy.validateProviderScreenIdentity",
+      ),
+      rejectStaleAsyncCompletion: asBoolean(
+        policyRaw.rejectStaleAsyncCompletion,
+        "regenerationPolicy.rejectStaleAsyncCompletion",
+      ),
+      persistContentReference: asBoolean(
+        policyRaw.persistContentReference,
+        "regenerationPolicy.persistContentReference",
+      ),
+      preserveCurrentVersionOnFailure: asBoolean(
+        policyRaw.preserveCurrentVersionOnFailure,
+        "regenerationPolicy.preserveCurrentVersionOnFailure",
+      ),
+      preserveCurrentVersionOnCancellation: asBoolean(
+        policyRaw.preserveCurrentVersionOnCancellation,
+        "regenerationPolicy.preserveCurrentVersionOnCancellation",
+      ),
+    };
+  }
+
+  let scope: RunManifest["scope"];
+  if (raw.scope !== undefined) {
+    const scopeRaw = asRecord(raw.scope, "scope");
+    scope = {
+      activateCutLine: asBoolean(scopeRaw.activateCutLine, "scope.activateCutLine"),
+      completeVersionHistory: asBoolean(
+        scopeRaw.completeVersionHistory,
+        "scope.completeVersionHistory",
+      ),
+      completeAccessibilityOverlay: asBoolean(
+        scopeRaw.completeAccessibilityOverlay,
+        "scope.completeAccessibilityOverlay",
+      ),
+      contrastBadges: asBoolean(scopeRaw.contrastBadges, "scope.contrastBadges"),
+      resilientStates: asBoolean(scopeRaw.resilientStates, "scope.resilientStates"),
+      reducedMotion: asBoolean(scopeRaw.reducedMotion, "scope.reducedMotion"),
+      visualPolish: asBoolean(scopeRaw.visualPolish, "scope.visualPolish"),
+    };
+  }
+
+  let featureFlags: RunManifest["featureFlags"];
+  if (raw.featureFlags !== undefined) {
+    const flagsRaw = asRecord(raw.featureFlags, "featureFlags");
+    featureFlags = {
+      enableVersionHistory: asBoolean(
+        flagsRaw.enableVersionHistory,
+        "featureFlags.enableVersionHistory",
+      ),
+      enableAccessibilityOverlay: asBoolean(
+        flagsRaw.enableAccessibilityOverlay,
+        "featureFlags.enableAccessibilityOverlay",
+      ),
+      enableContrastBadges: asBoolean(
+        flagsRaw.enableContrastBadges,
+        "featureFlags.enableContrastBadges",
+      ),
+      enableControlledProviderFailure: asBoolean(
+        flagsRaw.enableControlledProviderFailure,
+        "featureFlags.enableControlledProviderFailure",
+      ),
+    };
+  }
+
   return {
     schemaVersion: asNumber(raw.schemaVersion, "schemaVersion"),
     runId: asString(raw.runId, "runId"),
@@ -525,6 +694,10 @@ function normalizeManifest(raw: Record<string, unknown>): RunManifest {
     roles,
     scopeBoundary,
     resetPolicy,
+    provider,
+    regenerationPolicy,
+    scope,
+    featureFlags,
     stories,
     finalization,
     stopAfter: {
@@ -701,6 +874,92 @@ function validateManifestStructure(
     }
   }
 
+  if (manifest.provider) {
+    if (manifest.provider.port !== "DesignAgentProvider") {
+      fail(`${label}: provider.port must be DesignAgentProvider when declared.`);
+    }
+    if (manifest.provider.implementation !== "deterministic-mock") {
+      fail(
+        `${label}: provider.implementation must be deterministic-mock when declared.`,
+      );
+    }
+    if (manifest.provider.targetScreenId.trim().length === 0) {
+      fail(`${label}: provider.targetScreenId must be non-empty when declared.`);
+    }
+    if (
+      typeof manifest.provider.simulatedLatencyMs !== "number" ||
+      Number.isNaN(manifest.provider.simulatedLatencyMs) ||
+      manifest.provider.simulatedLatencyMs <= 0
+    ) {
+      fail(`${label}: provider.simulatedLatencyMs must be a positive number.`);
+    }
+    if (manifest.provider.supportsAbortSignal !== true) {
+      fail(`${label}: provider.supportsAbortSignal must be true when declared.`);
+    }
+    if (manifest.provider.controlledFailure !== true) {
+      fail(`${label}: provider.controlledFailure must be true when declared.`);
+    }
+    if (manifest.provider.externalNetwork !== false) {
+      fail(`${label}: provider.externalNetwork must be false when declared.`);
+    }
+    if (manifest.provider.requiresSecrets !== false) {
+      fail(`${label}: provider.requiresSecrets must be false when declared.`);
+    }
+    if (manifest.provider.realLlm !== false) {
+      fail(`${label}: provider.realLlm must be false when declared.`);
+    }
+  }
+
+  if (manifest.regenerationPolicy) {
+    for (const key of [
+      "requireLatestCurrentVersionRevision",
+      "providerOutputRuntimeValidation",
+      "rejectDuplicateVersionIds",
+      "atomicEventAndVersionActivation",
+      "validateRevisionCrossReferences",
+      "validateProviderScreenIdentity",
+      "rejectStaleAsyncCompletion",
+      "persistContentReference",
+      "preserveCurrentVersionOnFailure",
+      "preserveCurrentVersionOnCancellation",
+    ] as const) {
+      if (manifest.regenerationPolicy[key] !== true) {
+        fail(`${label}: regenerationPolicy.${key} must be true when declared.`);
+      }
+    }
+  }
+
+  if (manifest.scope) {
+    if (manifest.scope.activateCutLine !== false) {
+      fail(`${label}: scope.activateCutLine must be false when declared.`);
+    }
+    for (const key of [
+      "completeVersionHistory",
+      "completeAccessibilityOverlay",
+      "contrastBadges",
+      "resilientStates",
+      "reducedMotion",
+      "visualPolish",
+    ] as const) {
+      if (manifest.scope[key] !== true) {
+        fail(`${label}: scope.${key} must be true when declared.`);
+      }
+    }
+  }
+
+  if (manifest.featureFlags) {
+    for (const key of [
+      "enableVersionHistory",
+      "enableAccessibilityOverlay",
+      "enableContrastBadges",
+      "enableControlledProviderFailure",
+    ] as const) {
+      if (manifest.featureFlags[key] !== true) {
+        fail(`${label}: featureFlags.${key} must be true when declared.`);
+      }
+    }
+  }
+
   if (manifest.stories.length === 0) {
     fail(`${label}: stories must contain at least one story.`);
   }
@@ -767,6 +1026,15 @@ function validateManifestStructure(
         );
       } else if (story.branchOverrideReason.trim().length < 12) {
         fail(`${storyLabel}: branchOverrideReason must explain the human-approved override.`);
+      }
+    }
+
+    const cutScope = story.authorizedCutScope ?? story.authorizedScope;
+    if (cutScope !== undefined) {
+      if (cutScope.activateCutLine === true) {
+        fail(
+          `${storyLabel}: authorized cut scope must not activate the cut line during this run.`,
+        );
       }
     }
 
@@ -890,6 +1158,15 @@ if (!skill.includes("useWorktrees") || !skill.includes("single-checkout")) {
 if (!skill.includes("roles") || !skill.includes("resetPolicy") || !skill.includes("scopeBoundary")) {
   fail("Skill must recognize roles, resetPolicy, and scopeBoundary manifest metadata.");
 }
+if (!skill.includes("provider") || !skill.includes("regenerationPolicy")) {
+  fail("Skill must recognize provider and regenerationPolicy manifest metadata.");
+}
+if (!skill.includes("authorizedCutScope") && !skill.includes("authorizedScope")) {
+  fail("Skill must recognize authorized cut-scope metadata.");
+}
+if (!skill.includes("atomic version activation") && !skill.includes("stale-response")) {
+  fail("Skill must require stale-response and atomic version activation verification.");
+}
 if (!skill.includes("provider-backed regeneration") && !skill.includes("DesignAgentProvider")) {
   fail("Skill must require epic-boundary exclusion verification for provider-backed regeneration.");
 }
@@ -938,8 +1215,14 @@ if (!verifier.includes("E3-specific") && !verifier.includes("When E3 work is in 
 if (!verifier.includes("E4-specific") && !verifier.includes("When E4 work is in scope")) {
   fail("Verifier must include E4-specific verification criteria.");
 }
+if (!verifier.includes("E5-specific") && !verifier.includes("When E5 work is in scope")) {
+  fail("Verifier must include E5-specific verification criteria.");
+}
 if (!verifier.includes("provider-backed regeneration") && !verifier.includes("DesignAgentProvider")) {
   fail("Verifier must include E4/E5 regeneration-boundary checks.");
+}
+if (!verifier.includes("atomic") || !verifier.includes("duplicate generated version")) {
+  fail("Verifier must include E5 atomic activation and duplicate-version checks.");
 }
 if (!verifier.includes("localStorage.clear()")) {
   fail("Verifier must prohibit localStorage.clear() for managed reset.");
@@ -1039,8 +1322,21 @@ if (!agents.includes("separate from UX personas")) {
 if (!agents.includes("localStorage.clear()")) {
   fail("AGENTS.md must prohibit localStorage.clear() for demo reset.");
 }
-if (!agents.includes("Provider-backed regeneration belongs to a later epic")) {
-  fail("AGENTS.md must keep provider-backed regeneration out of current governance epic scope.");
+if (
+  !agents.includes("Outside an authorized regeneration epic run, provider-backed regeneration remains out of scope")
+) {
+  fail(
+    "AGENTS.md must keep provider-backed regeneration out of scope outside an authorized regeneration epic run.",
+  );
+}
+if (!agents.includes("Provider output is untrusted until shared runtime screen validation succeeds")) {
+  fail("AGENTS.md must require runtime validation of provider output.");
+}
+if (!agents.includes("atomic") || !agents.includes("Generated screen-version IDs must be unique")) {
+  fail("AGENTS.md must require unique generated version IDs and atomic activation.");
+}
+if (!agents.includes("No later epic, including E6, starts automatically")) {
+  fail("AGENTS.md must prohibit automatic E6 start after regeneration-epic finalization.");
 }
 
 const runsDir = path.join(root, ".agents/runs");

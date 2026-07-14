@@ -249,7 +249,18 @@
                 "screenId": "screen-task-detail"
               }
             },
-            "children": []
+            "children": [],
+            "accessibility": [
+              {
+                "type": "aria",
+                "role": "button",
+                "label": "Create task"
+              },
+              {
+                "type": "keyboard",
+                "note": "Create task is the first interactive control after the metrics grid"
+              }
+            ]
           }
         ],
         "accessibility": [
@@ -257,6 +268,10 @@
             "type": "aria",
             "role": "main",
             "label": "Dashboard"
+          },
+          {
+            "type": "screenReader",
+            "note": "Dashboard announces open task count when the screen loads"
           }
         ]
       },
@@ -289,6 +304,15 @@
         {
           "type": "keyboard",
           "note": "Primary CTA is reachable in tab order"
+        },
+        {
+          "type": "contrast",
+          "status": "pass",
+          "ratio": 6.8
+        },
+        {
+          "type": "screenReader",
+          "note": "Status badges expose text alternatives for approval states"
         }
       ]
     },

@@ -53,6 +53,8 @@ Also inspect `package.json` dynamically before selecting scripts.
 - Recognize optional manifest `roles` policy metadata when present (default role, allowed options, demo-only flag, persona separation)
 - Recognize optional manifest `resetPolicy` metadata when present (managed-key-only reset, preserved seed surfaces, prohibition of `localStorage.clear()`)
 - Recognize optional manifest `scopeBoundary` metadata when present and enforce declared epic-boundary exclusions (for example provider-backed regeneration owned by a later epic)
+- Recognize optional manifest `provider`, `regenerationPolicy`, `scope`, and `featureFlags` metadata when present and enforce declared provider, regeneration-safety, cut-scope, and feature-flag constraints
+- Recognize optional story `authorizedCutScope` / `authorizedScope` metadata when present for cut-line authorization without activating undeclared cuts
 - Manifest `branch` is authoritative for execution
 - When manifest branch and ticket-suggested branch match, proceed
 - When they differ, require `ticketSuggestedBranch`, `branchOverrideReason`, and explicit human authorization represented by the reviewed active manifest; missing override evidence is a hard stop
@@ -117,6 +119,9 @@ and the current story is Done.
 - No unrelated refactoring, speculative frameworks, or unapproved dependencies
 - No excluded capabilities (real LLM, production backend/auth, Module Federation)
 - Honor manifest `scopeBoundary` exclusions; do not implement provider-backed regeneration, DesignAgentProvider adapters, or generated screen variants when the active run declares those false
+- When optional manifest `provider`, `regenerationPolicy`, `scope`, and `featureFlags` sections authorize provider-bound work, implement only through the declared port and policy; never introduce a real LLM, external network, or secrets
+- When `authorizedCutScope` or `authorizedScope` is present, deliver only the authorized cut-line items and never activate a cut when `activateCutLine` is false
+- For provider-bound stories, verify async cancellation, controlled failure, provider-result schema evidence, stale-response rejection, and atomic version activation
 - No test deletion or type-safety / lint / accessibility / security weakening
 - Domain modules remain framework-independent
 - When `roles` metadata is present, keep demo roles separate from UX personas and label role switching as demonstration-only
@@ -173,6 +178,7 @@ Do not reset counters by restarting the agent. Exhausted budget => Block and sto
 - Stage only story-related files
 - No secrets, Cursor/AI attribution, or unapproved dependencies
 - Create signed commit with `git commit -S`
+- Commit messages must use a Conventional Commit subject and a `Summary` body that states what was done (outcome-focused bullets)
 - Run `git verify-commit HEAD` and inspect `git log --show-signature -1`
 - Signing failure is an immediate hard stop
 
@@ -181,6 +187,7 @@ Do not reset counters by restarting the agent. Exhausted budget => Block and sto
 - Push only the active story branch
 - Open one PR targeting the base branch from the manifest
 - Use the repository pull-request template structure
+- PR `## Summary` must include the story outcome and an Implemented list of capabilities or modules delivered in that PR
 - No Cursor/AI attribution, model names, or promotional text
 - Do not rely on closing keywords alone when the PR targets `staging`
 
@@ -254,6 +261,7 @@ Blocked when possible, and report exact evidence plus minimum user action.
 ## Final epic convergence verification
 
 After the last authorized story is Done, synchronize the base branch, run the full
-available quality gate, and invoke the verifier in epic mode. Close the epic only
-on PASS. Execute only the final release action declared in the manifest. Do not
-automatically start the next epic.
+available quality gate, and invoke the verifier in epic mode (including any
+declared hard-gate convergence checks such as provider-bound regeneration gates).
+Close the epic only on PASS. Execute only the final release action declared in
+the manifest. Do not automatically start the next epic.

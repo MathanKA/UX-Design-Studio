@@ -7,7 +7,9 @@ import {
   baselineScreenVersionId,
   createApproveScreenEvent,
   createInitialGovernanceState,
+  createRegeneratedEvent,
   createRequestRevisionEvent,
+  selectCurrentScreenVersion,
   type GovernanceState,
 } from "../../domain/governance";
 import {
@@ -381,6 +383,74 @@ describe("LocalStorageGovernanceRepository (US-4.4)", () => {
       "screen.approved",
       "screen.revision_requested",
     ]);
+  });
+
+  it("rehydrates regenerated versions with contentRef", () => {
+    const storage = createMemoryStorage();
+    const first = createRepo(storage);
+    let state = createFallback();
+    const ports = {
+      clock: createFixedClock(FIXED_NOW),
+      idGenerator: createSequentialIdGenerator(1),
+    };
+
+    const revision = createRequestRevisionEvent(
+      state,
+      {
+        ...identity,
+        screenId: SCREEN_A,
+        expectedScreenVersionId: baselineScreenVersionId(SCREEN_A),
+        actor: approver,
+        affectedNodeIds: ["dashboard-title"],
+        category: "layout",
+        description: "Please refine the dashboard hierarchy.",
+      },
+      ports,
+    );
+    expect(revision.ok).toBe(true);
+    if (!revision.ok) return;
+    const appendedRevision = appendGovernanceEvent(state, revision.value);
+    expect(appendedRevision.ok).toBe(true);
+    if (!appendedRevision.ok) return;
+    state = appendedRevision.state;
+
+    const regenerated = createRegeneratedEvent(
+      state,
+      {
+        ...identity,
+        screenId: SCREEN_A,
+        expectedScreenVersionId: baselineScreenVersionId(SCREEN_A),
+        actor: approver,
+        revisionEventId: revision.value.id,
+        provider: "mock",
+        contentRef: "agentpilot.dashboard.v2",
+        providerRequestId: "provider-req-1",
+      },
+      ports,
+    );
+    expect(regenerated.ok).toBe(true);
+    if (!regenerated.ok) return;
+    const appendedRegen = appendGovernanceEvent(state, regenerated.value.event);
+    expect(appendedRegen.ok).toBe(true);
+    if (!appendedRegen.ok) return;
+    state = appendedRegen.state;
+
+    expect(first.save(state).ok).toBe(true);
+
+    const reloaded = createRepo(storage).load();
+    expect(reloaded.ok).toBe(true);
+    if (!reloaded.ok) return;
+
+    const current = selectCurrentScreenVersion(reloaded.state, SCREEN_A);
+    expect(current?.source).toBe("regenerated");
+    expect(current?.contentRef).toBe("agentpilot.dashboard.v2");
+    expect(
+      reloaded.state.events.find((event) => event.type === "screen.regenerated")
+        ?.payload,
+    ).toMatchObject({
+      contentRef: "agentpilot.dashboard.v2",
+      providerRequestId: "provider-req-1",
+    });
   });
 });
 

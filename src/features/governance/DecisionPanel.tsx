@@ -1,4 +1,5 @@
 import { useId, useState, type FormEvent } from "react";
+import { appConfig, REGENERATION_TARGET_SCREEN_ID } from "../../app/config";
 import { MIN_REVISION_DESCRIPTION_LENGTH } from "../../application/request-revision";
 import {
   GOVERNANCE_LIMITS,
@@ -21,14 +22,20 @@ export function DecisionPanel({ screenId, screenName }: DecisionPanelProps) {
   const {
     actor,
     isSubmitting,
+    isRegenerating,
     canApprove,
     canRequestRevision,
     canRegenerate,
+    controlledFailureArmed,
+    setControlledFailureArmed,
     approveScreen,
     requestRevision,
+    regenerateScreen,
+    cancelRegeneration,
     listScreenNodes,
     getScreenStatus,
     getCurrentScreenVersion,
+    getLatestRevisionForScreen,
     getApprovalProgress,
     isGateComplete,
   } = useGovernance();
@@ -36,6 +43,7 @@ export function DecisionPanel({ screenId, screenName }: DecisionPanelProps) {
   const categoryId = useId();
   const descriptionId = useId();
   const nodesFieldId = useId();
+  const controlledFailureId = useId();
   const [comment, setComment] = useState("");
   const [selectedNodeIds, setSelectedNodeIds] = useState<string[]>([]);
   const [category, setCategory] = useState<RevisionCategory>("content");
@@ -47,9 +55,16 @@ export function DecisionPanel({ screenId, screenName }: DecisionPanelProps) {
   const gateComplete = isGateComplete();
   const version = screenId ? getCurrentScreenVersion(screenId) : undefined;
   const status = screenId ? getScreenStatus(screenId) : null;
+  const latestRevision = screenId
+    ? getLatestRevisionForScreen(screenId)
+    : undefined;
   const nodeOptions = screenId ? listScreenNodes(screenId) : [];
   const alreadyApproved = status === "approved";
   const roleRestricted = !canApprove && !canRequestRevision;
+  const isDashboardTarget = screenId === REGENERATION_TARGET_SCREEN_ID;
+  const hasCurrentRevision =
+    Boolean(latestRevision) &&
+    latestRevision?.screenVersionId === version?.id;
   const approveDisabled =
     !screenId ||
     !version ||
@@ -61,6 +76,14 @@ export function DecisionPanel({ screenId, screenName }: DecisionPanelProps) {
     !screenId ||
     !version ||
     !canRequestRevision ||
+    isSubmitting ||
+    status === "regenerating";
+  const regenerateDisabled =
+    !screenId ||
+    !version ||
+    !canRegenerate ||
+    !isDashboardTarget ||
+    !hasCurrentRevision ||
     isSubmitting ||
     status === "regenerating";
 
@@ -124,6 +147,35 @@ export function DecisionPanel({ screenId, screenName }: DecisionPanelProps) {
     setFeedbackTone("info");
     setFeedback(
       `Revision requested for ${screenName ?? "Screen"}. Approval for this version is invalidated.`,
+    );
+  };
+
+  const onRegenerate = async () => {
+    if (!screenId || !version || regenerateDisabled) {
+      return;
+    }
+
+    setFeedbackTone("info");
+    setFeedback(`Regenerating ${screenName ?? "screen"}…`);
+
+    const result = await regenerateScreen({
+      screenId,
+      expectedScreenVersionId: version.id,
+    });
+
+    if (!result.ok) {
+      setFeedbackTone("error");
+      if (result.outcome === "cancelled") {
+        setFeedback("Regeneration cancelled. Current screen version retained.");
+      } else {
+        setFeedback(result.error.message);
+      }
+      return;
+    }
+
+    setFeedbackTone("info");
+    setFeedback(
+      `${screenName ?? "Screen"} regenerated to version ${result.version.id}. Ready for review.`,
     );
   };
 
@@ -224,7 +276,7 @@ export function DecisionPanel({ screenId, screenName }: DecisionPanelProps) {
               >
                 {alreadyApproved
                   ? "Current version approved"
-                  : isSubmitting
+                  : isSubmitting && !isRegenerating
                     ? "Approving…"
                     : "Approve current version"}
               </button>
@@ -311,7 +363,7 @@ export function DecisionPanel({ screenId, screenName }: DecisionPanelProps) {
                 disabled={revisionDisabled}
                 data-decision="request-revision"
               >
-                {isSubmitting ? "Submitting…" : "Request revision"}
+                {isSubmitting && !isRegenerating ? "Submitting…" : "Request revision"}
               </button>
             </form>
           ) : null}
@@ -321,22 +373,86 @@ export function DecisionPanel({ screenId, screenName }: DecisionPanelProps) {
               className={styles.regenerate}
               data-decision="regenerate"
               data-testid="regenerate-indicator"
-              data-regenerate-operational="false"
+              data-regenerate-operational={isDashboardTarget ? "true" : "false"}
             >
-              <p className={styles.sectionHeading}>Regenerate (E5)</p>
-              <button
-                type="button"
-                className={styles.regenerateButton}
-                disabled
-                aria-disabled="true"
-                data-decision="regenerate-control"
-              >
-                Regenerate (E5)
-              </button>
-              <p className={styles.hint} data-decision="regenerate-help">
-                Provider-backed regeneration is delivered in E5. This control is
-                non-operational and does not append governance events.
-              </p>
+              <p className={styles.sectionHeading}>Regenerate</p>
+              {!isDashboardTarget ? (
+                <p className={styles.hint} data-decision="regenerate-scope">
+                  Provider-backed regeneration in this POC targets Dashboard
+                  only ({REGENERATION_TARGET_SCREEN_ID}).
+                </p>
+              ) : !hasCurrentRevision ? (
+                <p className={styles.hint} data-decision="regenerate-help">
+                  Submit a structured revision for the current Dashboard version
+                  before regenerating.
+                </p>
+              ) : (
+                <p className={styles.hint} data-decision="regenerate-help">
+                  Uses DesignAgentProvider with a deterministic mock variant.
+                  Cancel retains the current version.
+                </p>
+              )}
+
+              {isDashboardTarget &&
+              canRegenerate &&
+              appConfig.enableControlledProviderFailure ? (
+                <label
+                  className={styles.controlledFailure}
+                  htmlFor={controlledFailureId}
+                >
+                  <input
+                    id={controlledFailureId}
+                    type="checkbox"
+                    checked={controlledFailureArmed}
+                    disabled={isRegenerating || isSubmitting}
+                    onChange={(event) => {
+                      setControlledFailureArmed(event.target.checked);
+                    }}
+                    data-decision="controlled-failure"
+                  />
+                  <span>Simulate controlled provider failure</span>
+                </label>
+              ) : null}
+
+              <div className={styles.regenerateActions}>
+                <button
+                  type="button"
+                  className={styles.regenerateButton}
+                  disabled={regenerateDisabled}
+                  onClick={() => {
+                    void onRegenerate();
+                  }}
+                  data-decision="regenerate-control"
+                >
+                  {isRegenerating ? "Regenerating…" : "Regenerate"}
+                </button>
+                {isRegenerating ? (
+                  <button
+                    type="button"
+                    className={styles.cancelButton}
+                    onClick={cancelRegeneration}
+                    data-decision="cancel-regeneration"
+                  >
+                    Cancel
+                  </button>
+                ) : null}
+                {!isRegenerating &&
+                status === "changes_requested" &&
+                hasCurrentRevision &&
+                isDashboardTarget ? (
+                  <button
+                    type="button"
+                    className={styles.retryButton}
+                    disabled={regenerateDisabled}
+                    onClick={() => {
+                      void onRegenerate();
+                    }}
+                    data-decision="retry-regeneration"
+                  >
+                    Retry regenerate
+                  </button>
+                ) : null}
+              </div>
             </div>
           ) : null}
         </>
@@ -358,7 +474,13 @@ export function DecisionPanel({ screenId, screenName }: DecisionPanelProps) {
             ? "No screens remaining"
             : `${progress.remainingCount} remaining`}
         </p>
-        <p data-decision="gate-readiness" data-gate-complete={gateComplete}>
+        <p
+          data-decision="gate-readiness"
+          data-gate-complete={gateComplete}
+          role="status"
+          aria-live="polite"
+          aria-atomic="true"
+        >
           {gateComplete
             ? "Ready for Agile plan generation"
             : "Agile plan generation unavailable until all required screens are approved"}
