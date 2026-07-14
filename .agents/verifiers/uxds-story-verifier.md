@@ -183,6 +183,71 @@ work.
 - `localStorage.clear()` is absent
 - immutable AgentPilot specification, personas, journeys, tokens, and feature flags remain unchanged
 
+## When E5 work is in scope
+
+Apply these E5-specific checks only when the active story, epic mode, or changed
+diff includes provider regeneration, reapproval after regeneration, version
+history, accessibility overlay, resilient studio states, or related hardening.
+
+### Provider boundary
+
+- a `DesignAgentProvider` port exists and remains transport-independent
+- UI and application depend on the port, not the mock adapter import path
+- mock adapter lives under infrastructure
+- regeneration request includes project, spec, baseline, current version, revision, screen, and optional persona
+- simulated latency is deterministic
+- AbortSignal cancellation is honored
+- controlled failure is deterministic and demo-labeled
+- no network call, secret, or real LLM exists
+- provider result is validated through shared screen validation before activation
+- original UXSpec remains unchanged
+
+### Regeneration safety
+
+- latest current-version revision is required before regeneration
+- revision event exists and cross-references the expected screen and version
+- duplicate generated version IDs are rejected with no regenerated event and no version record
+- screen ID mismatch and invalid provider output are rejected
+- stale provider completion is rejected
+- cancellation and failure leave the current version intact
+- started and terminal regeneration events are traceable
+- regenerated event and version activation are atomic
+- generated content reference resolves after reload
+- persisted regeneration state rehydrates consistently or recovers safely
+- other screens remain unchanged
+
+### Reapproval
+
+- new version becomes current with status `ready_for_review`
+- previous approval remains historical only
+- project gate becomes incomplete after regeneration of an approved screen
+- new version requires fresh approval
+- approving the new version restores approved state and can complete the gate again
+
+### Version history
+
+- prior and current versions are visible with current identification
+- source and timestamp are shown
+- prior approval is not presented as current
+- panel derives from version records and events
+- feature remains independently removable
+
+### Accessibility evidence
+
+- overlay derives from screen/node accessibility metadata
+- contrast, ARIA, screen-reader, and keyboard notes are shown
+- markers or controls are keyboard reachable
+- preview remains operable
+- visible focus exists
+- live regions announce regeneration states
+- reduced-motion preference is respected
+- overlay does not mutate UXSpec
+- contrast badges remain independently available
+
+### Resilient studio states
+
+- pending, cancellation, controlled failure, invalid result, empty metadata, partial metadata, retry, and screen-level render failure recover without shell failure
+
 ## Verdict rules
 
 - `PASS` is valid only when `SAFE_TO_COMMIT: YES`
