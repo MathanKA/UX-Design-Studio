@@ -109,7 +109,7 @@ function appendOk(
 describe("governance domain", () => {
   describe("event creation and shared metadata", () => {
     it("creates every event variant with shared baseline metadata", () => {
-      const state = createState();
+      let state = createState();
       const ports = createPorts();
       const command = baseCommand(SCREEN_A, state);
 
@@ -162,12 +162,15 @@ describe("governance domain", () => {
       expect(started.value.payload.requestId).toBe("req-1");
       expect(started.value.id).toBe("evt-3");
 
+      state = appendOk(state, revision.value);
+
       const regenerated = createRegeneratedEvent(
         state,
         {
-          ...command,
+          ...baseCommand(SCREEN_A, state),
           revisionEventId: revision.value.id,
           provider: "mock",
+          contentRef: "agentpilot.dashboard.v2",
         },
         ports,
       );
@@ -175,18 +178,24 @@ describe("governance domain", () => {
       if (!regenerated.ok) return;
       expect(regenerated.value.event.type).toBe("screen.regenerated");
       expect(regenerated.value.event.payload.provider).toBe("mock");
+      expect(regenerated.value.event.payload.contentRef).toBe(
+        "agentpilot.dashboard.v2",
+      );
       expect(regenerated.value.event.payload.previousVersionId).toBe(
         baselineScreenVersionId(SCREEN_A),
       );
       expect(regenerated.value.version.source).toBe("regenerated");
       expect(regenerated.value.version.sequence).toBe(2);
+      expect(regenerated.value.version.contentRef).toBe(
+        "agentpilot.dashboard.v2",
+      );
       expect(regenerated.value.event.id).toBe("evt-5");
       expect(regenerated.value.version.id).toBe(`sv-${SCREEN_A}-4`);
 
       const failed = createRegenerationFailedEvent(
         state,
         {
-          ...command,
+          ...baseCommand(SCREEN_A, state),
           failureCode: "PROVIDER_TIMEOUT",
           message: "Mock provider timed out",
         },
@@ -312,6 +321,7 @@ describe("governance domain", () => {
           ...baseCommand(SCREEN_A, state),
           revisionEventId: revision.value.id,
           provider: "mock",
+          contentRef: "agentpilot.dashboard.v2",
         },
         ports,
       );
@@ -328,8 +338,108 @@ describe("governance domain", () => {
       const current = selectCurrentScreenVersion(next.state, SCREEN_A);
       expect(current?.id).toBe(regenerated.value.version.id);
       expect(current?.source).toBe("regenerated");
+      expect(current?.contentRef).toBe("agentpilot.dashboard.v2");
       expect(current?.sequence).toBe(2);
       expect(next.state.screenVersions[SCREEN_A]).toHaveLength(2);
+    });
+
+    it("rejects duplicate regenerated version ids without appending", () => {
+      let state = createState();
+      const ports = createPorts();
+      const revision = createRequestRevisionEvent(
+        state,
+        {
+          ...baseCommand(SCREEN_A, state),
+          affectedNodeIds: ["node-title"],
+          category: "content",
+          description: "Update copy",
+        },
+        ports,
+      );
+      expect(revision.ok).toBe(true);
+      if (!revision.ok) return;
+      state = appendOk(state, revision.value);
+
+      const regenerated = createRegeneratedEvent(
+        state,
+        {
+          ...baseCommand(SCREEN_A, state),
+          revisionEventId: revision.value.id,
+          provider: "mock",
+          contentRef: "agentpilot.dashboard.v2",
+          newVersionId: baselineScreenVersionId(SCREEN_B),
+        },
+        ports,
+      );
+      expect(regenerated.ok).toBe(false);
+      if (regenerated.ok) return;
+      expect(regenerated.error.code).toBe("DUPLICATE_VERSION_ID");
+
+      const collision = createRegeneratedEvent(
+        state,
+        {
+          ...baseCommand(SCREEN_A, state),
+          revisionEventId: revision.value.id,
+          provider: "mock",
+          contentRef: "agentpilot.dashboard.v2",
+          newVersionId: baselineScreenVersionId(SCREEN_A),
+        },
+        ports,
+      );
+      expect(collision.ok).toBe(false);
+      if (collision.ok) return;
+      expect(collision.error.code).toBe("VERSION_ID_COLLISION");
+      expect(state.events).toHaveLength(1);
+    });
+
+    it("rejects regenerated activation without contentRef atomically", () => {
+      let state = createState();
+      const ports = createPorts();
+      const revision = createRequestRevisionEvent(
+        state,
+        {
+          ...baseCommand(SCREEN_A, state),
+          affectedNodeIds: ["node-title"],
+          category: "content",
+          description: "Update copy",
+        },
+        ports,
+      );
+      expect(revision.ok).toBe(true);
+      if (!revision.ok) return;
+      state = appendOk(state, revision.value);
+
+      const missing = createRegeneratedEvent(
+        state,
+        {
+          ...baseCommand(SCREEN_A, state),
+          revisionEventId: revision.value.id,
+          provider: "mock",
+          contentRef: "   ",
+        },
+        ports,
+      );
+      expect(missing.ok).toBe(false);
+      if (missing.ok) return;
+      expect(missing.error.code).toBe("MISSING_CONTENT_REF");
+    });
+
+    it("rejects invalid revision cross-references", () => {
+      const state = createState();
+      const ports = createPorts();
+      const regenerated = createRegeneratedEvent(
+        state,
+        {
+          ...baseCommand(SCREEN_A, state),
+          revisionEventId: "evt-missing",
+          provider: "mock",
+          contentRef: "agentpilot.dashboard.v2",
+        },
+        ports,
+      );
+      expect(regenerated.ok).toBe(false);
+      if (regenerated.ok) return;
+      expect(regenerated.error.code).toBe("INVALID_REVISION_REFERENCE");
     });
 
     it("supports screenVersionAdded and foldGovernanceEvents", () => {
@@ -361,6 +471,7 @@ describe("governance domain", () => {
           source: "regenerated",
           createdAt: fixedNow,
           previousVersionId: baselineScreenVersionId(SCREEN_A),
+          contentRef: "agentpilot.dashboard.v2",
         },
       });
       expect(added.ok).toBe(true);
@@ -459,6 +570,7 @@ describe("governance domain", () => {
           ...baseCommand(SCREEN_A, state),
           revisionEventId: revision.value.id,
           provider: "mock",
+          contentRef: "agentpilot.dashboard.v2",
         },
         ports,
       );
@@ -469,6 +581,9 @@ describe("governance domain", () => {
       expect(selectScreenStatus(state, SCREEN_A)).toBe("ready_for_review");
       expect(selectCurrentScreenVersion(state, SCREEN_A)?.id).toBe(
         regenerated.value.version.id,
+      );
+      expect(selectCurrentScreenVersion(state, SCREEN_A)?.contentRef).toBe(
+        "agentpilot.dashboard.v2",
       );
     });
   });

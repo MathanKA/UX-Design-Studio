@@ -32,7 +32,7 @@ export function formatEventDetails(event: GovernanceEvent): string {
         `Description: ${event.payload.description}`,
       ].join(" · ");
     case "screen.regeneration_started": {
-      const parts = ["Regeneration requested (contract event)"];
+      const parts = ["Regeneration in progress"];
       if (event.payload.requestId) {
         parts.push(`requestId: ${event.payload.requestId}`);
       }
@@ -41,18 +41,26 @@ export function formatEventDetails(event: GovernanceEvent): string {
       }
       return parts.join(" · ");
     }
-    case "screen.regenerated":
-      return [
+    case "screen.regenerated": {
+      const parts = [
         `Provider: ${event.payload.provider}`,
         `Previous version: ${event.payload.previousVersionId}`,
         `New version: ${event.payload.newVersionId}`,
         `Revision event: ${event.payload.revisionEventId}`,
-      ].join(" · ");
-    case "screen.regeneration_failed":
-      return [
-        `Code: ${event.payload.failureCode}`,
-        `Message: ${event.payload.message}`,
-      ].join(" · ");
+        `Content ref: ${event.payload.contentRef}`,
+      ];
+      if (event.payload.providerRequestId) {
+        parts.push(`Provider request: ${event.payload.providerRequestId}`);
+      }
+      return parts.join(" · ");
+    }
+    case "screen.regeneration_failed": {
+      const displayCode =
+        event.payload.failureCode === "PROVIDER_CANCELLED"
+          ? "Regeneration cancelled"
+          : `Code: ${event.payload.failureCode}`;
+      return [displayCode, `Message: ${event.payload.message}`].join(" · ");
+    }
     default: {
       const _exhaustive: never = event;
       return String(_exhaustive);

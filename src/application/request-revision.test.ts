@@ -161,7 +161,7 @@ describe("requestRevision use case", () => {
     }
   });
 
-  it("models screen.regenerate capability for Approver without regenerating", () => {
+  it("models screen.regenerate capability for Approver", () => {
     expect(hasCapability(DEMO_APPROVER.role, "screen.regenerate")).toBe(true);
     expect(hasCapability(DEMO_REVIEWER.role, "screen.regenerate")).toBe(false);
     expect(hasCapability(DEMO_VIEWER.role, "screen.regenerate")).toBe(false);

@@ -43,6 +43,45 @@ function walkNodes(
   return count;
 }
 
+/**
+ * Screen-local invariants shared by full UXSpec load and provider output validation.
+ */
+export function collectScreenInvariantIssues(
+  screen: ScreenSpec,
+  options?: { knownPersonaIds?: ReadonlySet<string> },
+): UXSpecValidationIssue[] {
+  const issues: UXSpecValidationIssue[] = [];
+  const knownPersonaIds = options?.knownPersonaIds;
+
+  if (knownPersonaIds) {
+    for (const touchpoint of screen.personaTouchpoints ?? []) {
+      if (!knownPersonaIds.has(touchpoint.personaId)) {
+        issues.push(
+          issue(
+            `screens[${screen.id}].personaTouchpoints`,
+            `Unknown persona reference "${touchpoint.personaId}"`,
+            "broken_persona_ref",
+          ),
+        );
+      }
+    }
+  }
+
+  const nodeIds = new Set<string>();
+  const nodeCount = walkNodes(screen.root, screen.id, 1, nodeIds, issues);
+  if (nodeCount > UX_SPEC_LIMITS.maxNodesPerScreen) {
+    issues.push(
+      issue(
+        `screens[${screen.id}]`,
+        `Screen exceeds ${UX_SPEC_LIMITS.maxNodesPerScreen} composed nodes`,
+        "max_nodes",
+      ),
+    );
+  }
+
+  return issues;
+}
+
 export function collectInvariantIssues(spec: UXSpec): UXSpecValidationIssue[] {
   const issues: UXSpecValidationIssue[] = [];
 
@@ -101,29 +140,9 @@ export function collectInvariantIssues(spec: UXSpec): UXSpecValidationIssue[] {
   }
 
   for (const screen of spec.screens) {
-    for (const touchpoint of screen.personaTouchpoints ?? []) {
-      if (!personaIds.has(touchpoint.personaId)) {
-        issues.push(
-          issue(
-            `screens[${screen.id}].personaTouchpoints`,
-            `Unknown persona reference "${touchpoint.personaId}"`,
-            "broken_persona_ref",
-          ),
-        );
-      }
-    }
-
-    const nodeIds = new Set<string>();
-    const nodeCount = walkNodes(screen.root, screen.id, 1, nodeIds, issues);
-    if (nodeCount > UX_SPEC_LIMITS.maxNodesPerScreen) {
-      issues.push(
-        issue(
-          `screens[${screen.id}]`,
-          `Screen exceeds ${UX_SPEC_LIMITS.maxNodesPerScreen} composed nodes`,
-          "max_nodes",
-        ),
-      );
-    }
+    issues.push(
+      ...collectScreenInvariantIssues(screen, { knownPersonaIds: personaIds }),
+    );
   }
 
   const navigationGroups = [

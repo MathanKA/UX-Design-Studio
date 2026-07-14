@@ -87,7 +87,9 @@
 
 .approve,
 .revise,
-.regenerateButton {
+.regenerateButton,
+.cancelButton,
+.retryButton {
   align-self: flex-start;
   padding: 0.5rem 0.85rem;
   border-radius: 0.375rem;
@@ -119,6 +121,8 @@
 .approve:focus-visible,
 .revise:focus-visible,
 .regenerateButton:focus-visible,
+.cancelButton:focus-visible,
+.retryButton:focus-visible,
 .field select:focus-visible {
   outline: 2px solid #c8102e;
   outline-offset: 2px;
@@ -126,7 +130,9 @@
 
 .approve:disabled,
 .revise:disabled,
-.regenerateButton:disabled {
+.regenerateButton:disabled,
+.cancelButton:disabled,
+.retryButton:disabled {
   opacity: 0.55;
   cursor: not-allowed;
 }
@@ -197,6 +203,32 @@
   border: 1px solid #8a8a8a;
   background: #f0f0f0;
   color: #3d3d3d;
+}
+
+.cancelButton {
+  border: 1px solid #8a1f1f;
+  background: #ffffff;
+  color: #8a1f1f;
+}
+
+.retryButton {
+  border: 1px solid #14213d;
+  background: #ffffff;
+  color: #14213d;
+}
+
+.regenerateActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.controlledFailure {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.4rem;
+  font-size: 0.8rem;
+  cursor: pointer;
 }
 
 .progress {

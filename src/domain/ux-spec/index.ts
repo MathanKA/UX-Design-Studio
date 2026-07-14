@@ -39,9 +39,14 @@ export {
   uxSpecSchema,
 } from "./schemas";
 
-export { collectInvariantIssues } from "./invariants";
-export { normalizeUXSpec } from "./normalize";
+export { collectInvariantIssues, collectScreenInvariantIssues } from "./invariants";
+export { normalizeUXSpec, normalizeScreenSpec } from "./normalize";
 export { loadUXSpec } from "./load-ux-spec";
+export { loadScreenSpec } from "./load-screen-spec";
+export type {
+  LoadScreenSpecContext,
+  ScreenSpecLoadResult,
+} from "./load-screen-spec";
 export {
   countComponentNodes,
   countSpecComponentNodes,

@@ -10,6 +10,8 @@ export type {
   ApproveScreenArgs,
   ApproveScreenAttemptResult,
   GovernanceContextValue,
+  RegenerateScreenArgs,
+  RegenerateScreenAttemptResult,
   RequestRevisionArgs,
   RequestRevisionAttemptResult,
 } from "./governance-context";

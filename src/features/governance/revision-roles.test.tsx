@@ -127,11 +127,13 @@ describe("US-4.3 structured revisions and role enforcement", () => {
     expect(hasCapability("approver", "screen.regenerate")).toBe(true);
     expect(
       screen.getByTestId("regenerate-indicator"),
-    ).toHaveAttribute("data-regenerate-operational", "false");
+    ).toHaveAttribute("data-regenerate-operational", "true");
     expect(
-      screen.getByRole("button", { name: /regenerate \(e5\)/i }),
+      screen.getByRole("button", { name: /^regenerate$/i }),
     ).toBeDisabled();
-    expect(screen.getByText(/provider-backed regeneration is delivered in e5/i)).toBeInTheDocument();
+    expect(
+      screen.getByText(/submit a structured revision for the current dashboard/i),
+    ).toBeInTheDocument();
 
     await user.click(
       screen.getByRole("button", { name: /approve current version/i }),
@@ -163,6 +165,9 @@ describe("US-4.3 structured revisions and role enforcement", () => {
     expect(document.querySelector('[data-decision="feedback"]')).toHaveTextContent(
       /revision requested/i,
     );
+    expect(
+      screen.getByRole("button", { name: /^regenerate$/i }),
+    ).toBeEnabled();
   });
 
   it("hides approve, revision, and regenerate controls for Reviewer and Viewer", async () => {
@@ -343,7 +348,7 @@ describe("US-4.3 structured revisions and role enforcement", () => {
     );
   });
 
-  it("does not introduce DesignAgentProvider or regeneration results", () => {
+  it("wires DesignAgentProvider regeneration without exposing mock adapter in the DOM", () => {
     render(
       <AppProviders>
         <MemoryRouter initialEntries={["/review/screen-dashboard"]}>
@@ -353,9 +358,11 @@ describe("US-4.3 structured revisions and role enforcement", () => {
     );
 
     expect(document.querySelector("[data-design-agent]")).toBeNull();
-    expect(document.querySelector("[data-regeneration-result]")).toBeNull();
     expect(
       screen.getByTestId("regenerate-indicator"),
-    ).toHaveAttribute("data-regenerate-operational", "false");
+    ).toHaveAttribute("data-regenerate-operational", "true");
+    expect(
+      screen.getByRole("button", { name: /^regenerate$/i }),
+    ).toBeDisabled();
   });
 });

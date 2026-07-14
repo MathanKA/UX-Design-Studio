@@ -101,6 +101,12 @@ const regeneratedEventSchema = z
         newVersionId: boundedId,
         revisionEventId: boundedId,
         provider: z.enum(["mock", "production"]),
+        contentRef: z
+          .string()
+          .trim()
+          .min(1)
+          .max(GOVERNANCE_LIMITS.maxContentRefLength),
+        providerRequestId: boundedId.optional(),
       })
       .strict(),
   })
@@ -147,8 +153,23 @@ export const screenVersionRecordSchema = z
     source: z.enum(["baseline", "regenerated"]),
     createdAt: z.string().trim().min(1).max(64),
     previousVersionId: boundedId.optional(),
+    contentRef: z
+      .string()
+      .trim()
+      .min(1)
+      .max(GOVERNANCE_LIMITS.maxContentRefLength)
+      .optional(),
   })
-  .strict();
+  .strict()
+  .superRefine((version, ctx) => {
+    if (version.source === "regenerated" && !version.contentRef) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Regenerated screen versions require contentRef.",
+        path: ["contentRef"],
+      });
+    }
+  });
 
 export const governanceStateSchema = z
   .object({
