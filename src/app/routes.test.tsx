@@ -28,9 +28,9 @@ describe("application routes", () => {
     renderAt("/overview");
     expect(screen.getByRole("heading", { name: "Overview" })).toBeInTheDocument();
 
-    renderAt("/review/dashboard");
+    renderAt("/review/screen-dashboard");
     expect(screen.getByRole("heading", { name: "Screen review" })).toBeInTheDocument();
-    expect(screen.getByText(/dashboard/i)).toBeInTheDocument();
+    expect(document.querySelector('[data-screen-id="screen-dashboard"]')).not.toBeNull();
 
     renderAt("/audit");
     expect(screen.getByRole("heading", { name: "Audit" })).toBeInTheDocument();
