@@ -1,4 +1,4 @@
-import styles from "../overview/PlaceholderPage.module.css";
+import styles from "../../ui/PlaceholderPage.module.css";
 
 export function AuditPage() {
   return (

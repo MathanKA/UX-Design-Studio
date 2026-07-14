@@ -6,10 +6,12 @@ export type {
   ComponentType,
   DesignTokens,
   Journey,
+  JourneyId,
   JourneyStep,
   NavigationItem,
   NavigationSpec,
   Persona,
+  PersonaId,
   PersonaTouchpoint,
   ResponsiveScreenSpec,
   ScreenId,
@@ -40,3 +42,26 @@ export {
 export { collectInvariantIssues } from "./invariants";
 export { normalizeUXSpec } from "./normalize";
 export { loadUXSpec } from "./load-ux-spec";
+export {
+  countComponentNodes,
+  countSpecComponentNodes,
+} from "./count-component-nodes";
+export {
+  deriveDesignSystemSummary,
+  deriveUXSpecOverviewSummary,
+  listOverviewScreens,
+} from "./overview-selectors";
+export type {
+  DesignSystemSummary,
+  OverviewScreenCard,
+  UXSpecOverviewSummary,
+} from "./overview-selectors";
+export {
+  defaultPersonaId,
+  derivePersonaLensContext,
+  findPersona,
+  listPersonas,
+  relatedJourneyStepsForScreen,
+  resolveScreenTouchpoint,
+} from "./persona-lens-selectors";
+export type { PersonaLensContext } from "./persona-lens-selectors";

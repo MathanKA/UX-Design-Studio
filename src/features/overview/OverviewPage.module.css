@@ -1,0 +1,144 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.page h2 {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.lede {
+  margin: 0;
+  color: #5c5c5c;
+  max-width: 42rem;
+}
+
+.summaryGrid {
+  display: grid;
+  gap: 1rem;
+}
+
+@media (min-width: 768px) {
+  .summaryGrid {
+    grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+  }
+
+  .approval {
+    grid-column: 1 / -1;
+  }
+}
+
+.stats {
+  margin: 0;
+  display: grid;
+  gap: 0.65rem;
+  grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+}
+
+.stats div {
+  border: 1px solid #e2e2e2;
+  border-radius: 0.5rem;
+  padding: 0.75rem;
+  background: #ffffff;
+}
+
+.stats dt {
+  margin: 0;
+  font-size: 0.8rem;
+  color: #5c5c5c;
+}
+
+.stats dd {
+  margin: 0.25rem 0 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.designSystem,
+.approval {
+  border: 1px solid #e2e2e2;
+  border-radius: 0.5rem;
+  padding: 0.9rem 1rem;
+  background: #ffffff;
+}
+
+.designSystem h3,
+.approval h3 {
+  margin: 0 0 0.6rem;
+  font-size: 1.05rem;
+}
+
+.tokenList {
+  margin: 0;
+  padding-left: 1.1rem;
+  color: #3d3d3d;
+}
+
+.tokenList li {
+  margin-bottom: 0.35rem;
+}
+
+.note {
+  margin: 0.5rem 0 0;
+  color: #5c5c5c;
+  font-size: 0.9rem;
+}
+
+.cardGrid {
+  display: grid;
+  gap: 0.85rem;
+  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+}
+
+.card {
+  border: 1px solid #d6d6d6;
+  border-radius: 0.6rem;
+  padding: 0.9rem;
+  background: #ffffff;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.cardTitle {
+  margin: 0;
+  font-size: 1.05rem;
+}
+
+.cardDescription {
+  margin: 0;
+  color: #5c5c5c;
+  font-size: 0.92rem;
+}
+
+.cardMeta {
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+.metaLabel {
+  color: #5c5c5c;
+}
+
+.cardAction {
+  margin-top: auto;
+  align-self: flex-start;
+  display: inline-flex;
+  padding: 0.45rem 0.75rem;
+  border: 1px solid #c8102e;
+  border-radius: 0.375rem;
+  color: #c8102e;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.cardAction:focus-visible {
+  outline: 2px solid #c8102e;
+  outline-offset: 2px;
+}
+
+.cardAction:hover {
+  background: #fff5f5;
+}

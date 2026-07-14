@@ -114,6 +114,29 @@ describe("US-2.4 five-screen review rendering", () => {
     renderAt("/review/not-a-real-screen");
     expect(screen.getByRole("alert")).toHaveTextContent("Unknown screen");
     expect(screen.getByRole("alert")).toHaveTextContent("not-a-real-screen");
+    expect(screen.getByRole("heading", { name: "UX Design Studio" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("navigation", { name: "Studio" }),
+    ).toBeInTheDocument();
+  });
+
+  it("separates workbench regions without E4 decision controls", () => {
+    renderAt("/review/screen-dashboard");
+    expect(
+      document.querySelector('[data-workbench-region="screen-navigation"]'),
+    ).not.toBeNull();
+    expect(
+      document.querySelector('[data-workbench-region="preview-canvas"]'),
+    ).not.toBeNull();
+    expect(
+      document.querySelector('[data-workbench-region="lens-controls"]'),
+    ).not.toBeNull();
+    expect(
+      document.querySelector('[data-workbench-region="decision-panel"]'),
+    ).not.toBeNull();
+    expect(screen.queryByRole("button", { name: /approve/i })).toBeNull();
+    expect(screen.queryByRole("button", { name: /request revision/i })).toBeNull();
+    expect(document.querySelector("[data-decision-placeholder='true']")).not.toBeNull();
   });
 
   it("renders required data, form, feedback, and chart nodes on representative screens", () => {
@@ -143,6 +166,16 @@ describe("US-2.4 five-screen review rendering", () => {
       path.join(path.dirname(fileURLToPath(import.meta.url)), "ReviewPage.tsx"),
       "utf8",
     );
+    const workbenchSource = readFileSync(
+      path.join(
+        path.dirname(fileURLToPath(import.meta.url)),
+        "ReviewWorkbench.tsx",
+      ),
+      "utf8",
+    );
     expect(reviewSource).not.toMatch(/switch\s*\(\s*screenId|if\s*\(\s*screenId\s*===/);
+    expect(workbenchSource).not.toMatch(
+      /switch\s*\(\s*screenId|if\s*\(\s*screenId\s*===/,
+    );
   });
 });
