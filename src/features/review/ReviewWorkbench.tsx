@@ -6,7 +6,10 @@ import {
   derivePersonaLensContext,
   listPersonas,
 } from "../../domain/ux-spec/persona-lens-selectors";
-import { agentPilotSeed } from "../../infrastructure/seed";
+import {
+  agentPilotSeed,
+  createAgentPilotContentRegistry,
+} from "../../infrastructure/seed";
 import {
   createActionResolver,
   createComponentRegistry,
@@ -23,6 +26,10 @@ import {
   InvalidRouteState,
 } from "../../ui/states";
 import {
+  AccessibilityOverlayPanel,
+  ContrastBadges,
+} from "../accessibility-overlay";
+import {
   DEFAULT_JOURNEY_ID,
   deriveJourneyWalkthrough,
   JourneyWalkthroughPanel,
@@ -36,11 +43,16 @@ import {
   PREVIEW_WIDTHS,
 } from "../responsive-preview";
 import { DecisionPanel, useGovernance } from "../governance";
+import {
+  deriveVersionHistory,
+  VersionHistoryPanel,
+} from "../version-history";
 import { GeneratedNavigation } from "./GeneratedNavigation";
 import { cssClass } from "../../renderer/styles/css-class";
 import styles from "./ReviewWorkbench.module.css";
 
 const registry = createComponentRegistry();
+const contentRegistry = createAgentPilotContentRegistry();
 
 type ReviewWorkbenchProps = {
   screenId?: string;
@@ -48,7 +60,7 @@ type ReviewWorkbenchProps = {
 };
 
 export function ReviewWorkbench({ screenId, navigate }: ReviewWorkbenchProps) {
-  const { getScreen } = useGovernance();
+  const { getScreen, state } = useGovernance();
   const [breakpoint, setBreakpoint] = useState<PreviewBreakpoint>(
     DEFAULT_PREVIEW_BREAKPOINT,
   );
@@ -59,6 +71,8 @@ export function ReviewWorkbench({ screenId, navigate }: ReviewWorkbenchProps) {
     useState<PersonaId>(initialPersonaId);
   const [journeyStepIndex, setJourneyStepIndex] = useState(0);
   const [journeyAnnouncement, setJourneyAnnouncement] = useState("");
+  const [accessibilityOverlayEnabled, setAccessibilityOverlayEnabled] =
+    useState(false);
   const knownScreenIds = new Set(screens.map((screen) => screen.id));
   const lensContext = derivePersonaLensContext(
     agentPilotSeed,
@@ -73,6 +87,21 @@ export function ReviewWorkbench({ screenId, navigate }: ReviewWorkbenchProps) {
       )
     : null;
 
+  const baselineScreen = screens.find((entry) => entry.id === screenId);
+  const screen =
+    (screenId ? getScreen(screenId) : undefined) ?? baselineScreen;
+
+  const versionHistoryContext =
+    appConfig.enableVersionHistory && screenId
+      ? deriveVersionHistory({
+          state,
+          screenId,
+          ...(screen?.name ? { screenName: screen.name } : {}),
+          seed: agentPilotSeed,
+          contentRegistry,
+        })
+      : null;
+
   if (screens.length === 0) {
     return (
       <section aria-labelledby="review-heading" className={styles.workbench}>
@@ -86,9 +115,6 @@ export function ReviewWorkbench({ screenId, navigate }: ReviewWorkbenchProps) {
     );
   }
 
-  const baselineScreen = screens.find((entry) => entry.id === screenId);
-  const screen =
-    (screenId ? getScreen(screenId) : undefined) ?? baselineScreen;
   const actionResolver = createActionResolver(knownScreenIds, {
     navigate: (target) => {
       navigate(`/review/${target}`);
@@ -181,7 +207,19 @@ export function ReviewWorkbench({ screenId, navigate }: ReviewWorkbenchProps) {
             Active preview: {PREVIEW_BREAKPOINT_LABELS[breakpoint]} (
             {PREVIEW_WIDTHS[breakpoint]}px)
           </p>
-          {previewContent}
+          {appConfig.enableContrastBadges ? (
+            <ContrastBadges screen={screen} />
+          ) : null}
+          <div
+            className={styles.previewStack}
+            data-accessibility-overlay-active={
+              appConfig.enableAccessibilityOverlay && accessibilityOverlayEnabled
+                ? "true"
+                : "false"
+            }
+          >
+            {previewContent}
+          </div>
         </PreviewCanvas>
 
         <div className={styles.sidePanels}>
@@ -222,17 +260,14 @@ export function ReviewWorkbench({ screenId, navigate }: ReviewWorkbenchProps) {
             />
           ) : null}
           {appConfig.enableVersionHistory ? (
-            <div
-              data-testid="version-history-flag"
-              data-version-history-enabled="true"
-              hidden
-            />
+            <VersionHistoryPanel context={versionHistoryContext} />
           ) : null}
           {appConfig.enableAccessibilityOverlay ? (
-            <div
-              data-testid="accessibility-overlay-flag"
-              data-accessibility-overlay-enabled="true"
-              hidden
+            <AccessibilityOverlayPanel
+              spec={agentPilotSeed}
+              screen={screen}
+              enabled={accessibilityOverlayEnabled}
+              onEnabledChange={setAccessibilityOverlayEnabled}
             />
           ) : null}
           <DecisionPanel

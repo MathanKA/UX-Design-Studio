@@ -1,8 +1,15 @@
 ## Summary
 
-A concise description of the completed story and user or engineering outcome.
+Required. State the story or control outcome in 1–3 sentences, then list what was implemented in this PR.
+
+- Outcome:
+- Implemented:
+  - Capability or module
+  - Capability or module
 
 ## What changed
+
+Concrete file or module-level changes (keep aligned with Implemented above).
 
 - Concrete implementation change
 - Concrete implementation change

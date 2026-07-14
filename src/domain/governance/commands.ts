@@ -64,6 +64,7 @@ export type RecordRegeneratedCommand = ScreenCommandBase & {
   provider: "mock" | "production";
   contentRef: string;
   providerRequestId?: string;
+  explanation?: readonly string[];
 };
 
 export type RecordRegenerationFailedCommand = ScreenCommandBase & {
@@ -339,6 +340,11 @@ export function createRegeneratedEvent(
     occurredAt,
   });
 
+  const explanation = command.explanation
+    ?.map((line) => line.trim())
+    .filter((line) => line.length > 0)
+    .slice(0, 10);
+
   const event: ScreenRegeneratedEvent = {
     ...metadata,
     type: "screen.regenerated",
@@ -351,6 +357,7 @@ export function createRegeneratedEvent(
       ...(command.providerRequestId !== undefined
         ? { providerRequestId: command.providerRequestId }
         : {}),
+      ...(explanation && explanation.length > 0 ? { explanation } : {}),
     },
   };
 

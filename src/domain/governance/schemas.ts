@@ -107,6 +107,16 @@ const regeneratedEventSchema = z
           .min(1)
           .max(GOVERNANCE_LIMITS.maxContentRefLength),
         providerRequestId: boundedId.optional(),
+        explanation: z
+          .array(
+            z
+              .string()
+              .trim()
+              .min(1)
+              .max(GOVERNANCE_LIMITS.maxStringLength),
+          )
+          .max(10)
+          .optional(),
       })
       .strict(),
   })
