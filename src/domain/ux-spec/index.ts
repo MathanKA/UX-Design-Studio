@@ -47,6 +47,11 @@ export {
   countSpecComponentNodes,
 } from "./count-component-nodes";
 export {
+  collectScreenNodeIds,
+  listScreenNodeOptions,
+} from "./collect-screen-node-ids";
+export type { ScreenNodeOption } from "./collect-screen-node-ids";
+export {
   deriveDesignSystemSummary,
   deriveUXSpecOverviewSummary,
   listOverviewScreens,

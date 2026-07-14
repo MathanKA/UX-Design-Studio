@@ -1,5 +1,6 @@
 import { NavLink, Outlet } from "react-router-dom";
 import { appConfig } from "../app/config";
+import { RoleSwitcher } from "../features/governance/RoleSwitcher";
 import styles from "./AppShell.module.css";
 
 const navItems = [
@@ -19,22 +20,27 @@ export function AppShell() {
           <p className={styles.eyebrow}>InsaneSDD proof-of-work concept</p>
           <h1 className={styles.title}>{appConfig.appName}</h1>
         </div>
-        <nav aria-label="Studio">
-          <ul className={styles.navList}>
-            {navItems.map((item) => (
-              <li key={item.to}>
-                <NavLink
-                  to={item.to}
-                  className={({ isActive }) =>
-                    isActive ? `${styles.navLink} ${styles.navLinkActive}` : styles.navLink
-                  }
-                >
-                  {item.label}
-                </NavLink>
-              </li>
-            ))}
-          </ul>
-        </nav>
+        <div className={styles.headerTools}>
+          <nav aria-label="Studio">
+            <ul className={styles.navList}>
+              {navItems.map((item) => (
+                <li key={item.to}>
+                  <NavLink
+                    to={item.to}
+                    className={({ isActive }) =>
+                      isActive
+                        ? `${styles.navLink} ${styles.navLinkActive}`
+                        : styles.navLink
+                    }
+                  >
+                    {item.label}
+                  </NavLink>
+                </li>
+              ))}
+            </ul>
+          </nav>
+          <RoleSwitcher />
+        </div>
       </header>
       <main id="main-content" className={styles.main} tabIndex={-1}>
         <Outlet />

@@ -1,9 +1,13 @@
 import { useId, useState, type FormEvent } from "react";
+import { MIN_REVISION_DESCRIPTION_LENGTH } from "../../application/request-revision";
 import {
   GOVERNANCE_LIMITS,
+  REVISION_CATEGORIES,
   selectApprovalProgress,
   selectIsGateComplete,
+  type RevisionCategory,
 } from "../../domain/governance";
+import { RoleSwitcher } from "./RoleSwitcher";
 import { useGovernance } from "./governance-context";
 import { screenReviewStatusLabel } from "./status-labels";
 import styles from "./DecisionPanel.module.css";
@@ -18,14 +22,24 @@ export function DecisionPanel({ screenId, screenName }: DecisionPanelProps) {
     actor,
     isSubmitting,
     canApprove,
+    canRequestRevision,
+    canRegenerate,
     approveScreen,
+    requestRevision,
+    listScreenNodes,
     getScreenStatus,
     getCurrentScreenVersion,
     getApprovalProgress,
     isGateComplete,
   } = useGovernance();
   const commentId = useId();
+  const categoryId = useId();
+  const descriptionId = useId();
+  const nodesFieldId = useId();
   const [comment, setComment] = useState("");
+  const [selectedNodeIds, setSelectedNodeIds] = useState<string[]>([]);
+  const [category, setCategory] = useState<RevisionCategory>("content");
+  const [description, setDescription] = useState("");
   const [feedback, setFeedback] = useState("");
   const [feedbackTone, setFeedbackTone] = useState<"info" | "error">("info");
 
@@ -33,7 +47,9 @@ export function DecisionPanel({ screenId, screenName }: DecisionPanelProps) {
   const gateComplete = isGateComplete();
   const version = screenId ? getCurrentScreenVersion(screenId) : undefined;
   const status = screenId ? getScreenStatus(screenId) : null;
+  const nodeOptions = screenId ? listScreenNodes(screenId) : [];
   const alreadyApproved = status === "approved";
+  const roleRestricted = !canApprove && !canRequestRevision;
   const approveDisabled =
     !screenId ||
     !version ||
@@ -41,8 +57,14 @@ export function DecisionPanel({ screenId, screenName }: DecisionPanelProps) {
     alreadyApproved ||
     isSubmitting ||
     status === "regenerating";
+  const revisionDisabled =
+    !screenId ||
+    !version ||
+    !canRequestRevision ||
+    isSubmitting ||
+    status === "regenerating";
 
-  const onSubmit = (event: FormEvent) => {
+  const onApprove = (event: FormEvent) => {
     event.preventDefault();
     if (!screenId || !version || approveDisabled) {
       return;
@@ -76,19 +98,58 @@ export function DecisionPanel({ screenId, screenName }: DecisionPanelProps) {
     }
   };
 
+  const onRequestRevision = (event: FormEvent) => {
+    event.preventDefault();
+    if (!screenId || !version || revisionDisabled) {
+      return;
+    }
+
+    const result = requestRevision({
+      screenId,
+      expectedScreenVersionId: version.id,
+      affectedNodeIds: selectedNodeIds,
+      category,
+      description,
+    });
+
+    if (!result.ok) {
+      setFeedbackTone("error");
+      setFeedback(result.error.message);
+      return;
+    }
+
+    setSelectedNodeIds([]);
+    setDescription("");
+    setCategory("content");
+    setFeedbackTone("info");
+    setFeedback(
+      `Revision requested for ${screenName ?? "Screen"}. Approval for this version is invalidated.`,
+    );
+  };
+
+  const toggleNode = (nodeId: string) => {
+    setSelectedNodeIds((current) =>
+      current.includes(nodeId)
+        ? current.filter((id) => id !== nodeId)
+        : [...current, nodeId],
+    );
+  };
+
   return (
     <aside
       className={styles.panel}
       aria-labelledby="decision-panel-heading"
       data-workbench-region="decision-panel"
       data-testid="decision-panel"
+      data-actor-role={actor.role}
     >
       <h3 id="decision-panel-heading" className={styles.heading}>
         Decision panel
       </h3>
+      <RoleSwitcher />
       <p className={styles.lede}>
-        Approval applies only to the current screen version. Other screens are
-        unchanged.
+        Approval and revision apply only to the current screen version. Other
+        screens are unchanged.
       </p>
 
       {!screenId || !version || status === null ? (
@@ -96,7 +157,7 @@ export function DecisionPanel({ screenId, screenName }: DecisionPanelProps) {
           Select a valid screen to review and approve.
         </p>
       ) : (
-        <form className={styles.form} onSubmit={onSubmit} data-decision="form">
+        <>
           <dl className={styles.meta}>
             <div>
               <dt>Active screen</dt>
@@ -118,38 +179,167 @@ export function DecisionPanel({ screenId, screenName }: DecisionPanelProps) {
             </div>
           </dl>
 
-          <div className={styles.field}>
-            <label htmlFor={commentId}>Approval comment (optional)</label>
-            <textarea
-              id={commentId}
-              name="approval-comment"
-              value={comment}
-              maxLength={GOVERNANCE_LIMITS.maxCommentLength}
-              rows={3}
-              disabled={alreadyApproved || isSubmitting}
-              onChange={(event) => {
-                setComment(event.target.value);
-              }}
-              data-decision="comment"
-            />
-            <p className={styles.hint}>
-              {comment.length}/{GOVERNANCE_LIMITS.maxCommentLength} characters
+          {roleRestricted ? (
+            <p
+              className={styles.roleMessage}
+              data-decision="role-restricted"
+              data-testid="role-restricted-message"
+            >
+              The current POC demo role ({actor.displayLabel}) is read-only for
+              approval and revision. Switch to Demo Approver to submit decisions.
+              Viewing overview, preview, and audit remains available.
             </p>
-          </div>
+          ) : null}
 
-          <button
-            type="submit"
-            className={styles.approve}
-            disabled={approveDisabled}
-            data-decision="approve"
-          >
-            {alreadyApproved
-              ? "Current version approved"
-              : isSubmitting
-                ? "Approving…"
-                : "Approve current version"}
-          </button>
-        </form>
+          {canApprove ? (
+            <form
+              className={styles.form}
+              onSubmit={onApprove}
+              data-decision="approve-form"
+            >
+              <div className={styles.field}>
+                <label htmlFor={commentId}>Approval comment (optional)</label>
+                <textarea
+                  id={commentId}
+                  name="approval-comment"
+                  value={comment}
+                  maxLength={GOVERNANCE_LIMITS.maxCommentLength}
+                  rows={3}
+                  disabled={alreadyApproved || isSubmitting || !canApprove}
+                  onChange={(event) => {
+                    setComment(event.target.value);
+                  }}
+                  data-decision="comment"
+                />
+                <p className={styles.hint}>
+                  {comment.length}/{GOVERNANCE_LIMITS.maxCommentLength} characters
+                </p>
+              </div>
+
+              <button
+                type="submit"
+                className={styles.approve}
+                disabled={approveDisabled}
+                data-decision="approve"
+              >
+                {alreadyApproved
+                  ? "Current version approved"
+                  : isSubmitting
+                    ? "Approving…"
+                    : "Approve current version"}
+              </button>
+            </form>
+          ) : null}
+
+          {canRequestRevision ? (
+            <form
+              className={styles.form}
+              onSubmit={onRequestRevision}
+              data-decision="revision-form"
+              data-testid="revision-form"
+            >
+              <h4 className={styles.sectionHeading}>Request revision</h4>
+              <fieldset className={styles.fieldset} disabled={revisionDisabled}>
+                <legend id={nodesFieldId}>Affected component nodes</legend>
+                <div
+                  className={styles.nodeList}
+                  role="group"
+                  aria-labelledby={nodesFieldId}
+                  data-decision="affected-nodes"
+                >
+                  {nodeOptions.map((node) => (
+                    <label key={node.id} className={styles.nodeOption}>
+                      <input
+                        type="checkbox"
+                        name="affected-nodes"
+                        value={node.id}
+                        checked={selectedNodeIds.includes(node.id)}
+                        onChange={() => {
+                          toggleNode(node.id);
+                        }}
+                        data-node-option={node.id}
+                      />
+                      <span>{node.label}</span>
+                    </label>
+                  ))}
+                </div>
+              </fieldset>
+
+              <div className={styles.field}>
+                <label htmlFor={categoryId}>Revision category</label>
+                <select
+                  id={categoryId}
+                  name="revision-category"
+                  value={category}
+                  disabled={revisionDisabled}
+                  onChange={(event) => {
+                    setCategory(event.target.value as RevisionCategory);
+                  }}
+                  data-decision="revision-category"
+                >
+                  {REVISION_CATEGORIES.map((entry) => (
+                    <option key={entry} value={entry}>
+                      {entry}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className={styles.field}>
+                <label htmlFor={descriptionId}>Revision description</label>
+                <textarea
+                  id={descriptionId}
+                  name="revision-description"
+                  value={description}
+                  maxLength={GOVERNANCE_LIMITS.maxDescriptionLength}
+                  rows={4}
+                  disabled={revisionDisabled}
+                  onChange={(event) => {
+                    setDescription(event.target.value);
+                  }}
+                  data-decision="revision-description"
+                />
+                <p className={styles.hint}>
+                  {description.length}/{GOVERNANCE_LIMITS.maxDescriptionLength}{" "}
+                  characters (minimum {MIN_REVISION_DESCRIPTION_LENGTH})
+                </p>
+              </div>
+
+              <button
+                type="submit"
+                className={styles.revise}
+                disabled={revisionDisabled}
+                data-decision="request-revision"
+              >
+                {isSubmitting ? "Submitting…" : "Request revision"}
+              </button>
+            </form>
+          ) : null}
+
+          {canRegenerate ? (
+            <div
+              className={styles.regenerate}
+              data-decision="regenerate"
+              data-testid="regenerate-indicator"
+              data-regenerate-operational="false"
+            >
+              <p className={styles.sectionHeading}>Regenerate (E5)</p>
+              <button
+                type="button"
+                className={styles.regenerateButton}
+                disabled
+                aria-disabled="true"
+                data-decision="regenerate-control"
+              >
+                Regenerate (E5)
+              </button>
+              <p className={styles.hint} data-decision="regenerate-help">
+                Provider-backed regeneration is delivered in E5. This control is
+                non-operational and does not append governance events.
+              </p>
+            </div>
+          ) : null}
+        </>
       )}
 
       <section
