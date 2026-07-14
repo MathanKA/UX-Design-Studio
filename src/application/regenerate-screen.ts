@@ -398,6 +398,9 @@ export async function regenerateScreen(
         provider: "mock",
         contentRef,
         providerRequestId: providerResult.providerRequestId,
+        ...(providerResult.explanation !== undefined
+          ? { explanation: providerResult.explanation }
+          : {}),
       },
       { clock: ports.clock, idGenerator: ports.idGenerator },
     );

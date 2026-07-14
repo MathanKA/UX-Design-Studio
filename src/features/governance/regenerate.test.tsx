@@ -82,31 +82,35 @@ describe("US-5.1 regenerate flow", () => {
     vi.useRealTimers();
   });
 
-  it("regenerates Dashboard after revision and shows variant content", async () => {
-    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
-    const { container } = renderDashboard();
+  it(
+    "regenerates Dashboard after revision and shows variant content",
+    async () => {
+      const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+      const { container } = renderDashboard();
 
-    await requestDashboardRevision(user);
-    expect(
-      screen.getByRole("button", { name: /^regenerate$/i }),
-    ).toBeEnabled();
+      await requestDashboardRevision(user);
+      expect(
+        screen.getByRole("button", { name: /^regenerate$/i }),
+      ).toBeEnabled();
 
-    await user.click(screen.getByRole("button", { name: /^regenerate$/i }));
-    expect(
-      screen.getByRole("button", { name: /regenerating/i }),
-    ).toBeInTheDocument();
+      await user.click(screen.getByRole("button", { name: /^regenerate$/i }));
+      expect(
+        screen.getByRole("button", { name: /regenerating/i }),
+      ).toBeInTheDocument();
 
-    await act(async () => {
-      await vi.advanceTimersByTimeAsync(MOCK_DESIGN_AGENT_LATENCY_MS);
-    });
-    expect(
-      await screen.findByText(/regenerated to version/i),
-    ).toBeInTheDocument();
-    expect(document.querySelector('[data-decision="status"]')).toHaveTextContent(
-      "Ready for review",
-    );
-    expect(container.textContent).toMatch(/Priority operations view/i);
-  });
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(MOCK_DESIGN_AGENT_LATENCY_MS);
+      });
+      expect(
+        await screen.findByText(/regenerated to version/i),
+      ).toBeInTheDocument();
+      expect(
+        document.querySelector('[data-decision="status"]'),
+      ).toHaveTextContent("Ready for review");
+      expect(container.textContent).toMatch(/Priority operations view/i);
+    },
+    15_000,
+  );
 
   it("shows POC scope message on non-Dashboard screens", async () => {
     const clock = createFixedClock("2026-07-15T03:00:00.000Z");

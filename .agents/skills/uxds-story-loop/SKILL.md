@@ -178,6 +178,7 @@ Do not reset counters by restarting the agent. Exhausted budget => Block and sto
 - Stage only story-related files
 - No secrets, Cursor/AI attribution, or unapproved dependencies
 - Create signed commit with `git commit -S`
+- Commit messages must use a Conventional Commit subject and a `Summary` body that states what was done (outcome-focused bullets)
 - Run `git verify-commit HEAD` and inspect `git log --show-signature -1`
 - Signing failure is an immediate hard stop
 
@@ -186,6 +187,7 @@ Do not reset counters by restarting the agent. Exhausted budget => Block and sto
 - Push only the active story branch
 - Open one PR targeting the base branch from the manifest
 - Use the repository pull-request template structure
+- PR `## Summary` must include the story outcome and an Implemented list of capabilities or modules delivered in that PR
 - No Cursor/AI attribution, model names, or promotional text
 - Do not rely on closing keywords alone when the PR targets `staging`
 

@@ -47,3 +47,34 @@
   outline: 2px solid #c8102e;
   outline-offset: 2px;
 }
+
+.panel[aria-busy="true"] .title::after {
+  content: "";
+  display: inline-block;
+  width: 0.55rem;
+  height: 0.55rem;
+  margin-left: 0.4rem;
+  border-radius: 50%;
+  background: #c8102e;
+  animation: shell-busy-pulse 900ms ease-in-out infinite;
+  vertical-align: middle;
+}
+
+@keyframes shell-busy-pulse {
+  0%,
+  100% {
+    opacity: 0.35;
+    transform: scale(0.85);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .panel[aria-busy="true"] .title::after {
+    animation: none;
+    opacity: 1;
+  }
+}

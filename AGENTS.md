@@ -295,6 +295,8 @@ Implementation is a hard stop unless all are true:
 - Create working branches from latest `staging` and target working PRs to `staging`.
 - Use `<type>/uxds-<github-issue-number>-<slug>`.
 - Use Conventional Commit style with the issue: `feat(renderer): compose nested UXSpec nodes [#21]`, `fix(governance): invalidate approval after regeneration [#38]`, `test(governance): cover current-version gate rules [#54]`, or `docs(release): add POC setup and demo guide [#59]`.
+- Every signed commit must include a `Summary` body describing what was done (outcome-focused bullets), not only a subject line.
+- Every pull request must include a `## Summary` that states the outcome and lists what was implemented in that PR, following `.github/pull_request_template.md`.
 - Use signed commits with `git commit -S`; stop if signing or verification fails.
 - Merge commit only after verification (preserve personally signed feature commits; do not squash; do not delete the feature branch).
 - Release through a final `staging` to `main` PR and tag `v0.1.0-poc`.

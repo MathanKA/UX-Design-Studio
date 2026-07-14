@@ -474,7 +474,13 @@ export function DecisionPanel({ screenId, screenName }: DecisionPanelProps) {
             ? "No screens remaining"
             : `${progress.remainingCount} remaining`}
         </p>
-        <p data-decision="gate-readiness" data-gate-complete={gateComplete}>
+        <p
+          data-decision="gate-readiness"
+          data-gate-complete={gateComplete}
+          role="status"
+          aria-live="polite"
+          aria-atomic="true"
+        >
           {gateComplete
             ? "Ready for Agile plan generation"
             : "Agile plan generation unavailable until all required screens are approved"}
