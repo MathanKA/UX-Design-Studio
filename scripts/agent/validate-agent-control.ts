@@ -64,6 +64,29 @@ type RunManifest = {
     verifierRerun: number;
     transientCiRerun: number;
   };
+  roles?: {
+    default: string;
+    options: string[];
+    demoOnly: boolean;
+    separateFromPersonas: boolean;
+  };
+  scopeBoundary?: {
+    defineRegenerationContracts: boolean;
+    defineRegenerationCapabilities: boolean;
+    providerBackedRegeneration: boolean;
+    designAgentProvider: boolean;
+    generatedScreenVariant: boolean;
+    nextOwningEpic: number;
+  };
+  resetPolicy?: {
+    removeManagedGovernanceKeyOnly: boolean;
+    preserveUXSpec: boolean;
+    preservePersonas: boolean;
+    preserveJourneys: boolean;
+    preserveDesignTokens: boolean;
+    preserveFeatureFlags: boolean;
+    prohibitLocalStorageClear: boolean;
+  };
   stories: RunStory[];
   finalization?: {
     deactivateManifest: boolean;
@@ -368,6 +391,84 @@ function normalizeManifest(raw: Record<string, unknown>): RunManifest {
     };
   }
 
+  let roles: RunManifest["roles"];
+  if (raw.roles !== undefined) {
+    const rolesRaw = asRecord(raw.roles, "roles");
+    const optionsRaw = rolesRaw.options;
+    if (!Array.isArray(optionsRaw) || optionsRaw.some((entry) => typeof entry !== "string")) {
+      fail("Manifest field roles.options must be an array of strings.");
+    }
+    roles = {
+      default: asString(rolesRaw.default, "roles.default"),
+      options: (Array.isArray(optionsRaw) ? optionsRaw : []) as string[],
+      demoOnly: asBoolean(rolesRaw.demoOnly, "roles.demoOnly"),
+      separateFromPersonas: asBoolean(
+        rolesRaw.separateFromPersonas,
+        "roles.separateFromPersonas",
+      ),
+    };
+  }
+
+  let scopeBoundary: RunManifest["scopeBoundary"];
+  if (raw.scopeBoundary !== undefined) {
+    const scopeRaw = asRecord(raw.scopeBoundary, "scopeBoundary");
+    scopeBoundary = {
+      defineRegenerationContracts: asBoolean(
+        scopeRaw.defineRegenerationContracts,
+        "scopeBoundary.defineRegenerationContracts",
+      ),
+      defineRegenerationCapabilities: asBoolean(
+        scopeRaw.defineRegenerationCapabilities,
+        "scopeBoundary.defineRegenerationCapabilities",
+      ),
+      providerBackedRegeneration: asBoolean(
+        scopeRaw.providerBackedRegeneration,
+        "scopeBoundary.providerBackedRegeneration",
+      ),
+      designAgentProvider: asBoolean(
+        scopeRaw.designAgentProvider,
+        "scopeBoundary.designAgentProvider",
+      ),
+      generatedScreenVariant: asBoolean(
+        scopeRaw.generatedScreenVariant,
+        "scopeBoundary.generatedScreenVariant",
+      ),
+      nextOwningEpic: asNumber(scopeRaw.nextOwningEpic, "scopeBoundary.nextOwningEpic"),
+    };
+  }
+
+  let resetPolicy: RunManifest["resetPolicy"];
+  if (raw.resetPolicy !== undefined) {
+    const resetRaw = asRecord(raw.resetPolicy, "resetPolicy");
+    resetPolicy = {
+      removeManagedGovernanceKeyOnly: asBoolean(
+        resetRaw.removeManagedGovernanceKeyOnly,
+        "resetPolicy.removeManagedGovernanceKeyOnly",
+      ),
+      preserveUXSpec: asBoolean(resetRaw.preserveUXSpec, "resetPolicy.preserveUXSpec"),
+      preservePersonas: asBoolean(
+        resetRaw.preservePersonas,
+        "resetPolicy.preservePersonas",
+      ),
+      preserveJourneys: asBoolean(
+        resetRaw.preserveJourneys,
+        "resetPolicy.preserveJourneys",
+      ),
+      preserveDesignTokens: asBoolean(
+        resetRaw.preserveDesignTokens,
+        "resetPolicy.preserveDesignTokens",
+      ),
+      preserveFeatureFlags: asBoolean(
+        resetRaw.preserveFeatureFlags,
+        "resetPolicy.preserveFeatureFlags",
+      ),
+      prohibitLocalStorageClear: asBoolean(
+        resetRaw.prohibitLocalStorageClear,
+        "resetPolicy.prohibitLocalStorageClear",
+      ),
+    };
+  }
+
   return {
     schemaVersion: asNumber(raw.schemaVersion, "schemaVersion"),
     runId: asString(raw.runId, "runId"),
@@ -421,6 +522,9 @@ function normalizeManifest(raw: Record<string, unknown>): RunManifest {
         "retryBudget.transientCiRerun",
       ),
     },
+    roles,
+    scopeBoundary,
+    resetPolicy,
     stories,
     finalization,
     stopAfter: {
@@ -531,6 +635,69 @@ function validateManifestStructure(
     }
     if (!hasApprovedBranchPrefix(manifest.finalization.closureBranch)) {
       fail(`${label}: finalization.closureBranch must use an approved prefix.`);
+    }
+  }
+
+  if (manifest.roles) {
+    if (manifest.roles.options.length === 0) {
+      fail(`${label}: roles.options must be non-empty when roles is declared.`);
+    }
+    if (!manifest.roles.options.includes(manifest.roles.default)) {
+      fail(`${label}: roles.default must be included in roles.options.`);
+    }
+    if (manifest.roles.demoOnly !== true) {
+      fail(`${label}: roles.demoOnly must be true when roles is declared.`);
+    }
+    if (manifest.roles.separateFromPersonas !== true) {
+      fail(
+        `${label}: roles.separateFromPersonas must be true when roles is declared.`,
+      );
+    }
+  }
+
+  if (manifest.scopeBoundary) {
+    if (manifest.scopeBoundary.providerBackedRegeneration !== false) {
+      fail(
+        `${label}: scopeBoundary.providerBackedRegeneration must be false when declared.`,
+      );
+    }
+    if (manifest.scopeBoundary.designAgentProvider !== false) {
+      fail(`${label}: scopeBoundary.designAgentProvider must be false when declared.`);
+    }
+    if (manifest.scopeBoundary.generatedScreenVariant !== false) {
+      fail(
+        `${label}: scopeBoundary.generatedScreenVariant must be false when declared.`,
+      );
+    }
+    if (
+      !Number.isInteger(manifest.scopeBoundary.nextOwningEpic) ||
+      manifest.scopeBoundary.nextOwningEpic < 1
+    ) {
+      fail(`${label}: scopeBoundary.nextOwningEpic must be a positive integer.`);
+    }
+  }
+
+  if (manifest.resetPolicy) {
+    if (manifest.resetPolicy.removeManagedGovernanceKeyOnly !== true) {
+      fail(
+        `${label}: resetPolicy.removeManagedGovernanceKeyOnly must be true when declared.`,
+      );
+    }
+    if (manifest.resetPolicy.prohibitLocalStorageClear !== true) {
+      fail(
+        `${label}: resetPolicy.prohibitLocalStorageClear must be true when declared.`,
+      );
+    }
+    for (const key of [
+      "preserveUXSpec",
+      "preservePersonas",
+      "preserveJourneys",
+      "preserveDesignTokens",
+      "preserveFeatureFlags",
+    ] as const) {
+      if (manifest.resetPolicy[key] !== true) {
+        fail(`${label}: resetPolicy.${key} must be true when declared.`);
+      }
     }
   }
 
@@ -720,6 +887,12 @@ if (!skill.includes("ticketSuggestedBranch") || !skill.includes("branchOverrideR
 if (!skill.includes("useWorktrees") || !skill.includes("single-checkout")) {
   fail("Skill must document single-checkout workspace behavior.");
 }
+if (!skill.includes("roles") || !skill.includes("resetPolicy") || !skill.includes("scopeBoundary")) {
+  fail("Skill must recognize roles, resetPolicy, and scopeBoundary manifest metadata.");
+}
+if (!skill.includes("provider-backed regeneration") && !skill.includes("DesignAgentProvider")) {
+  fail("Skill must require epic-boundary exclusion verification for provider-backed regeneration.");
+}
 if (skill.includes("#5 requires #2") || skill.includes("#8 requires #5")) {
   fail("Skill must not hard-code E1 dependency pairs.");
 }
@@ -761,6 +934,15 @@ if (!verifier.includes("active run manifest")) {
 }
 if (!verifier.includes("E3-specific") && !verifier.includes("When E3 work is in scope")) {
   fail("Verifier must include E3-specific verification criteria.");
+}
+if (!verifier.includes("E4-specific") && !verifier.includes("When E4 work is in scope")) {
+  fail("Verifier must include E4-specific verification criteria.");
+}
+if (!verifier.includes("provider-backed regeneration") && !verifier.includes("DesignAgentProvider")) {
+  fail("Verifier must include E4/E5 regeneration-boundary checks.");
+}
+if (!verifier.includes("localStorage.clear()")) {
+  fail("Verifier must prohibit localStorage.clear() for managed reset.");
 }
 
 const cursorRule = read(".cursor/rules/uxds-story-loop.mdc");
@@ -841,6 +1023,24 @@ if (
 }
 if (!/inspect `package\.json`/i.test(agents)) {
   fail("AGENTS.md must require dynamic package.json inspection.");
+}
+if (!agents.includes("append-only domain events")) {
+  fail("AGENTS.md must preserve append-only governance events.");
+}
+if (!agents.includes("second mutable status source")) {
+  fail("AGENTS.md must prohibit a second mutable status source.");
+}
+if (!agents.includes("injected outside the reducer")) {
+  fail("AGENTS.md must require injected clock and ID generation.");
+}
+if (!agents.includes("separate from UX personas")) {
+  fail("AGENTS.md must keep demo roles separate from UX personas.");
+}
+if (!agents.includes("localStorage.clear()")) {
+  fail("AGENTS.md must prohibit localStorage.clear() for demo reset.");
+}
+if (!agents.includes("Provider-backed regeneration belongs to a later epic")) {
+  fail("AGENTS.md must keep provider-backed regeneration out of current governance epic scope.");
 }
 
 const runsDir = path.join(root, ".agents/runs");

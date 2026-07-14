@@ -1,0 +1,104 @@
+schemaVersion: 1
+runId: uxds-e4
+active: true
+
+epic:
+  key: E4
+  issue: 34
+  title: Screen-Level Governance, Roles and Audit
+  estimateHours: 8
+
+baseBranch: staging
+
+workspace:
+  mode: single-checkout
+  useWorktrees: false
+
+merge:
+  method: merge
+  retainFeatureBranch: true
+
+autonomy:
+  sequentialStories: true
+  automaticStoryMerge: true
+  automaticNextStory: true
+  finalReleasePR:
+    base: main
+    head: staging
+    open: true
+    merge: false
+
+retryBudget:
+  implementationRepair: 1
+  verifierRerun: 1
+  transientCiRerun: 1
+
+roles:
+  default: approver
+  options:
+    - approver
+    - reviewer
+    - viewer
+  demoOnly: true
+  separateFromPersonas: true
+
+scopeBoundary:
+  defineRegenerationContracts: true
+  defineRegenerationCapabilities: true
+  providerBackedRegeneration: false
+  designAgentProvider: false
+  generatedScreenVariant: false
+  nextOwningEpic: 47
+
+resetPolicy:
+  removeManagedGovernanceKeyOnly: true
+  preserveUXSpec: true
+  preservePersonas: true
+  preserveJourneys: true
+  preserveDesignTokens: true
+  preserveFeatureFlags: true
+  prohibitLocalStorageClear: true
+
+stories:
+  - key: US-4.1
+    issue: 35
+    tasks: [36, 37]
+    branch: feat/uxds-35-implement-event-driven-governance-domain
+    ticketSuggestedBranch: feat/uxds-35-implement-event-driven-governance-domain
+    dependsOn: [21]
+
+  - key: US-4.2
+    issue: 38
+    tasks: [39, 40]
+    branch: feat/uxds-38-approve-current-screen-versions-and-complete-ux-gate
+    ticketSuggestedBranch: feat/uxds-38-approve-current-screen-versions-and-complete-the
+    branchOverrideReason: Human-approved complete readable branch name replacing an importer-truncated suggestion
+    dependsOn: [35]
+
+  - key: US-4.3
+    issue: 41
+    tasks: [42, 43]
+    branch: feat/uxds-41-request-structured-revisions-with-role-enforcement
+    ticketSuggestedBranch: feat/uxds-41-request-structured-revisions-with-role-enforceme
+    branchOverrideReason: Human-approved complete readable branch name replacing an importer-truncated suggestion
+    dependsOn: [38]
+
+  - key: US-4.4
+    issue: 44
+    tasks: [45, 46]
+    branch: feat/uxds-44-persist-governance-state-and-expose-audit-log
+    ticketSuggestedBranch: feat/uxds-44-persist-governance-state-and-expose-the-audit-lo
+    branchOverrideReason: Human-approved complete readable branch name replacing an importer-truncated suggestion
+    dependsOn: [41]
+
+finalization:
+  deactivateManifest: true
+  closureBranch: chore/uxds-close-e4-autonomous-run
+  automaticClosureMerge: true
+
+stopAfter:
+  epic: 34
+  openReleasePR: true
+  mergeReleasePR: false
+
+authorizationExpiry: epic-done-or-blocked
