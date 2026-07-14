@@ -126,7 +126,19 @@ The bootstrap story targets:
 - Persistence remains behind a port; adapters validate untrusted storage envelopes.
 - Role authorization is enforced in both UI presentation and application commands.
 - Demo actors and roles remain separate from UX personas.
-- Provider-backed regeneration belongs to a later epic; E4 may model contracts and capability only.
+- Outside an authorized regeneration epic run, provider-backed regeneration remains out of scope; E4 may model contracts and capability only.
+- When an authorized regeneration epic run is active, provider-backed regeneration is in scope only under the declared provider port, regeneration policy, and feature-flag constraints.
+- Provider output is untrusted until shared runtime screen validation succeeds; invalid output must never render or activate.
+- Regeneration requires the latest structured revision request for the active current screen version.
+- Provider output must not mutate the frozen source UXSpec; regenerated screens are versioned outputs with bounded content references.
+- Generated screen-version IDs must be unique across relevant history; collisions reject activation without appending a regenerated event.
+- Regenerated event append and version activation must be atomic; event-only or version-only success states are forbidden.
+- Stale asynchronous provider completions must not activate after the expected current version changes.
+- Cancellation and controlled provider failure must retain the prior current version and content.
+- Validated regenerated content must remain resolvable after reload through persisted content references, not by mutating seed UXSpec.
+- Full screen-version history and the complete accessibility evidence overlay are delivered when the active run authorizes them; no cut is active under an authorized E5 run that disables the cut line.
+- No real LLM, external provider network request, or provider secret is permitted in the POC.
+- No later epic, including E6, starts automatically after regeneration-epic finalization.
 - Demo-state reset removes only the managed governance storage key and must never call `localStorage.clear()`.
 
 ## Ports, adapters, and host isolation
