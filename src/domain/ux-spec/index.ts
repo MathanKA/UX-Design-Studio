@@ -10,6 +10,7 @@ export type {
   NavigationItem,
   NavigationSpec,
   Persona,
+  PersonaId,
   PersonaTouchpoint,
   ResponsiveScreenSpec,
   ScreenId,
@@ -54,3 +55,12 @@ export type {
   OverviewScreenCard,
   UXSpecOverviewSummary,
 } from "./overview-selectors";
+export {
+  defaultPersonaId,
+  derivePersonaLensContext,
+  findPersona,
+  listPersonas,
+  relatedJourneyStepsForScreen,
+  resolveScreenTouchpoint,
+} from "./persona-lens-selectors";
+export type { PersonaLensContext } from "./persona-lens-selectors";

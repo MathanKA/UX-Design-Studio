@@ -1,5 +1,11 @@
 import { Link } from "react-router-dom";
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
+import type { PersonaId } from "../../domain/ux-spec";
+import {
+  defaultPersonaId,
+  derivePersonaLensContext,
+  listPersonas,
+} from "../../domain/ux-spec/persona-lens-selectors";
 import { agentPilotSeed } from "../../infrastructure/seed";
 import {
   createActionResolver,
@@ -14,6 +20,7 @@ import {
   FailureState,
   InvalidRouteState,
 } from "../../ui/states";
+import { PersonaLensPanel } from "../persona-lens/PersonaLensPanel";
 import { GeneratedNavigation } from "./GeneratedNavigation";
 import { usePreviewBreakpoint } from "./usePreviewBreakpoint";
 import { cssClass } from "../../renderer/styles/css-class";
@@ -29,7 +36,16 @@ type ReviewWorkbenchProps = {
 export function ReviewWorkbench({ screenId, navigate }: ReviewWorkbenchProps) {
   const breakpoint = usePreviewBreakpoint();
   const screens = agentPilotSeed.screens;
+  const personas = listPersonas(agentPilotSeed);
+  const initialPersonaId = defaultPersonaId(agentPilotSeed) ?? "persona-alex";
+  const [selectedPersonaId, setSelectedPersonaId] =
+    useState<PersonaId>(initialPersonaId);
   const knownScreenIds = new Set(screens.map((screen) => screen.id));
+  const lensContext = derivePersonaLensContext(
+    agentPilotSeed,
+    selectedPersonaId,
+    screenId,
+  );
 
   if (screens.length === 0) {
     return (
@@ -117,7 +133,12 @@ export function ReviewWorkbench({ screenId, navigate }: ReviewWorkbenchProps) {
         <PreviewCanvas>{previewContent}</PreviewCanvas>
 
         <div className={styles.sidePanels}>
-          <LensControlsPanel />
+          <PersonaLensPanel
+            personas={personas}
+            selectedPersonaId={selectedPersonaId}
+            onSelectPersona={setSelectedPersonaId}
+            context={lensContext}
+          />
           <DecisionPanelPlaceholder />
         </div>
       </div>
@@ -152,24 +173,6 @@ function PreviewCanvas({ children }: { children: ReactNode }) {
       </h3>
       {children}
     </div>
-  );
-}
-
-function LensControlsPanel() {
-  return (
-    <aside
-      className={styles.panel}
-      aria-labelledby="lens-controls-heading"
-      data-workbench-region="lens-controls"
-    >
-      <h3 id="lens-controls-heading" className={styles.regionHeading}>
-        Lens controls
-      </h3>
-      <p className={styles.panelBody}>
-        Persona, responsive, and journey lenses attach here in later E3 stories.
-        No lens is active yet.
-      </p>
-    </aside>
   );
 }
 
