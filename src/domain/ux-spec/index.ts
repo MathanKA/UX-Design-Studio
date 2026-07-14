@@ -40,3 +40,17 @@ export {
 export { collectInvariantIssues } from "./invariants";
 export { normalizeUXSpec } from "./normalize";
 export { loadUXSpec } from "./load-ux-spec";
+export {
+  countComponentNodes,
+  countSpecComponentNodes,
+} from "./count-component-nodes";
+export {
+  deriveDesignSystemSummary,
+  deriveUXSpecOverviewSummary,
+  listOverviewScreens,
+} from "./overview-selectors";
+export type {
+  DesignSystemSummary,
+  OverviewScreenCard,
+  UXSpecOverviewSummary,
+} from "./overview-selectors";
