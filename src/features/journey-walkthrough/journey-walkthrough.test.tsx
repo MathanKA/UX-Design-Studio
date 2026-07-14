@@ -176,6 +176,15 @@ describe("US-3.3 journey walkthrough", () => {
         "[data-uxds-preview-root='true'] [data-journey-walkthrough='true']",
       ),
     ).toBeNull();
-    expect(screen.queryByRole("button", { name: /approve/i })).toBeNull();
+    expect(
+      document.querySelector(
+        "[data-journey-walkthrough='true'] [data-decision='approve']",
+      ),
+    ).toBeNull();
+    expect(
+      document.querySelector(
+        '[data-workbench-region="decision-panel"] [data-decision="approve"]',
+      ),
+    ).not.toBeNull();
   });
 });

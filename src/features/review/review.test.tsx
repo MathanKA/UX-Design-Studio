@@ -120,7 +120,7 @@ describe("US-2.4 five-screen review rendering", () => {
     ).toBeInTheDocument();
   });
 
-  it("separates workbench regions without E4 decision controls", () => {
+  it("separates workbench regions and exposes version-bound approval controls", () => {
     renderAt("/review/screen-dashboard");
     expect(
       document.querySelector('[data-workbench-region="screen-navigation"]'),
@@ -134,9 +134,14 @@ describe("US-2.4 five-screen review rendering", () => {
     expect(
       document.querySelector('[data-workbench-region="decision-panel"]'),
     ).not.toBeNull();
-    expect(screen.queryByRole("button", { name: /approve/i })).toBeNull();
+    expect(
+      screen.getByRole("button", { name: /approve current version/i }),
+    ).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: /request revision/i })).toBeNull();
-    expect(document.querySelector("[data-decision-placeholder='true']")).not.toBeNull();
+    expect(document.querySelector("[data-decision-placeholder='true']")).toBeNull();
+    expect(document.querySelector('[data-decision="screen-version"]')).toHaveTextContent(
+      "sv-screen-dashboard-baseline",
+    );
   });
 
   it("renders required data, form, feedback, and chart nodes on representative screens", () => {
@@ -147,9 +152,9 @@ describe("US-2.4 five-screen review rendering", () => {
 
     renderAt("/review/screen-login");
     expect(screen.getByLabelText("Email")).toBeInTheDocument();
-    expect(screen.getByRole("status")).toHaveTextContent(
-      "Use your organization credentials.",
-    );
+    expect(
+      screen.getByText("Use your organization credentials."),
+    ).toBeInTheDocument();
   });
 
   it("does not introduce page-specific screen React modules", () => {
