@@ -35,6 +35,7 @@ import {
   PREVIEW_BREAKPOINT_LABELS,
   PREVIEW_WIDTHS,
 } from "../responsive-preview";
+import { DecisionPanel } from "../governance";
 import { GeneratedNavigation } from "./GeneratedNavigation";
 import { cssClass } from "../../renderer/styles/css-class";
 import styles from "./ReviewWorkbench.module.css";
@@ -217,7 +218,13 @@ export function ReviewWorkbench({ screenId, navigate }: ReviewWorkbenchProps) {
               }}
             />
           ) : null}
-          <DecisionPanelPlaceholder />
+          <DecisionPanel
+            {...(screen
+              ? { screenId: screen.id, screenName: screen.name }
+              : screenId
+                ? { screenId }
+                : {})}
+          />
         </div>
       </div>
     </section>
@@ -251,26 +258,5 @@ function PreviewCanvas({ children }: { children: ReactNode }) {
       </h3>
       {children}
     </div>
-  );
-}
-
-function DecisionPanelPlaceholder() {
-  return (
-    <aside
-      className={styles.panel}
-      aria-labelledby="decision-panel-heading"
-      data-workbench-region="decision-panel"
-    >
-      <h3 id="decision-panel-heading" className={styles.regionHeading}>
-        Decision panel
-      </h3>
-      <p className={styles.panelBody}>
-        Approval and revision controls arrive in the governance stage. This panel
-        is presentational only in E3.
-      </p>
-      <p className={styles.panelNote} data-decision-placeholder="true">
-        No approve or revision actions are available yet.
-      </p>
-    </aside>
   );
 }

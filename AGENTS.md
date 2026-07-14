@@ -114,11 +114,20 @@ The bootstrap story targets:
 
 ## Governance invariants
 - Approval, revision, and regeneration are append-only domain events.
-- Derive visible status through selectors; do not maintain a second mutable status source.
-- Approval belongs to one screen version.
+- Visible review status and audit history derive from the same event source through selectors; do not maintain a second mutable status source.
+- Approval belongs to one screen version and is effective only for that current version.
+- Stale screen versions cannot be approved; submit the expected current screen-version identity.
 - Regeneration creates a new current version.
 - An old approval never approves a regenerated version.
+- A later revision request invalidates effective approval for that screen version.
 - Gate completion requires approvals for all current required screen versions.
+- Domain governance modules remain free of React, routing, and browser APIs.
+- Clock and ID generation are injected outside the reducer.
+- Persistence remains behind a port; adapters validate untrusted storage envelopes.
+- Role authorization is enforced in both UI presentation and application commands.
+- Demo actors and roles remain separate from UX personas.
+- Provider-backed regeneration belongs to a later epic; E4 may model contracts and capability only.
+- Demo-state reset removes only the managed governance storage key and must never call `localStorage.clear()`.
 
 ## Ports, adapters, and host isolation
 - Keep persistence, time, ID generation, design-agent regeneration, future APIs, and host integration behind interfaces.

@@ -4,10 +4,8 @@ import {
   listOverviewScreens,
 } from "../../domain/ux-spec/overview-selectors";
 import { agentPilotSeed } from "../../infrastructure/seed";
-import {
-  deriveApprovalProgressPlaceholder,
-  buildPlaceholderScreenStatuses,
-} from "./review-status-placeholder";
+import { useGovernance } from "../governance";
+import { screenReviewStatusLabel } from "../governance/status-labels";
 import { OverviewCard } from "./OverviewCard";
 import { EmptyState, LoadingState } from "../../ui/states";
 import styles from "./OverviewPage.module.css";
@@ -22,6 +20,9 @@ export function OverviewPage({
   spec = agentPilotSeed,
   loading = false,
 }: OverviewPageProps = {}) {
+  const { getScreenStatus, getApprovalProgress, isGateComplete } =
+    useGovernance();
+
   if (loading) {
     return (
       <section className={styles.page} aria-labelledby="overview-heading">
@@ -44,9 +45,8 @@ export function OverviewPage({
 
   const summary = deriveUXSpecOverviewSummary(spec);
   const screens = listOverviewScreens(spec);
-  const statuses = buildPlaceholderScreenStatuses(spec);
-  const statusById = new Map(statuses.map((entry) => [entry.screenId, entry.label]));
-  const progress = deriveApprovalProgressPlaceholder(spec);
+  const progress = getApprovalProgress();
+  const gateComplete = isGateComplete();
   const spacingValues = Object.values(summary.designSystem.spacingScale).join(", ");
   const radiusValues = Object.values(summary.designSystem.radiusScale).join(", ");
 
@@ -55,7 +55,7 @@ export function OverviewPage({
       <h2 id="overview-heading">Overview</h2>
       <p className={styles.lede}>
         Specification summary for {summary.projectTitle}. Counts derive from the
-        validated UXSpec.
+        validated UXSpec. Review status comes from governance selectors.
       </p>
 
       <div className={styles.summaryGrid} data-testid="overview-summary">
@@ -123,13 +123,28 @@ export function OverviewPage({
         <section
           className={styles.approval}
           aria-labelledby="approval-progress-heading"
-          data-testid="approval-progress-placeholder"
+          data-testid="approval-progress"
         >
           <h3 id="approval-progress-heading">Approval progress</h3>
-          <p data-approval="headline">{progress.headline}</p>
-          <p data-approval="detail">{progress.detail}</p>
-          <p className={styles.note} data-approval="note">
-            {progress.note}
+          <p data-approval="headline">
+            {progress.approvedCount} of {progress.totalRequired} screens approved
+          </p>
+          <p data-approval="detail">
+            {gateComplete
+              ? "No screens remaining"
+              : `${progress.remainingCount} remaining`}
+          </p>
+          <p
+            className={styles.note}
+            data-approval="gate-readiness"
+            data-gate-complete={gateComplete}
+            role="status"
+            aria-live="polite"
+            aria-atomic="true"
+          >
+            {gateComplete
+              ? "Ready for Agile plan generation"
+              : "Agile plan generation unavailable until all required screens are approved"}
           </p>
         </section>
       </div>
@@ -141,7 +156,7 @@ export function OverviewPage({
             <OverviewCard
               key={screen.id}
               screen={screen}
-              statusLabel={statusById.get(screen.id) ?? "Not reviewed"}
+              statusLabel={screenReviewStatusLabel(getScreenStatus(screen.id))}
             />
           ))}
         </div>

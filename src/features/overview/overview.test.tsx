@@ -11,10 +11,6 @@ import {
   deriveUXSpecOverviewSummary,
 } from "../../domain/ux-spec";
 import { OverviewPage } from "./OverviewPage";
-import {
-  buildPlaceholderScreenStatuses,
-  deriveApprovalProgressPlaceholder,
-} from "./review-status-placeholder";
 import { EmptyState, LoadingState, PartialDataState } from "../../ui/states";
 import type { UXSpec } from "../../domain/ux-spec";
 
@@ -96,19 +92,16 @@ describe("US-3.1 specification overview", () => {
     }
   });
 
-  it("uses an honest approval progress placeholder without governance events", () => {
+  it("shows governance-derived approval progress for baseline screens", () => {
     renderAt("/overview");
-    const progress = deriveApprovalProgressPlaceholder(agentPilotSeed);
-    expect(screen.getByTestId("approval-progress-placeholder")).toHaveTextContent(
-      progress.headline,
+    const progress = screen.getByTestId("approval-progress");
+    expect(progress).toHaveTextContent("0 of 5 screens approved");
+    expect(progress).toHaveTextContent("5 remaining");
+    expect(progress).toHaveTextContent(
+      "Agile plan generation unavailable until all required screens are approved",
     );
-    expect(screen.getByTestId("approval-progress-placeholder")).toHaveTextContent(
-      progress.detail,
-    );
-    expect(buildPlaceholderScreenStatuses(agentPilotSeed)).toHaveLength(
-      agentPilotSeed.screens.length,
-    );
-    expect(document.querySelector("[data-governance-event]")).toBeNull();
+    expect(progress).not.toHaveTextContent(/arrives later|governance stage/i);
+    expect(document.querySelector("[data-testid='approval-progress-placeholder']")).toBeNull();
   });
 
   it("supports keyboard activation of screen review entry points", async () => {
@@ -131,9 +124,11 @@ describe("US-3.1 specification overview", () => {
 
   it("preserves the shell for loading and empty overview states", () => {
     const { unmount } = render(
-      <MemoryRouter>
-        <OverviewPage loading />
-      </MemoryRouter>,
+      <AppProviders>
+        <MemoryRouter>
+          <OverviewPage loading />
+        </MemoryRouter>
+      </AppProviders>,
     );
     expect(screen.getByRole("status")).toHaveAttribute("aria-busy", "true");
     unmount();
@@ -143,9 +138,11 @@ describe("US-3.1 specification overview", () => {
       screens: [],
     };
     render(
-      <MemoryRouter>
-        <OverviewPage spec={emptySpec} />
-      </MemoryRouter>,
+      <AppProviders>
+        <MemoryRouter>
+          <OverviewPage spec={emptySpec} />
+        </MemoryRouter>
+      </AppProviders>,
     );
     expect(screen.getByText(/No screens are available/i)).toBeInTheDocument();
   });
