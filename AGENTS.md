@@ -161,38 +161,52 @@ Dependency direction:
 - Work from one explicitly approved user story at a time.
 - Include only that story and its listed engineering tasks.
 - Treat task issues as traceability units within the approved story.
-- Do not begin the next story automatically, except under the active E1 Autonomous Loop Exception below.
+- Do not begin the next story automatically, except under an active authorized autonomous epic run below.
 - Do not perform bonus refactors or modify unrelated files.
 - Before editing, confirm acceptance criteria, dependencies, requirement IDs, architecture references, and scope classification.
 - Stop when a ticket is ambiguous, incomplete, blocked, or inconsistent with controlling documents.
 - Preserve the work-in-progress limit of one implementation story.
 
-## E1 Autonomous Loop Exception
-This narrowly scoped exception applies only while GitHub issue `#1` (Epic E1) remains open and is not marked Blocked.
+## Authorized Autonomous Epic Runs
+Autonomous execution is prohibited by default.
 
-Authorization covered by this exception:
-- Automatic chaining of the E1 story queue only: `#2` (US-1.1), `#5` (US-1.2), and `#8` (US-1.3).
-- Automatic merge-commit of the corresponding story pull requests into `staging` only after every merge gate passes.
-- Use of the installed independent verifier in `.agents/verifiers/uxds-story-verifier.md` as the independent verification gate for those E1 stories.
+An epic may run autonomously only when an explicit run manifest exists under `.agents/runs/` and is marked active. Exactly one active autonomous manifest is permitted at a time unless a schema explicitly marks inactive runs.
 
-Still mandatory under this exception:
+Each run manifest must identify:
+- Epic issue
+- Authorized story queue
+- Child tasks
+- Exact branch names
+- Dependency order
+- Retry budgets
+- Merge method
+- Feature-branch retention policy
+- Final release action
+- Authorization expiry
+
+Still mandatory under every authorized run:
 - WIP limit of one implementation story.
 - One story, one branch, and one pull request at a time.
 - Signed commits and `git verify-commit` before push and merge.
+- Merge commits into `staging` after every merge gate passes; do not squash; retain feature branches.
 - No direct pushes to `staging` or `main`.
 - No branch-protection weakening.
 - No test, type-safety, accessibility, or security weakening.
+- Independent verification via `.agents/verifiers/uxds-story-verifier.md`.
+- Required CI must pass.
 - All other hard stops in this file.
 
-This exception does not authorize:
-- Automatic chaining or self-merge for E2 or any later epic.
-- Merging with failing, pending, or skipped-required checks.
-- Bypassing the independent verifier.
-- Starting another story before the current story is Done and its PR is merged.
+Authorization rules:
+- Authorize an epic only through its run manifest. Do not hard-code epic queues in this file.
+- The active E2 authorization is `.agents/runs/e2.yml`.
+- Autonomous execution expires when the authorized epic is Done or Blocked.
+- No later epic starts automatically.
+- Final release behavior must be explicitly declared in the manifest (for E2: open `staging` → `main` PR; do not merge it).
+- Merging with failing, pending, or skipped-required checks is never authorized.
+- Bypassing the independent verifier is never authorized.
+- Starting another story before the current story is Done and its PR is merged is never authorized.
 
-Expiration:
-- This exception expires automatically when issue `#1` is closed or marked Blocked.
-- Outside this exception, human review remains the independent gate when no other authorized verifier path applies, and the next story must not start automatically.
+Outside an active authorized run, human review remains the independent gate when no other authorized verifier path applies, and the next story must not start automatically.
 
 ## Definition of Ready
 Implementation is a hard stop unless all are true:
@@ -261,14 +275,14 @@ Implementation is a hard stop unless all are true:
 - Merge commit only after verification (preserve personally signed feature commits; do not squash; do not delete the feature branch).
 - Release through a final `staging` to `main` PR and tag `v0.1.0-poc`.
 - Never push directly to `staging` or `main`, change protections, weaken CI, or delete required tests.
-- Never merge your own PR or start another story without approval, except under the active E1 Autonomous Loop Exception.
+- Never merge your own PR or start another story without approval, except under an active authorized autonomous epic run.
 
 ## Independent verification
 - When verifier infrastructure exists, use an independent read-only review of story scope, architecture, acceptance criteria, tests, accessibility, and security before commit.
 - The verifier must not modify files, implement fixes, commit, push, or open a PR.
 - The implementer must not mark its own work independently verified.
-- For Epic E1 stories covered by the E1 Autonomous Loop Exception, the installed verifier at `.agents/verifiers/uxds-story-verifier.md` is the required independent gate.
-- Outside that exception, human review remains the required independent gate until another verifier path is explicitly authorized.
+- For stories covered by an active authorized autonomous epic run, the installed verifier at `.agents/verifiers/uxds-story-verifier.md` is the required independent gate.
+- Outside an authorized run, human review remains the required independent gate until another verifier path is explicitly authorized.
 - Allow at most one verifier-driven repair attempt before escalation.
 
 ## Hard stops
@@ -281,7 +295,8 @@ Stop and report rather than bypassing the condition when:
 - A real backend, LLM, authentication system, or Module Federation becomes necessary.
 - A dependency or architecture change lacks approval.
 - Commit signing fails.
-- The next story would start automatically outside the active E1 Autonomous Loop Exception.
+- The next story would start automatically outside an active authorized autonomous epic run.
+- An active run manifest is missing, invalid, or more than one active autonomous manifest exists.
 
 ## Maintaining this file
 - Keep only durable repository-wide instructions here.

@@ -1,0 +1,20 @@
+.depthGuard,
+.nodeError {
+  border: 1px solid var(--uxds-color-warning, #dc6803);
+  border-radius: var(--uxds-radius-md, 0.5rem);
+  background: var(--uxds-color-surface-muted, #f2f4f7);
+  color: var(--uxds-color-text, #101828);
+  padding: 0.75rem 0.9rem;
+  margin: 0.25rem 0;
+}
+
+.title {
+  margin: 0 0 0.35rem;
+  font-weight: 600;
+}
+
+.detail {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--uxds-color-text-muted, #667085);
+}
