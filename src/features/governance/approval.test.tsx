@@ -11,6 +11,8 @@ import {
   selectScreenStatus,
 } from "../../domain/governance";
 import { agentPilotSeed } from "../../infrastructure/seed";
+import { createGovernanceStateFromSpec } from "../../application/governance-session";
+import { InMemoryGovernanceRepository } from "../../infrastructure/persistence/in-memory-governance-repository";
 import {
   createFixedClock,
   createSequentialIdGenerator,
@@ -47,6 +49,12 @@ function renderApp(pathName: string) {
   );
 }
 
+function createMemoryRepository() {
+  return new InMemoryGovernanceRepository(
+    createGovernanceStateFromSpec(agentPilotSeed, "2026-07-15T01:00:00.000Z"),
+  );
+}
+
 function renderWithDeterministicGovernance(pathName: string) {
   const clock = createFixedClock("2026-07-15T03:00:00.000Z");
   const idGenerator = createSequentialIdGenerator(1);
@@ -56,6 +64,7 @@ function renderWithDeterministicGovernance(pathName: string) {
         clock={clock}
         idGenerator={idGenerator}
         createdAt="2026-07-15T01:00:00.000Z"
+        repository={createMemoryRepository()}
       >
         <MemoryRouter initialEntries={[pathName]}>
           <AppRoutes />
@@ -95,6 +104,9 @@ function StaleApprovalProbe() {
 describe("US-4.2 version-bound approval and UX gate", () => {
   beforeEach(() => {
     installMatchMedia();
+    window.localStorage.removeItem(
+      `uxds:v1:${agentPilotSeed.projectId}:${agentPilotSeed.id}:${agentPilotSeed.baselineVersion}`,
+    );
   });
 
   it("initializes baseline screen versions for all five AgentPilot screens", () => {
@@ -157,6 +169,7 @@ describe("US-4.2 version-bound approval and UX gate", () => {
         clock={createFixedClock("2026-07-15T03:00:00.000Z")}
         idGenerator={createSequentialIdGenerator(1)}
         createdAt="2026-07-15T01:00:00.000Z"
+        repository={createMemoryRepository()}
       >
         <StaleApprovalProbe />
       </GovernanceProvider>,
@@ -195,6 +208,7 @@ describe("US-4.2 version-bound approval and UX gate", () => {
         clock={createFixedClock("2026-07-15T03:00:00.000Z")}
         idGenerator={createSequentialIdGenerator(1)}
         createdAt="2026-07-15T01:00:00.000Z"
+        repository={createMemoryRepository()}
       >
         <MemoryRouter initialEntries={["/review/screen-dashboard"]}>
           <AppRoutes />
@@ -228,6 +242,7 @@ describe("US-4.2 version-bound approval and UX gate", () => {
         clock={createFixedClock("2026-07-15T03:00:00.000Z")}
         idGenerator={createSequentialIdGenerator(1)}
         createdAt="2026-07-15T01:00:00.000Z"
+        repository={createMemoryRepository()}
       >
         <MemoryRouter initialEntries={["/review/screen-dashboard"]}>
           <AppRoutes />
@@ -269,6 +284,7 @@ describe("US-4.2 version-bound approval and UX gate", () => {
         clock={createFixedClock("2026-07-15T03:00:00.000Z")}
         idGenerator={createSequentialIdGenerator(1)}
         createdAt="2026-07-15T01:00:00.000Z"
+        repository={createMemoryRepository()}
       >
         <MemoryRouter initialEntries={["/overview"]}>
           <AppRoutes />

@@ -50,10 +50,17 @@ export type GovernanceContextValue = {
   canApprove: boolean;
   canRequestRevision: boolean;
   canRegenerate: boolean;
+  /** Non-blocking notice when persisted governance could not be restored or saved. */
+  persistenceNotice: string | null;
+  dismissPersistenceNotice: () => void;
+  /** aria-live announcement after demo-state reset. */
+  resetAnnouncement: string | null;
   setActor: (actor: ActorSnapshot) => void;
   switchRole: (role: DemoRole) => void;
   approveScreen: (args: ApproveScreenArgs) => ApproveScreenAttemptResult;
   requestRevision: (args: RequestRevisionArgs) => RequestRevisionAttemptResult;
+  /** Remove managed governance key and restore clean baseline in-memory state. */
+  resetDemoState: () => void;
   getScreen: (screenId: ScreenId) => ScreenSpec | undefined;
   listScreenNodes: (screenId: ScreenId) => readonly ScreenNodeOption[];
   getScreenStatus: (screenId: ScreenId) => ScreenReviewStatus;

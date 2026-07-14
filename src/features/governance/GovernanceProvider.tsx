@@ -14,6 +14,7 @@ import {
 } from "../../application/governance-session";
 import { requestRevision as executeRequestRevision } from "../../application/request-revision";
 import {
+  reduceGovernance,
   selectApprovalProgress,
   selectCanApprove,
   selectCanRegenerate,
@@ -30,12 +31,15 @@ import {
   listScreenNodeOptions,
   type UXSpec,
 } from "../../domain/ux-spec";
+import { LocalStorageGovernanceRepository } from "../../infrastructure/persistence/local-storage-governance-repository";
 import { agentPilotSeed } from "../../infrastructure/seed";
-import { InMemoryGovernanceRepository } from "../../infrastructure/persistence/in-memory-governance-repository";
 import { createBrowserIdGenerator } from "../../infrastructure/platform/browser-id-generator";
 import { createSystemClock } from "../../infrastructure/platform/system-clock";
 import type { Clock } from "../../ports/clock";
-import type { GovernanceRepository } from "../../ports/governance-repository";
+import type {
+  GovernanceLoadResult,
+  GovernanceRepository,
+} from "../../ports/governance-repository";
 import type { IdGenerator } from "../../ports/id-generator";
 import {
   GovernanceContext,
@@ -46,6 +50,15 @@ import {
   type RequestRevisionAttemptResult,
 } from "./governance-context";
 
+export const PERSISTENCE_RECOVERY_NOTICE =
+  "Persisted demo decisions could not be restored.";
+
+export const PERSISTENCE_SAVE_NOTICE =
+  "Demo decisions could not be saved to browser storage. The session continues in memory.";
+
+export const RESET_DEMO_ANNOUNCEMENT =
+  "Demo governance state was reset. Approvals, revisions, and audit history were cleared.";
+
 export type GovernanceProviderProps = {
   children: ReactNode;
   /** Injected UXSpec; defaults to AgentPilot seed. */
@@ -54,26 +67,43 @@ export type GovernanceProviderProps = {
   actor?: ActorSnapshot;
   clock?: Clock;
   idGenerator?: IdGenerator;
+  /** Injected repository; defaults to LocalStorageGovernanceRepository. */
   repository?: GovernanceRepository;
   /** Fixed createdAt for baseline versions (tests). */
   createdAt?: string;
 };
 
+function isThenable<T>(value: T | Promise<T>): value is Promise<T> {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    "then" in value &&
+    typeof (value as Promise<T>).then === "function"
+  );
+}
+
 function loadSync(
   repository: GovernanceRepository,
   fallback: GovernanceState,
-): GovernanceState {
+): GovernanceLoadResult {
   const loaded = repository.load();
-  if (
-    typeof loaded === "object" &&
-    loaded !== null &&
-    "then" in loaded &&
-    typeof (loaded as Promise<GovernanceState>).then === "function"
-  ) {
-    // US-4.2 wires a sync in-memory repository; async adapters arrive later.
-    return fallback;
+  if (isThenable(loaded)) {
+    // Sync adapters are used in the POC; async load falls back cleanly.
+    return { ok: false, reason: "unavailable", fallbackState: fallback };
   }
-  return loaded as GovernanceState;
+  return loaded;
+}
+
+function persistState(
+  repository: GovernanceRepository,
+  state: GovernanceState,
+): boolean {
+  const result = repository.save(state);
+  if (isThenable(result)) {
+    void result;
+    return true;
+  }
+  return result.ok;
 }
 
 const SUBMIT_IN_PROGRESS = {
@@ -95,26 +125,55 @@ export function GovernanceProvider({
 }: GovernanceProviderProps) {
   const specContext = useMemo(() => specGovernanceContext(spec), [spec]);
   const repositoryRef = useRef<GovernanceRepository | null>(null);
+  const baselineCreatedAtRef = useRef(createdAt ?? clock.now());
 
   if (repositoryRef.current === null) {
     const initial = createGovernanceStateFromSpec(
       spec,
-      createdAt ?? clock.now(),
+      baselineCreatedAtRef.current,
     );
     repositoryRef.current =
-      repositoryProp ?? new InMemoryGovernanceRepository(initial);
+      repositoryProp ??
+      new LocalStorageGovernanceRepository({
+        identity: specContext,
+        fallbackState: initial,
+        clock,
+      });
   }
 
   const repository = repositoryRef.current;
-  const [state, setState] = useState<GovernanceState>(() =>
-    loadSync(
-      repository,
-      createGovernanceStateFromSpec(spec, createdAt ?? clock.now()),
-    ),
+  const hydrationRef = useRef<{
+    state: GovernanceState;
+    notice: string | null;
+  } | null>(null);
+  if (hydrationRef.current === null) {
+    const fallback = createGovernanceStateFromSpec(
+      spec,
+      baselineCreatedAtRef.current,
+    );
+    const result = loadSync(repository, fallback);
+    hydrationRef.current = {
+      state: result.ok ? result.state : result.fallbackState,
+      notice: result.ok ? null : PERSISTENCE_RECOVERY_NOTICE,
+    };
+  }
+
+  const [state, setState] = useState<GovernanceState>(
+    () => hydrationRef.current!.state,
+  );
+  const [persistenceNotice, setPersistenceNotice] = useState<string | null>(
+    () => hydrationRef.current!.notice,
+  );
+  const [resetAnnouncement, setResetAnnouncement] = useState<string | null>(
+    null,
   );
   const [actor, setActor] = useState<ActorSnapshot>(initialActor);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const submittingRef = useRef(false);
+
+  const dismissPersistenceNotice = useCallback(() => {
+    setPersistenceNotice(null);
+  }, []);
 
   const switchRole = useCallback((role: DemoRole) => {
     setActor(demoActorForRole(role));
@@ -134,6 +193,17 @@ export function GovernanceProvider({
       return listScreenNodeOptions(screen.root);
     },
     [spec],
+  );
+
+  const applyPersistedState = useCallback(
+    (next: GovernanceState) => {
+      const saved = persistState(repository, next);
+      setState(next);
+      if (!saved) {
+        setPersistenceNotice(PERSISTENCE_SAVE_NOTICE);
+      }
+    },
+    [repository],
   );
 
   const approveScreen = useCallback(
@@ -160,8 +230,7 @@ export function GovernanceProvider({
         );
 
         if (result.ok) {
-          void repository.save(result.state);
-          setState(result.state);
+          applyPersistedState(result.state);
         }
 
         return result;
@@ -170,7 +239,7 @@ export function GovernanceProvider({
         setIsSubmitting(false);
       }
     },
-    [actor, clock, idGenerator, repository, specContext, state],
+    [actor, applyPersistedState, clock, idGenerator, specContext, state],
   );
 
   const requestRevision = useCallback(
@@ -211,8 +280,7 @@ export function GovernanceProvider({
         );
 
         if (result.ok) {
-          void repository.save(result.state);
-          setState(result.state);
+          applyPersistedState(result.state);
         }
 
         return result;
@@ -221,8 +289,27 @@ export function GovernanceProvider({
         setIsSubmitting(false);
       }
     },
-    [actor, clock, getScreen, idGenerator, repository, specContext, state],
+    [
+      actor,
+      applyPersistedState,
+      clock,
+      getScreen,
+      idGenerator,
+      specContext,
+      state,
+    ],
   );
+
+  const resetDemoState = useCallback(() => {
+    void repository.reset();
+    const resetResult = reduceGovernance(state, { type: "storageReset" });
+    const next = resetResult.ok
+      ? resetResult.state
+      : createGovernanceStateFromSpec(spec, baselineCreatedAtRef.current);
+    setState(next);
+    setPersistenceNotice(null);
+    setResetAnnouncement(RESET_DEMO_ANNOUNCEMENT);
+  }, [repository, spec, state]);
 
   const value = useMemo<GovernanceContextValue>(
     () => ({
@@ -232,10 +319,14 @@ export function GovernanceProvider({
       canApprove: selectCanApprove(actor),
       canRequestRevision: selectCanRequestRevision(actor),
       canRegenerate: selectCanRegenerate(actor),
+      persistenceNotice,
+      dismissPersistenceNotice,
+      resetAnnouncement,
       setActor,
       switchRole,
       approveScreen,
       requestRevision,
+      resetDemoState,
       getScreen,
       listScreenNodes,
       getScreenStatus: (screenId) => selectScreenStatus(state, screenId),
@@ -247,10 +338,14 @@ export function GovernanceProvider({
     [
       actor,
       approveScreen,
+      dismissPersistenceNotice,
       getScreen,
       isSubmitting,
       listScreenNodes,
+      persistenceNotice,
       requestRevision,
+      resetAnnouncement,
+      resetDemoState,
       state,
       switchRole,
     ],

@@ -6,8 +6,8 @@ type AppProvidersProps = {
 };
 
 /**
- * Application provider seam. Governance session mounts here; persistence,
- * design-agent, and host adapters will join in later stories.
+ * Application provider seam.
+ * Governance defaults to LocalStorageGovernanceRepository; tests may inject memory.
  */
 export function AppProviders({ children }: AppProvidersProps) {
   return <GovernanceProvider>{children}</GovernanceProvider>;

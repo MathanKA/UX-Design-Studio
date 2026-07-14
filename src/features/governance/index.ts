@@ -1,4 +1,9 @@
-export { GovernanceProvider } from "./GovernanceProvider";
+export {
+  GovernanceProvider,
+  PERSISTENCE_RECOVERY_NOTICE,
+  PERSISTENCE_SAVE_NOTICE,
+  RESET_DEMO_ANNOUNCEMENT,
+} from "./GovernanceProvider";
 export type { GovernanceProviderProps } from "./GovernanceProvider";
 export { useGovernance } from "./governance-context";
 export type {
