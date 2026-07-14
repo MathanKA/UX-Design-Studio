@@ -1,0 +1,74 @@
+schemaVersion: 1
+runId: uxds-e3
+active: true
+
+epic:
+  key: E3
+  issue: 24
+  title: Review Workbench and Contextual Lenses
+  estimateHours: 6
+
+baseBranch: staging
+
+workspace:
+  mode: single-checkout
+  useWorktrees: false
+
+merge:
+  method: merge
+  retainFeatureBranch: true
+
+autonomy:
+  sequentialStories: true
+  automaticStoryMerge: true
+  automaticNextStory: true
+  finalReleasePR:
+    base: main
+    head: staging
+    open: true
+    merge: false
+
+retryBudget:
+  implementationRepair: 1
+  verifierRerun: 1
+  transientCiRerun: 1
+
+stories:
+  - key: US-3.1
+    issue: 25
+    tasks: [26, 27]
+    branch: feat/uxds-25-deliver-specification-overview-and-review-workbench
+    ticketSuggestedBranch: feat/uxds-25-deliver-specification-overview-and-review-workbe
+    branchOverrideReason: Human-approved complete readable branch name replacing an importer-truncated suggestion
+    dependsOn: [21]
+
+  - key: US-3.2
+    issue: 28
+    tasks: [29, 30]
+    branch: feat/uxds-28-add-persona-review-lens
+    ticketSuggestedBranch: feat/uxds-28-add-persona-review-lens
+    dependsOn: [25]
+
+  - key: US-3.3
+    issue: 31
+    tasks: [32, 33]
+    branch: feat/uxds-31-add-responsive-preview-and-optional-journey-walkthrough
+    ticketSuggestedBranch: feat/uxds-31-add-responsive-preview-and-optional-journey-walk
+    branchOverrideReason: Human-approved complete readable branch name replacing an importer-truncated suggestion
+    dependsOn: [25]
+    authorizedScope:
+      journeyWalkthrough: true
+      tabletPreview: true
+      activateCutLine: false
+
+finalization:
+  deactivateManifest: true
+  closureBranch: chore/uxds-close-e3-autonomous-run
+  automaticClosureMerge: true
+
+stopAfter:
+  epic: 24
+  openReleasePR: true
+  mergeReleasePR: false
+
+authorizationExpiry: epic-done-or-blocked

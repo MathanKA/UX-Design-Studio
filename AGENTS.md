@@ -170,7 +170,7 @@ Dependency direction:
 ## Authorized Autonomous Epic Runs
 Autonomous execution is prohibited by default.
 
-An epic may run autonomously only when an explicit run manifest exists under `.agents/runs/` and is marked active. Exactly one active autonomous manifest is permitted at a time unless a schema explicitly marks inactive runs.
+An epic may run autonomously only when an explicit run manifest exists under `.agents/runs/` and is marked active. Zero or one active autonomous manifest is permitted for repository validation; more than one active manifest is always invalid. Autonomy requires exactly one valid active manifest at execution time.
 
 Each run manifest must identify:
 - Epic issue
@@ -198,10 +198,13 @@ Still mandatory under every authorized run:
 
 Authorization rules:
 - Authorize an epic only through its run manifest. Do not hard-code epic queues in this file.
-- The active E2 authorization is `.agents/runs/e2.yml`.
+- Discover the active manifest dynamically under `.agents/runs/`. Do not hard-code the active epic in this file.
+- Historical inactive manifests provide evidence and traceability only; they never authorize execution.
+- Zero or one active manifest is permitted for repository validation. Autonomy requires exactly one valid active manifest at execution time.
+- Manifest closure must deactivate the completed run so no active authorization remains.
 - Autonomous execution expires when the authorized epic is Done or Blocked.
 - No later epic starts automatically.
-- Final release behavior must be explicitly declared in the manifest (for E2: open `staging` → `main` PR; do not merge it).
+- Final release behavior must be explicitly declared in the manifest (open `staging` → `main` PR; do not merge it unless the manifest explicitly authorizes merge).
 - Merging with failing, pending, or skipped-required checks is never authorized.
 - Bypassing the independent verifier is never authorized.
 - Starting another story before the current story is Done and its PR is merged is never authorized.
@@ -296,7 +299,7 @@ Stop and report rather than bypassing the condition when:
 - A dependency or architecture change lacks approval.
 - Commit signing fails.
 - The next story would start automatically outside an active authorized autonomous epic run.
-- An active run manifest is missing, invalid, or more than one active autonomous manifest exists.
+- Autonomy is required but no valid active run manifest exists, the active manifest is invalid, or more than one active autonomous manifest exists.
 
 ## Maintaining this file
 - Keep only durable repository-wide instructions here.

@@ -70,6 +70,55 @@ For renderer, theming, and generated-navigation stories, also verify:
 - generated navigation comes from seed data when in scope
 - no later-epic scope was implemented
 
+## When E3 work is in scope
+
+Apply these E3-specific checks only when the active story, epic mode, or changed
+diff includes overview, workbench, persona lens, responsive preview, or journey
+walkthrough work.
+
+### Overview and review workbench
+
+- counts derive from the validated UXSpec and are not manually duplicated constants
+- component count is recursive and deterministic
+- all five screen cards are present
+- each card links to the canonical `/review/:screenId` route
+- review status placeholder is clearly a placeholder until E4
+- no fake governance event state is introduced
+- workbench visibly separates screen navigation, preview canvas, lens controls, and decision panel
+- loading, empty, partial, invalid-route, and failure states preserve the application shell
+- E4 approval functionality is not implemented
+
+### Persona lens
+
+- Alex, Jordan, and Taylor derive from UXSpec personas
+- goals and frustrations derive from persona data
+- current-screen touchpoints derive from screen metadata
+- persona annotations do not mutate UXSpec
+- persona annotations do not modify renderer component props
+- the preview remains keyboard and pointer accessible
+- empty touchpoint state is handled
+
+### Responsive preview
+
+- mobile, tablet, and desktop are explicitly selectable
+- preview width and render context update together
+- breakpoint changes occur without reload
+- mobile uses stacked behavior
+- tablet and desktop use appropriate multi-column behavior
+- no arbitrary CSS is accepted from UXSpec
+- responsive behavior remains renderer-driven and screen-agnostic
+
+### Journey walkthrough
+
+- journey data derives from UXSpec
+- current journey and step are identifiable
+- previous and next navigation work
+- related routes update client-side
+- boundaries prevent moving before the first or beyond the last step
+- journey is isolated from renderer and governance foundations
+- journey can be removed without rewriting core rendering
+- journey does not mutate UXSpec
+
 ## Verdict rules
 
 - `PASS` is valid only when `SAFE_TO_COMMIT: YES`

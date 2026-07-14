@@ -1,6 +1,12 @@
 #!/usr/bin/env node
 /**
- * Validates the UX Design Studio agent-control layer and active run manifests.
+ * Validates the UX Design Studio agent-control layer and run manifests.
+ *
+ * Default mode performs generic repository validation and allows zero or one
+ * active autonomous run. Optional CLI flags assert an expected active-run state:
+ *
+ *   --expect-active-run <runId>
+ *   --expect-no-active-run
  */
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import path from "node:path";
@@ -9,12 +15,18 @@ import { fileURLToPath } from "node:url";
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 const errors: string[] = [];
 
+const APPROVED_BRANCH_PREFIXES = ["feat/", "fix/", "chore/", "test/", "docs/"] as const;
+const MAX_RETRY = 5;
+
 type RunStory = {
   key: string;
   issue: number;
   tasks: number[];
   branch: string;
   dependsOn: number[];
+  ticketSuggestedBranch?: string;
+  branchOverrideReason?: string;
+  authorizedScope?: Record<string, unknown>;
 };
 
 type RunManifest = {
@@ -28,6 +40,10 @@ type RunManifest = {
     estimateHours: number;
   };
   baseBranch: string;
+  workspace?: {
+    mode: string;
+    useWorktrees: boolean;
+  };
   merge: {
     method: string;
     retainFeatureBranch: boolean;
@@ -49,11 +65,22 @@ type RunManifest = {
     transientCiRerun: number;
   };
   stories: RunStory[];
+  finalization?: {
+    deactivateManifest: boolean;
+    closureBranch: string;
+    automaticClosureMerge: boolean;
+  };
   stopAfter: {
     epic: number;
     openReleasePR: boolean;
     mergeReleasePR: boolean;
   };
+  authorizationExpiry: string;
+};
+
+type CliExpectations = {
+  expectActiveRunId: string | null;
+  expectNoActiveRun: boolean;
 };
 
 function fail(message: string): void {
@@ -225,6 +252,43 @@ function asNumberArray(value: unknown, label: string): number[] {
   return value as number[];
 }
 
+function asOptionalString(value: unknown, label: string): string | undefined {
+  if (value === undefined) return undefined;
+  return asString(value, label);
+}
+
+function parseCliExpectations(argv: string[]): CliExpectations {
+  let expectActiveRunId: string | null = null;
+  let expectNoActiveRun = false;
+
+  for (let index = 0; index < argv.length; index += 1) {
+    const arg = argv[index];
+    if (arg === "--expect-no-active-run") {
+      expectNoActiveRun = true;
+      continue;
+    }
+    if (arg === "--expect-active-run") {
+      const runId = argv[index + 1];
+      if (!runId || runId.startsWith("--")) {
+        fail("--expect-active-run requires a runId argument.");
+        continue;
+      }
+      expectActiveRunId = runId;
+      index += 1;
+      continue;
+    }
+    if (arg.startsWith("--")) {
+      fail(`Unknown CLI argument: ${arg}`);
+    }
+  }
+
+  if (expectNoActiveRun && expectActiveRunId) {
+    fail("Cannot combine --expect-no-active-run with --expect-active-run.");
+  }
+
+  return { expectActiveRunId, expectNoActiveRun };
+}
+
 function normalizeManifest(raw: Record<string, unknown>): RunManifest {
   const epic = asRecord(raw.epic, "epic");
   const merge = asRecord(raw.merge, "merge");
@@ -241,15 +305,68 @@ function normalizeManifest(raw: Record<string, unknown>): RunManifest {
   const stories: RunStory[] = (Array.isArray(storiesRaw) ? storiesRaw : []).map(
     (entry, index) => {
       const story = asRecord(entry, `stories[${index}]`);
-      return {
+      const normalized: RunStory = {
         key: asString(story.key, `stories[${index}].key`),
         issue: asNumber(story.issue, `stories[${index}].issue`),
         tasks: asNumberArray(story.tasks, `stories[${index}].tasks`),
         branch: asString(story.branch, `stories[${index}].branch`),
         dependsOn: asNumberArray(story.dependsOn, `stories[${index}].dependsOn`),
       };
+
+      const ticketSuggestedBranch = asOptionalString(
+        story.ticketSuggestedBranch,
+        `stories[${index}].ticketSuggestedBranch`,
+      );
+      if (ticketSuggestedBranch !== undefined) {
+        normalized.ticketSuggestedBranch = ticketSuggestedBranch;
+      }
+
+      const branchOverrideReason = asOptionalString(
+        story.branchOverrideReason,
+        `stories[${index}].branchOverrideReason`,
+      );
+      if (branchOverrideReason !== undefined) {
+        normalized.branchOverrideReason = branchOverrideReason;
+      }
+
+      if (story.authorizedScope !== undefined) {
+        normalized.authorizedScope = asRecord(
+          story.authorizedScope,
+          `stories[${index}].authorizedScope`,
+        );
+      }
+
+      return normalized;
     },
   );
+
+  let workspace: RunManifest["workspace"];
+  if (raw.workspace !== undefined) {
+    const workspaceRaw = asRecord(raw.workspace, "workspace");
+    workspace = {
+      mode: asString(workspaceRaw.mode, "workspace.mode"),
+      useWorktrees: asBoolean(workspaceRaw.useWorktrees, "workspace.useWorktrees"),
+    };
+  }
+
+  let finalization: RunManifest["finalization"];
+  if (raw.finalization !== undefined) {
+    const finalizationRaw = asRecord(raw.finalization, "finalization");
+    finalization = {
+      deactivateManifest: asBoolean(
+        finalizationRaw.deactivateManifest,
+        "finalization.deactivateManifest",
+      ),
+      closureBranch: asString(
+        finalizationRaw.closureBranch,
+        "finalization.closureBranch",
+      ),
+      automaticClosureMerge: asBoolean(
+        finalizationRaw.automaticClosureMerge,
+        "finalization.automaticClosureMerge",
+      ),
+    };
+  }
 
   return {
     schemaVersion: asNumber(raw.schemaVersion, "schemaVersion"),
@@ -262,6 +379,7 @@ function normalizeManifest(raw: Record<string, unknown>): RunManifest {
       estimateHours: asNumber(epic.estimateHours, "epic.estimateHours"),
     },
     baseBranch: asString(raw.baseBranch, "baseBranch"),
+    workspace,
     merge: {
       method: asString(merge.method, "merge.method"),
       retainFeatureBranch: asBoolean(
@@ -304,6 +422,7 @@ function normalizeManifest(raw: Record<string, unknown>): RunManifest {
       ),
     },
     stories,
+    finalization,
     stopAfter: {
       epic: asNumber(stopAfter.epic, "stopAfter.epic"),
       openReleasePR: asBoolean(stopAfter.openReleasePR, "stopAfter.openReleasePR"),
@@ -312,12 +431,214 @@ function normalizeManifest(raw: Record<string, unknown>): RunManifest {
         "stopAfter.mergeReleasePR",
       ),
     },
+    authorizationExpiry: asString(raw.authorizationExpiry, "authorizationExpiry"),
   };
 }
 
+function isPositiveBoundedInteger(value: number): boolean {
+  return Number.isInteger(value) && value >= 1 && value <= MAX_RETRY;
+}
+
+function hasApprovedBranchPrefix(branch: string): boolean {
+  return APPROVED_BRANCH_PREFIXES.some((prefix) => branch.startsWith(prefix));
+}
+
+function validateManifestStructure(
+  file: string,
+  manifest: RunManifest,
+  knownIssueNumbers: Set<number>,
+): void {
+  const label = file;
+
+  if (manifest.schemaVersion !== 1) {
+    fail(`${label}: schemaVersion must be 1.`);
+  }
+  if (!/^uxds-[a-z0-9-]+$/.test(manifest.runId)) {
+    fail(`${label}: runId must match uxds-<slug>.`);
+  }
+  if (!/^E\d+$/.test(manifest.epic.key)) {
+    fail(`${label}: epic.key must match E<number>.`);
+  }
+  if (!Number.isInteger(manifest.epic.issue) || manifest.epic.issue < 1) {
+    fail(`${label}: epic.issue must be a positive integer.`);
+  }
+  if (manifest.epic.title.trim().length === 0) {
+    fail(`${label}: epic.title must be non-empty.`);
+  }
+  if (
+    typeof manifest.epic.estimateHours !== "number" ||
+    Number.isNaN(manifest.epic.estimateHours) ||
+    manifest.epic.estimateHours <= 0
+  ) {
+    fail(`${label}: epic.estimateHours must be a positive number.`);
+  }
+  if (manifest.baseBranch !== "staging") {
+    fail(`${label}: baseBranch must be staging.`);
+  }
+  if (manifest.merge.method !== "merge") {
+    fail(`${label}: merge.method must be merge.`);
+  }
+  if (manifest.merge.retainFeatureBranch !== true) {
+    fail(`${label}: merge.retainFeatureBranch must be true.`);
+  }
+
+  if (manifest.workspace) {
+    if (manifest.workspace.mode !== "single-checkout") {
+      fail(`${label}: workspace.mode must be single-checkout when declared.`);
+    }
+    if (manifest.workspace.useWorktrees !== false) {
+      fail(`${label}: workspace.useWorktrees must be false when declared.`);
+    }
+  }
+
+  if (
+    manifest.autonomy.finalReleasePR.base !== "main" ||
+    manifest.autonomy.finalReleasePR.head !== "staging" ||
+    manifest.autonomy.finalReleasePR.open !== true ||
+    manifest.autonomy.finalReleasePR.merge !== false
+  ) {
+    fail(`${label}: finalReleasePR must open staging→main and must not merge.`);
+  }
+
+  if (
+    !isPositiveBoundedInteger(manifest.retryBudget.implementationRepair) ||
+    !isPositiveBoundedInteger(manifest.retryBudget.verifierRerun) ||
+    !isPositiveBoundedInteger(manifest.retryBudget.transientCiRerun)
+  ) {
+    fail(
+      `${label}: retryBudget values must be positive integers between 1 and ${MAX_RETRY}.`,
+    );
+  }
+
+  if (manifest.stopAfter.epic !== manifest.epic.issue) {
+    fail(`${label}: stopAfter.epic must match epic.issue.`);
+  }
+  if (manifest.stopAfter.openReleasePR !== manifest.autonomy.finalReleasePR.open) {
+    fail(`${label}: stopAfter.openReleasePR must match autonomy.finalReleasePR.open.`);
+  }
+  if (manifest.stopAfter.mergeReleasePR !== manifest.autonomy.finalReleasePR.merge) {
+    fail(
+      `${label}: stopAfter.mergeReleasePR must match autonomy.finalReleasePR.merge.`,
+    );
+  }
+  if (manifest.authorizationExpiry.trim().length === 0) {
+    fail(`${label}: authorizationExpiry must be present.`);
+  }
+
+  if (manifest.finalization) {
+    if (manifest.finalization.deactivateManifest !== true) {
+      fail(`${label}: finalization.deactivateManifest must be true when declared.`);
+    }
+    if (!hasApprovedBranchPrefix(manifest.finalization.closureBranch)) {
+      fail(`${label}: finalization.closureBranch must use an approved prefix.`);
+    }
+  }
+
+  if (manifest.stories.length === 0) {
+    fail(`${label}: stories must contain at least one story.`);
+  }
+
+  const storyKeys = new Set<string>();
+  const storyIssues = new Set<number>();
+  const taskNumbers = new Set<number>();
+  const branches = new Set<string>();
+  const queueIssueOrder: number[] = [];
+
+  for (let index = 0; index < manifest.stories.length; index += 1) {
+    const story = manifest.stories[index]!;
+    const storyLabel = `${label} stories[${index}] (${story.key})`;
+
+    if (!/^US-\d+\.\d+$/.test(story.key)) {
+      fail(`${storyLabel}: key must match US-<epic>.<n>.`);
+    }
+    if (storyKeys.has(story.key)) {
+      fail(`${label}: duplicate story key ${story.key}.`);
+    }
+    storyKeys.add(story.key);
+
+    if (!Number.isInteger(story.issue) || story.issue < 1) {
+      fail(`${storyLabel}: issue must be a positive integer.`);
+    }
+    if (storyIssues.has(story.issue)) {
+      fail(`${label}: duplicate story issue #${story.issue}.`);
+    }
+    storyIssues.add(story.issue);
+    queueIssueOrder.push(story.issue);
+    knownIssueNumbers.add(story.issue);
+
+    if (story.tasks.length === 0) {
+      fail(`${storyLabel}: tasks must be non-empty.`);
+    }
+    for (const task of story.tasks) {
+      if (!Number.isInteger(task) || task < 1) {
+        fail(`${storyLabel}: task numbers must be positive integers.`);
+      }
+      if (taskNumbers.has(task)) {
+        fail(`${label}: duplicate task number #${task}.`);
+      }
+      taskNumbers.add(task);
+      knownIssueNumbers.add(task);
+    }
+
+    if (!hasApprovedBranchPrefix(story.branch)) {
+      fail(`${storyLabel}: branch must use an approved prefix.`);
+    }
+    if (branches.has(story.branch)) {
+      fail(`${label}: duplicate branch ${story.branch}.`);
+    }
+    branches.add(story.branch);
+
+    if (story.dependsOn.length === 0) {
+      fail(`${storyLabel}: dependsOn must be non-empty.`);
+    }
+
+    const suggested = story.ticketSuggestedBranch ?? story.branch;
+    if (suggested !== story.branch) {
+      if (!story.ticketSuggestedBranch || !story.branchOverrideReason) {
+        fail(
+          `${storyLabel}: branch override requires ticketSuggestedBranch and branchOverrideReason.`,
+        );
+      } else if (story.branchOverrideReason.trim().length < 12) {
+        fail(`${storyLabel}: branchOverrideReason must explain the human-approved override.`);
+      }
+    }
+
+    for (const dependency of story.dependsOn) {
+      if (!Number.isInteger(dependency) || dependency < 1) {
+        fail(`${storyLabel}: dependsOn entries must be positive integers.`);
+      }
+      const earlierInQueue = queueIssueOrder.slice(0, index).includes(dependency);
+      const isExternal = !storyIssues.has(dependency) && !earlierInQueue;
+      if (isExternal) {
+        // External dependencies are allowed when explicitly listed; they must not
+        // refer to a later story in this same manifest queue.
+        const laterInQueue = manifest.stories
+          .slice(index + 1)
+          .some((candidate) => candidate.issue === dependency);
+        if (laterInQueue) {
+          fail(
+            `${storyLabel}: dependsOn #${dependency} refers to a later story in the same queue.`,
+          );
+        }
+      } else if (!earlierInQueue && storyIssues.has(dependency)) {
+        fail(
+          `${storyLabel}: internal dependency #${dependency} must appear earlier in the queue.`,
+        );
+      }
+    }
+  }
+
+  if (manifest.finalization) {
+    if (branches.has(manifest.finalization.closureBranch)) {
+      fail(`${label}: finalization.closureBranch must be unique among story branches.`);
+    }
+  }
+}
+
+const cli = parseCliExpectations(process.argv.slice(2));
+
 mustExist(".agents/skills/uxds-story-loop/SKILL.md");
 mustExist(".agents/verifiers/uxds-story-verifier.md");
-mustExist(".agents/runs/e2.yml");
 mustExist("scripts/agent/project-status.ts");
 mustExist("scripts/agent/validate-agent-control.ts");
 mustExist(".github/pull_request_template.md");
@@ -393,11 +714,20 @@ if (!skill.includes("Never push directly to `staging` or `main`")) {
 if (!skill.includes("exact branch name")) {
   fail("Skill must require the exact branch name from the story.");
 }
+if (!skill.includes("ticketSuggestedBranch") || !skill.includes("branchOverrideReason")) {
+  fail("Skill must document manifest branch override evidence fields.");
+}
+if (!skill.includes("useWorktrees") || !skill.includes("single-checkout")) {
+  fail("Skill must document single-checkout workspace behavior.");
+}
 if (skill.includes("#5 requires #2") || skill.includes("#8 requires #5")) {
   fail("Skill must not hard-code E1 dependency pairs.");
 }
 if (/E1-only autonomous chaining/i.test(skill)) {
   fail("Skill must not hard-code E1-only autonomous chaining.");
+}
+if (/active E2 authorization|requires E2|only authorize stories #12/i.test(skill)) {
+  fail("Skill must not hard-code E2-only autonomy.");
 }
 
 const verifier = read(".agents/verifiers/uxds-story-verifier.md");
@@ -429,6 +759,9 @@ if (!verifier.includes("modify files")) {
 if (!verifier.includes("active run manifest")) {
   fail("Verifier must support manifest-aware verification.");
 }
+if (!verifier.includes("E3-specific") && !verifier.includes("When E3 work is in scope")) {
+  fail("Verifier must include E3-specific verification criteria.");
+}
 
 const cursorRule = read(".cursor/rules/uxds-story-loop.mdc");
 if (!cursorRule.includes("AGENTS.md")) {
@@ -445,6 +778,9 @@ if (!cursorRule.includes(".agents/verifiers/uxds-story-verifier.md")) {
 }
 if (/E1-only|issues `#2`, `#5`, and `#8`/i.test(cursorRule)) {
   fail("Cursor rule must not hard-code E1-only autonomy.");
+}
+if (/active E2 authorization|\.agents\/runs\/e2\.yml/i.test(cursorRule)) {
+  fail("Cursor rule must not hard-code the active epic manifest path.");
 }
 
 const codexWrapper = read(".codex/agents/uxds-story-verifier.toml");
@@ -476,8 +812,14 @@ if (!agents.includes("## Authorized Autonomous Epic Runs")) {
 if (agents.includes("## E1 Autonomous Loop Exception")) {
   fail("AGENTS.md must not retain an active E1 Autonomous Loop Exception section.");
 }
-if (!agents.includes(".agents/runs/e2.yml")) {
-  fail("AGENTS.md must authorize E2 through .agents/runs/e2.yml.");
+if (/The active E2 authorization is/i.test(agents)) {
+  fail("AGENTS.md must not hard-code the active E2 authorization path.");
+}
+if (!agents.includes("Discover the active manifest") && !agents.includes("discover the active manifest")) {
+  fail("AGENTS.md must require dynamic active-manifest discovery.");
+}
+if (!agents.includes("zero or one") && !agents.includes("Zero or one")) {
+  fail("AGENTS.md must permit zero or one active manifest for repository validation.");
 }
 if (!agents.includes("WIP limit of one implementation story")) {
   fail("AGENTS.md must preserve WIP limit 1.");
@@ -506,18 +848,30 @@ const runFiles = existsSync(runsDir)
   ? readdirSync(runsDir).filter((name) => name.endsWith(".yml") || name.endsWith(".yaml"))
   : [];
 
+if (runFiles.length === 0) {
+  fail("At least one historical or active run manifest must exist under .agents/runs/.");
+}
+
 const manifests: Array<{ file: string; manifest: RunManifest }> = [];
+const runIds = new Set<string>();
+const knownIssueNumbers = new Set<number>();
+
 for (const file of runFiles) {
   const relative = `.agents/runs/${file}`;
   const raw = parseRunManifestYaml(read(relative));
   const manifest = normalizeManifest(raw);
+
+  if (runIds.has(manifest.runId)) {
+    fail(`Duplicate runId across manifests: ${manifest.runId}.`);
+  }
+  runIds.add(manifest.runId);
+
+  validateManifestStructure(relative, manifest, knownIssueNumbers);
   manifests.push({ file: relative, manifest });
 }
 
 const activeManifests = manifests.filter((entry) => entry.manifest.active);
-if (activeManifests.length === 0) {
-  fail("Exactly one active autonomous run manifest is required.");
-} else if (activeManifests.length > 1) {
+if (activeManifests.length > 1) {
   fail(
     `Multiple active autonomous manifests are not allowed: ${activeManifests
       .map((entry) => entry.file)
@@ -525,130 +879,25 @@ if (activeManifests.length === 0) {
   );
 }
 
-const e2Entry = manifests.find((entry) => entry.file === ".agents/runs/e2.yml");
-if (!e2Entry) {
-  fail("Missing required active manifest .agents/runs/e2.yml.");
-} else {
-  const e2 = e2Entry.manifest;
-  if (e2.schemaVersion !== 1) {
-    fail("E2 manifest schemaVersion must be 1.");
-  }
-  if (e2.runId !== "uxds-e2") {
-    fail("E2 manifest runId must be uxds-e2.");
-  }
-  if (!e2.active) {
-    fail("E2 manifest must be active.");
-  }
-  if (e2.epic.key !== "E2" || e2.epic.issue !== 11) {
-    fail("E2 manifest epic must be E2 issue #11.");
-  }
-  if (e2.baseBranch !== "staging") {
-    fail("E2 manifest baseBranch must be staging.");
-  }
-  if (e2.merge.method !== "merge") {
-    fail("E2 manifest merge.method must be merge.");
-  }
-  if (e2.merge.retainFeatureBranch !== true) {
-    fail("E2 manifest must retain feature branches.");
-  }
-  if (
-    e2.autonomy.finalReleasePR.base !== "main" ||
-    e2.autonomy.finalReleasePR.head !== "staging" ||
-    e2.autonomy.finalReleasePR.open !== true ||
-    e2.autonomy.finalReleasePR.merge !== false
-  ) {
-    fail("E2 final release PR must open staging→main and must not merge.");
-  }
-  if (
-    e2.retryBudget.implementationRepair !== 1 ||
-    e2.retryBudget.verifierRerun !== 1 ||
-    e2.retryBudget.transientCiRerun !== 1
-  ) {
-    fail("E2 retry budgets must equal 1 for each category.");
-  }
-  if (
-    e2.stopAfter.epic !== 11 ||
-    e2.stopAfter.openReleasePR !== true ||
-    e2.stopAfter.mergeReleasePR !== false
-  ) {
-    fail("E2 stopAfter must close after epic #11 with open-only release PR.");
-  }
-
-  const expectedStories: Array<{
-    key: string;
-    issue: number;
-    tasks: number[];
-    branch: string;
-    dependsOn: number[];
-  }> = [
-    {
-      key: "US-2.1",
-      issue: 12,
-      tasks: [13, 14],
-      branch: "feat/uxds-12-implement-the-allowlisted-component-registry",
-      dependsOn: [8],
-    },
-    {
-      key: "US-2.2",
-      issue: 15,
-      tasks: [16, 17],
-      branch: "feat/uxds-15-implement-recursive-composition-and-safe-actions",
-      dependsOn: [12],
-    },
-    {
-      key: "US-2.3",
-      issue: 18,
-      tasks: [19, 20],
-      branch: "feat/uxds-18-apply-safe-runtime-design-tokens",
-      dependsOn: [15],
-    },
-    {
-      key: "US-2.4",
-      issue: 21,
-      tasks: [22, 23],
-      branch: "feat/uxds-21-render-five-screens-with-generated-navigation",
-      dependsOn: [18],
-    },
-  ];
-
-  if (e2.stories.length !== expectedStories.length) {
+if (cli.expectNoActiveRun) {
+  if (activeManifests.length !== 0) {
     fail(
-      `E2 manifest must contain exactly ${expectedStories.length} stories; found ${e2.stories.length}.`,
+      `Expected no active run, but found: ${activeManifests
+        .map((entry) => `${entry.manifest.runId} (${entry.file})`)
+        .join(", ")}`,
     );
   }
+}
 
-  for (let index = 0; index < expectedStories.length; index += 1) {
-    const expected = expectedStories[index]!;
-    const actual = e2.stories[index];
-    if (!actual) {
-      fail(`E2 manifest missing story at index ${index}.`);
-      continue;
-    }
-    if (actual.key !== expected.key || actual.issue !== expected.issue) {
-      fail(
-        `E2 story mismatch at index ${index}: expected ${expected.key}/#${expected.issue}.`,
-      );
-    }
-    if (
-      actual.tasks.join(",") !== expected.tasks.join(",") ||
-      actual.branch !== expected.branch ||
-      actual.dependsOn.join(",") !== expected.dependsOn.join(",")
-    ) {
-      fail(
-        `E2 story ${expected.key} tasks/branch/dependsOn must match the authorized queue.`,
-      );
-    }
-  }
-
-  const storyIssues = new Set(e2.stories.map((story) => story.issue));
-  if ([...storyIssues].some((issue) => ![12, 15, 18, 21].includes(issue))) {
-    fail("E2 manifest may only authorize stories #12, #15, #18, and #21.");
-  }
-  if (e2.stories.some((story) => story.issue > 21 && story.key.startsWith("US-3"))) {
-    fail("Unsupported later epic stories must not appear in the active E2 manifest.");
-  }
-  if (manifests.some((entry) => /e3|uxds-e3/i.test(entry.file) && entry.manifest.active)) {
-    fail("No unsupported later epic may be active alongside E2.");
+if (cli.expectActiveRunId) {
+  if (activeManifests.length !== 1) {
+    fail(
+      `Expected active run ${cli.expectActiveRunId}, but found ${activeManifests.length} active manifest(s).`,
+    );
+  } else if (activeManifests[0]!.manifest.runId !== cli.expectActiveRunId) {
+    fail(
+      `Expected active run ${cli.expectActiveRunId}, found ${activeManifests[0]!.manifest.runId}.`,
+    );
   }
 }
 
@@ -714,14 +963,24 @@ console.log(
       validated: [
         ".agents/skills/uxds-story-loop/SKILL.md",
         ".agents/verifiers/uxds-story-verifier.md",
-        ".agents/runs/e2.yml",
+        ...manifests.map((entry) => entry.file),
         "AGENTS.md Authorized Autonomous Epic Runs",
         ".cursor/rules/uxds-story-loop.mdc",
         ".codex/agents/uxds-story-verifier.toml",
         "scripts/agent/project-status.ts",
         ".github/pull_request_template.md",
       ],
-      activeRun: activeManifests[0]?.file ?? null,
+      activeRun: activeManifests[0]
+        ? {
+            file: activeManifests[0].file,
+            runId: activeManifests[0].manifest.runId,
+          }
+        : null,
+      activeRunCount: activeManifests.length,
+      expectations: {
+        expectActiveRunId: cli.expectActiveRunId,
+        expectNoActiveRun: cli.expectNoActiveRun,
+      },
     },
     null,
     2,

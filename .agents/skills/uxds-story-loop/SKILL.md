@@ -46,11 +46,19 @@ Also inspect `package.json` dynamically before selecting scripts.
 
 - Discover manifests under `.agents/runs/*.yml`
 - Require schema validation before autonomy
-- Allow exactly one `active: true` autonomous manifest unless the schema explicitly marks inactive runs
-- Determine the active epic, ordered story queue, tasks, branches, dependencies, retry budgets, merge method, branch retention, and final release action from the manifest
-- Reject mismatches between manifest branch names and ticket-suggested branch names
+- Repository validation allows zero or one `active: true` manifest; more than one active manifest is always invalid
+- Autonomy requires exactly one valid active manifest at execution time
+- Inactive historical manifests provide evidence only and never authorize execution
+- Determine the active epic, ordered story queue, tasks, branches, dependencies, retry budgets, merge method, branch retention, workspace mode, finalization, and final release action from the manifest
+- Manifest `branch` is authoritative for execution
+- When manifest branch and ticket-suggested branch match, proceed
+- When they differ, require `ticketSuggestedBranch`, `branchOverrideReason`, and explicit human authorization represented by the reviewed active manifest; missing override evidence is a hard stop
+- Never invent a third branch name and never alter the ticket body automatically to force a match
+- Honor `workspace.mode`; when `workspace.useWorktrees` is false, do not use Git worktrees
+- After every merged story, return to a clean base branch checkout and verify no untracked story files remain before switching branches
 - Stop when the authorized epic is Done or Blocked
 - Do not start a later epic automatically
+- When finalization is declared, deactivate the completed run manifest through the closure branch before starting any later epic
 
 ## Ticket readiness validation
 
@@ -91,11 +99,13 @@ and the current story is Done.
 
 ## Branch creation
 
-- Create the exact branch name from the manifest and ticket on latest remote base
+- Create the exact branch name from the manifest on latest remote base
+- When the ticket suggests a different branch, use only the manifest branch and require override evidence fields
 - Never improvise a different branch name
 - Never reuse a stale local branch without comparing to remote state
 - Never include work from a previous story branch
 - Never delete the feature branch after merge when the manifest retains branches
+- Prefer single-checkout sequential workflow; do not create or use Git worktrees when the manifest disables them
 
 ## Implementation boundaries
 
