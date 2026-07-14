@@ -137,7 +137,9 @@ describe("US-2.4 five-screen review rendering", () => {
     expect(
       screen.getByRole("button", { name: /approve current version/i }),
     ).toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: /request revision/i })).toBeNull();
+    expect(
+      screen.getByRole("button", { name: /request revision/i }),
+    ).toBeInTheDocument();
     expect(document.querySelector("[data-decision-placeholder='true']")).toBeNull();
     expect(document.querySelector('[data-decision="screen-version"]')).toHaveTextContent(
       "sv-screen-dashboard-baseline",

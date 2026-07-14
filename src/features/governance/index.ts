@@ -5,8 +5,11 @@ export type {
   ApproveScreenArgs,
   ApproveScreenAttemptResult,
   GovernanceContextValue,
+  RequestRevisionArgs,
+  RequestRevisionAttemptResult,
 } from "./governance-context";
 export { DecisionPanel } from "./DecisionPanel";
+export { RoleSwitcher } from "./RoleSwitcher";
 export {
   SCREEN_REVIEW_STATUS_LABELS,
   screenReviewStatusLabel,

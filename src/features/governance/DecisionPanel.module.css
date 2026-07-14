@@ -85,30 +85,118 @@
   font-size: 0.75rem;
 }
 
-.approve {
+.approve,
+.revise,
+.regenerateButton {
   align-self: flex-start;
   padding: 0.5rem 0.85rem;
-  border: 1px solid #c8102e;
   border-radius: 0.375rem;
-  background: #c8102e;
-  color: #ffffff;
   font: inherit;
   font-weight: 600;
   cursor: pointer;
+}
+
+.approve {
+  border: 1px solid #c8102e;
+  background: #c8102e;
+  color: #ffffff;
 }
 
 .approve:hover:not(:disabled) {
   background: #a60d26;
 }
 
-.approve:focus-visible {
+.revise {
+  border: 1px solid #14213d;
+  background: #14213d;
+  color: #ffffff;
+}
+
+.revise:hover:not(:disabled) {
+  background: #0f1930;
+}
+
+.approve:focus-visible,
+.revise:focus-visible,
+.regenerateButton:focus-visible,
+.field select:focus-visible {
   outline: 2px solid #c8102e;
   outline-offset: 2px;
 }
 
-.approve:disabled {
+.approve:disabled,
+.revise:disabled,
+.regenerateButton:disabled {
   opacity: 0.55;
   cursor: not-allowed;
+}
+
+.sectionHeading {
+  margin: 0;
+  font-size: 0.85rem;
+}
+
+.roleMessage {
+  margin: 0;
+  padding: 0.55rem 0.65rem;
+  border-radius: 0.375rem;
+  background: #f4f1ea;
+  color: #3d3d3d;
+  font-size: 0.85rem;
+}
+
+.fieldset {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  min-width: 0;
+}
+
+.fieldset legend {
+  padding: 0;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.nodeList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  max-height: 10rem;
+  overflow: auto;
+  margin-top: 0.35rem;
+  padding: 0.45rem;
+  border: 1px solid #d6d6d6;
+  border-radius: 0.375rem;
+}
+
+.nodeOption {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.4rem;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+
+.field select {
+  padding: 0.45rem 0.5rem;
+  border: 1px solid #c8c8c8;
+  border-radius: 0.375rem;
+  font: inherit;
+  background: #ffffff;
+}
+
+.regenerate {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  padding-top: 0.25rem;
+}
+
+.regenerateButton {
+  border: 1px solid #8a8a8a;
+  background: #f0f0f0;
+  color: #3d3d3d;
 }
 
 .progress {
