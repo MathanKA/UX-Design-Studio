@@ -35,7 +35,7 @@ import {
   PREVIEW_BREAKPOINT_LABELS,
   PREVIEW_WIDTHS,
 } from "../responsive-preview";
-import { DecisionPanel } from "../governance";
+import { DecisionPanel, useGovernance } from "../governance";
 import { GeneratedNavigation } from "./GeneratedNavigation";
 import { cssClass } from "../../renderer/styles/css-class";
 import styles from "./ReviewWorkbench.module.css";
@@ -48,6 +48,7 @@ type ReviewWorkbenchProps = {
 };
 
 export function ReviewWorkbench({ screenId, navigate }: ReviewWorkbenchProps) {
+  const { getScreen } = useGovernance();
   const [breakpoint, setBreakpoint] = useState<PreviewBreakpoint>(
     DEFAULT_PREVIEW_BREAKPOINT,
   );
@@ -85,7 +86,9 @@ export function ReviewWorkbench({ screenId, navigate }: ReviewWorkbenchProps) {
     );
   }
 
-  const screen = screens.find((entry) => entry.id === screenId);
+  const baselineScreen = screens.find((entry) => entry.id === screenId);
+  const screen =
+    (screenId ? getScreen(screenId) : undefined) ?? baselineScreen;
   const actionResolver = createActionResolver(knownScreenIds, {
     navigate: (target) => {
       navigate(`/review/${target}`);
@@ -216,6 +219,20 @@ export function ReviewWorkbench({ screenId, navigate }: ReviewWorkbenchProps) {
               onRestart={() => {
                 goToJourneyStep(0, "Journey restarted at step 1.");
               }}
+            />
+          ) : null}
+          {appConfig.enableVersionHistory ? (
+            <div
+              data-testid="version-history-flag"
+              data-version-history-enabled="true"
+              hidden
+            />
+          ) : null}
+          {appConfig.enableAccessibilityOverlay ? (
+            <div
+              data-testid="accessibility-overlay-flag"
+              data-accessibility-overlay-enabled="true"
+              hidden
             />
           ) : null}
           <DecisionPanel

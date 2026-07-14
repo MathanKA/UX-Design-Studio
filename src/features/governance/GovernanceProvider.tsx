@@ -5,6 +5,10 @@ import {
   useState,
   type ReactNode,
 } from "react";
+import {
+  armControlledProviderFailure,
+  createDefaultGovernanceDeps,
+} from "../../infrastructure/providers/create-default-governance-deps";
 import { approveScreen as executeApproveScreen } from "../../application/approve-screen";
 import {
   DEMO_APPROVER,
@@ -12,7 +16,12 @@ import {
   demoActorForRole,
   specGovernanceContext,
 } from "../../application/governance-session";
+import { regenerateScreen as executeRegenerateScreen } from "../../application/regenerate-screen";
 import { requestRevision as executeRequestRevision } from "../../application/request-revision";
+import {
+  resolveScreenVersionContent,
+  type ScreenContentResolver,
+} from "../../application/screen-version-content";
 import {
   reduceGovernance,
   selectApprovalProgress,
@@ -21,6 +30,7 @@ import {
   selectCanRequestRevision,
   selectCurrentScreenVersion,
   selectIsGateComplete,
+  selectLatestRevisionRequest,
   selectScreenStatus,
   type ActorSnapshot,
   type DemoRole,
@@ -32,10 +42,11 @@ import {
   type UXSpec,
 } from "../../domain/ux-spec";
 import { LocalStorageGovernanceRepository } from "../../infrastructure/persistence/local-storage-governance-repository";
-import { agentPilotSeed } from "../../infrastructure/seed";
 import { createBrowserIdGenerator } from "../../infrastructure/platform/browser-id-generator";
 import { createSystemClock } from "../../infrastructure/platform/system-clock";
+import { agentPilotSeed } from "../../infrastructure/seed";
 import type { Clock } from "../../ports/clock";
+import type { DesignAgentProvider } from "../../ports/design-agent-provider";
 import type {
   GovernanceLoadResult,
   GovernanceRepository,
@@ -46,6 +57,8 @@ import {
   type ApproveScreenArgs,
   type ApproveScreenAttemptResult,
   type GovernanceContextValue,
+  type RegenerateScreenArgs,
+  type RegenerateScreenAttemptResult,
   type RequestRevisionArgs,
   type RequestRevisionAttemptResult,
 } from "./governance-context";
@@ -69,6 +82,13 @@ export type GovernanceProviderProps = {
   idGenerator?: IdGenerator;
   /** Injected repository; defaults to LocalStorageGovernanceRepository. */
   repository?: GovernanceRepository;
+  /**
+   * Injected DesignAgentProvider. When omitted, app composition defaults are used.
+   * Feature UI must never import the mock adapter directly.
+   */
+  designAgentProvider?: DesignAgentProvider;
+  /** Content registry for regenerated screen contentRefs. */
+  contentRegistry?: ScreenContentResolver;
   /** Fixed createdAt for baseline versions (tests). */
   createdAt?: string;
 };
@@ -88,7 +108,6 @@ function loadSync(
 ): GovernanceLoadResult {
   const loaded = repository.load();
   if (isThenable(loaded)) {
-    // Sync adapters are used in the POC; async load falls back cleanly.
     return { ok: false, reason: "unavailable", fallbackState: fallback };
   }
   return loaded;
@@ -114,6 +133,15 @@ const SUBMIT_IN_PROGRESS = {
   },
 };
 
+const REGENERATE_IN_PROGRESS = {
+  ok: false as const,
+  outcome: "failed" as const,
+  error: {
+    code: "SUBMIT_IN_PROGRESS" as const,
+    message: "A governance command is already in progress.",
+  },
+};
+
 export function GovernanceProvider({
   children,
   spec = agentPilotSeed,
@@ -121,11 +149,27 @@ export function GovernanceProvider({
   clock = createSystemClock(),
   idGenerator = createBrowserIdGenerator(),
   repository: repositoryProp,
+  designAgentProvider: designAgentProviderProp,
+  contentRegistry: contentRegistryProp,
   createdAt,
 }: GovernanceProviderProps) {
   const specContext = useMemo(() => specGovernanceContext(spec), [spec]);
   const repositoryRef = useRef<GovernanceRepository | null>(null);
   const baselineCreatedAtRef = useRef(createdAt ?? clock.now());
+  const depsRef = useRef<{
+    designAgentProvider: DesignAgentProvider;
+    contentRegistry: ScreenContentResolver;
+  } | null>(null);
+  const abortControllerRef = useRef<AbortController | null>(null);
+
+  if (depsRef.current === null) {
+    const defaults = createDefaultGovernanceDeps({ clock, idGenerator });
+    depsRef.current = {
+      designAgentProvider:
+        designAgentProviderProp ?? defaults.designAgentProvider,
+      contentRegistry: contentRegistryProp ?? defaults.contentRegistry,
+    };
+  }
 
   if (repositoryRef.current === null) {
     const initial = createGovernanceStateFromSpec(
@@ -142,6 +186,7 @@ export function GovernanceProvider({
   }
 
   const repository = repositoryRef.current;
+  const { designAgentProvider, contentRegistry } = depsRef.current;
   const hydrationRef = useRef<{
     state: GovernanceState;
     notice: string | null;
@@ -169,6 +214,9 @@ export function GovernanceProvider({
   );
   const [actor, setActor] = useState<ActorSnapshot>(initialActor);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isRegenerating, setIsRegenerating] = useState(false);
+  const [controlledFailureArmed, setControlledFailureArmedState] =
+    useState(false);
   const submittingRef = useRef(false);
 
   const dismissPersistenceNotice = useCallback(() => {
@@ -180,19 +228,33 @@ export function GovernanceProvider({
   }, []);
 
   const getScreen = useCallback(
-    (screenId: string) => spec.screens.find((screen) => screen.id === screenId),
-    [spec],
+    (screenId: string) => {
+      const version = selectCurrentScreenVersion(state, screenId);
+      if (!version) {
+        return spec.screens.find((screen) => screen.id === screenId);
+      }
+      const resolved = resolveScreenVersionContent({
+        version,
+        seed: spec,
+        contentRegistry,
+      });
+      if (resolved.ok) {
+        return resolved.screen;
+      }
+      return spec.screens.find((screen) => screen.id === screenId);
+    },
+    [contentRegistry, spec, state],
   );
 
   const listScreenNodes = useCallback(
     (screenId: string) => {
-      const screen = spec.screens.find((entry) => entry.id === screenId);
+      const screen = getScreen(screenId);
       if (!screen) {
         return [];
       }
       return listScreenNodeOptions(screen.root);
     },
-    [spec],
+    [getScreen],
   );
 
   const applyPersistedState = useCallback(
@@ -204,6 +266,14 @@ export function GovernanceProvider({
       }
     },
     [repository],
+  );
+
+  const setControlledFailureArmed = useCallback(
+    (armed: boolean) => {
+      setControlledFailureArmedState(armed);
+      armControlledProviderFailure(designAgentProvider, armed);
+    },
+    [designAgentProvider],
   );
 
   const approveScreen = useCallback(
@@ -300,7 +370,74 @@ export function GovernanceProvider({
     ],
   );
 
+  const cancelRegeneration = useCallback(() => {
+    abortControllerRef.current?.abort();
+  }, []);
+
+  const regenerateScreen = useCallback(
+    async (
+      args: RegenerateScreenArgs,
+    ): Promise<RegenerateScreenAttemptResult> => {
+      if (submittingRef.current) {
+        return REGENERATE_IN_PROGRESS;
+      }
+
+      const effectiveActor = args.actor ?? actor;
+      submittingRef.current = true;
+      setIsSubmitting(true);
+      setIsRegenerating(true);
+
+      const controller = new AbortController();
+      abortControllerRef.current = controller;
+
+      try {
+        const result = await executeRegenerateScreen(
+          state,
+          {
+            ...specContext,
+            screenId: args.screenId,
+            expectedScreenVersionId: args.expectedScreenVersionId,
+            actor: effectiveActor,
+            signal: controller.signal,
+          },
+          {
+            clock,
+            idGenerator,
+            provider: designAgentProvider,
+            seed: spec,
+            contentRegistry,
+          },
+        );
+
+        applyPersistedState(result.state);
+        if (controlledFailureArmed) {
+          setControlledFailureArmed(false);
+        }
+        return result;
+      } finally {
+        abortControllerRef.current = null;
+        submittingRef.current = false;
+        setIsSubmitting(false);
+        setIsRegenerating(false);
+      }
+    },
+    [
+      actor,
+      applyPersistedState,
+      clock,
+      contentRegistry,
+      controlledFailureArmed,
+      designAgentProvider,
+      idGenerator,
+      setControlledFailureArmed,
+      spec,
+      specContext,
+      state,
+    ],
+  );
+
   const resetDemoState = useCallback(() => {
+    abortControllerRef.current?.abort();
     void repository.reset();
     const resetResult = reduceGovernance(state, { type: "storageReset" });
     const next = resetResult.ok
@@ -309,16 +446,20 @@ export function GovernanceProvider({
     setState(next);
     setPersistenceNotice(null);
     setResetAnnouncement(RESET_DEMO_ANNOUNCEMENT);
-  }, [repository, spec, state]);
+    setControlledFailureArmed(false);
+  }, [repository, setControlledFailureArmed, spec, state]);
 
   const value = useMemo<GovernanceContextValue>(
     () => ({
       state,
       actor,
       isSubmitting,
+      isRegenerating,
       canApprove: selectCanApprove(actor),
       canRequestRevision: selectCanRequestRevision(actor),
       canRegenerate: selectCanRegenerate(actor),
+      controlledFailureArmed,
+      setControlledFailureArmed,
       persistenceNotice,
       dismissPersistenceNotice,
       resetAnnouncement,
@@ -326,26 +467,35 @@ export function GovernanceProvider({
       switchRole,
       approveScreen,
       requestRevision,
+      regenerateScreen,
+      cancelRegeneration,
       resetDemoState,
       getScreen,
       listScreenNodes,
       getScreenStatus: (screenId) => selectScreenStatus(state, screenId),
       getCurrentScreenVersion: (screenId) =>
         selectCurrentScreenVersion(state, screenId),
+      getLatestRevisionForScreen: (screenId) =>
+        selectLatestRevisionRequest(state, screenId),
       getApprovalProgress: () => selectApprovalProgress(state),
       isGateComplete: () => selectIsGateComplete(state),
     }),
     [
       actor,
       approveScreen,
+      cancelRegeneration,
+      controlledFailureArmed,
       dismissPersistenceNotice,
       getScreen,
+      isRegenerating,
       isSubmitting,
       listScreenNodes,
       persistenceNotice,
+      regenerateScreen,
       requestRevision,
       resetAnnouncement,
       resetDemoState,
+      setControlledFailureArmed,
       state,
       switchRole,
     ],

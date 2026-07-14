@@ -105,3 +105,8 @@ export function normalizeUXSpec(spec: UXSpec): UXSpec {
 
   return freezeDeep(normalized);
 }
+
+/** Normalize and freeze a single ScreenSpec (provider / variant boundary). */
+export function normalizeScreenSpec(screen: ScreenSpec): ScreenSpec {
+  return freezeDeep(normalizeScreen(screen));
+}

@@ -62,6 +62,8 @@ export type RecordRegeneratedCommand = ScreenCommandBase & {
   newVersionId?: ScreenVersionId;
   revisionEventId: AuditEventId;
   provider: "mock" | "production";
+  contentRef: string;
+  providerRequestId?: string;
 };
 
 export type RecordRegenerationFailedCommand = ScreenCommandBase & {
@@ -274,9 +276,55 @@ export function createRegeneratedEvent(
     return versionResult;
   }
 
+  const contentRef = command.contentRef.trim();
+  if (!contentRef) {
+    return governanceErr(
+      "MISSING_CONTENT_REF",
+      "Regenerated versions require a contentRef.",
+    );
+  }
+  if (contentRef.length > GOVERNANCE_LIMITS.maxContentRefLength) {
+    return governanceErr(
+      "MISSING_CONTENT_REF",
+      `contentRef exceeds ${GOVERNANCE_LIMITS.maxContentRefLength} characters.`,
+    );
+  }
+
   const previous = versionResult.value;
   const newVersionId =
     command.newVersionId ?? ports.idGenerator.next(`sv-${command.screenId}`);
+
+  if (newVersionId === previous.id) {
+    return governanceErr(
+      "VERSION_ID_COLLISION",
+      `newVersionId must differ from previousVersionId ("${previous.id}").`,
+    );
+  }
+
+  for (const versions of Object.values(state.screenVersions)) {
+    if (versions.some((entry) => entry.id === newVersionId)) {
+      return governanceErr(
+        "DUPLICATE_VERSION_ID",
+        `Screen version id "${newVersionId}" already exists.`,
+      );
+    }
+  }
+
+  const revision = state.events.find(
+    (entry) => entry.id === command.revisionEventId,
+  );
+  if (
+    !revision ||
+    revision.type !== "screen.revision_requested" ||
+    revision.screenId !== command.screenId ||
+    revision.screenVersionId !== previous.id
+  ) {
+    return governanceErr(
+      "INVALID_REVISION_REFERENCE",
+      `revisionEventId "${command.revisionEventId}" is not a revision for the current version.`,
+    );
+  }
+
   const occurredAt = ports.clock.now();
 
   const metadata = createEventMetadata({
@@ -299,6 +347,10 @@ export function createRegeneratedEvent(
       newVersionId,
       revisionEventId: command.revisionEventId,
       provider: command.provider,
+      contentRef,
+      ...(command.providerRequestId !== undefined
+        ? { providerRequestId: command.providerRequestId }
+        : {}),
     },
   };
 
@@ -313,6 +365,7 @@ export function createRegeneratedEvent(
     source: "regenerated",
     createdAt: occurredAt,
     previousVersionId: previous.id,
+    contentRef,
   };
 
   return governanceOk({ event, version });
