@@ -33,3 +33,17 @@ export type {
   ActionResolver,
   ActionResolverHandlers,
 } from "./actions/create-action-resolver";
+
+export {
+  createEffectiveTokenView,
+  mapDesignTokensToCssVars,
+  mergeDesignTokens,
+  tokenOverrideSchema,
+} from "./theming/token-mapper";
+export type {
+  TokenOverride,
+  TokenMapResult,
+  UxdsCssVarMap,
+  UxdsCssVarName,
+} from "./theming/token-mapper";
+export { PreviewThemeRoot } from "./theming/PreviewThemeRoot";
