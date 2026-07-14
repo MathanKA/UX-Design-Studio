@@ -1,0 +1,51 @@
+schemaVersion: 1
+runId: uxds-e2
+active: true
+epic:
+  key: E2
+  issue: 11
+  title: Spec-Driven Rendering and Runtime Theming
+  estimateHours: 16
+baseBranch: staging
+merge:
+  method: merge
+  retainFeatureBranch: true
+autonomy:
+  sequentialStories: true
+  automaticStoryMerge: true
+  automaticNextStory: true
+  finalReleasePR:
+    base: main
+    head: staging
+    open: true
+    merge: false
+retryBudget:
+  implementationRepair: 1
+  verifierRerun: 1
+  transientCiRerun: 1
+stories:
+  - key: US-2.1
+    issue: 12
+    tasks: [13, 14]
+    branch: feat/uxds-12-implement-the-allowlisted-component-registry
+    dependsOn: [8]
+  - key: US-2.2
+    issue: 15
+    tasks: [16, 17]
+    branch: feat/uxds-15-implement-recursive-composition-and-safe-actions
+    dependsOn: [12]
+  - key: US-2.3
+    issue: 18
+    tasks: [19, 20]
+    branch: feat/uxds-18-apply-safe-runtime-design-tokens
+    dependsOn: [15]
+  - key: US-2.4
+    issue: 21
+    tasks: [22, 23]
+    branch: feat/uxds-21-render-five-screens-with-generated-navigation
+    dependsOn: [18]
+stopAfter:
+  epic: 11
+  openReleasePR: true
+  mergeReleasePR: false
+authorizationExpiry: epic-done-or-blocked

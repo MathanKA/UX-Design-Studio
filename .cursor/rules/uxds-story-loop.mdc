@@ -1,0 +1,16 @@
+---
+description: UX Design Studio autonomous story loop and independent verifier routing
+alwaysApply: true
+---
+
+# UXDS Story Loop Routing
+
+Before implementing or merging UX Design Studio work:
+
+1. Read and follow `AGENTS.md`, including `Authorized Autonomous Epic Runs` when a run manifest is active.
+2. Discover the active authorized manifest under `.agents/runs/` (exactly one `active: true` run).
+3. Load the canonical story-loop skill at `.agents/skills/uxds-story-loop/SKILL.md`.
+4. Invoke the independent read-only verifier contract at `.agents/verifiers/uxds-story-verifier.md` before commit and merge.
+5. Preserve WIP limit 1, signed commits, merge commits, retained feature branches, and no direct pushes to `staging` or `main`.
+6. Prohibit autonomy outside an authorized run manifest. Do not start another epic after the authorized epic completes.
+7. Keep canonical rules in `.agents/**`; do not duplicate or weaken them here.
