@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import styles from "../overview/PlaceholderPage.module.css";
+import styles from "../../ui/PlaceholderPage.module.css";
 
 export function NotFoundPage() {
   return (
