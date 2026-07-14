@@ -6,6 +6,7 @@ export type {
   ComponentType,
   DesignTokens,
   Journey,
+  JourneyId,
   JourneyStep,
   NavigationItem,
   NavigationSpec,

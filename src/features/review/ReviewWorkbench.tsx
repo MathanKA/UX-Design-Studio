@@ -1,5 +1,5 @@
-import { Link } from "react-router-dom";
 import { useState, type ReactNode } from "react";
+import { Link } from "react-router-dom";
 import type { PersonaId } from "../../domain/ux-spec";
 import {
   defaultPersonaId,
@@ -13,16 +13,29 @@ import {
   createNoopRenderContext,
   PreviewThemeRoot,
   ScreenComposer,
+  type PreviewBreakpoint,
 } from "../../renderer";
+import { appConfig } from "../../app/config";
 import { ErrorBoundary } from "../../app/error-boundary";
 import {
   EmptyState,
   FailureState,
   InvalidRouteState,
 } from "../../ui/states";
+import {
+  DEFAULT_JOURNEY_ID,
+  deriveJourneyWalkthrough,
+  JourneyWalkthroughPanel,
+} from "../journey-walkthrough";
 import { PersonaLensPanel } from "../persona-lens/PersonaLensPanel";
+import {
+  DEFAULT_PREVIEW_BREAKPOINT,
+  PreviewBreakpointControls,
+  PreviewViewport,
+  PREVIEW_BREAKPOINT_LABELS,
+  PREVIEW_WIDTHS,
+} from "../responsive-preview";
 import { GeneratedNavigation } from "./GeneratedNavigation";
-import { usePreviewBreakpoint } from "./usePreviewBreakpoint";
 import { cssClass } from "../../renderer/styles/css-class";
 import styles from "./ReviewWorkbench.module.css";
 
@@ -34,18 +47,29 @@ type ReviewWorkbenchProps = {
 };
 
 export function ReviewWorkbench({ screenId, navigate }: ReviewWorkbenchProps) {
-  const breakpoint = usePreviewBreakpoint();
+  const [breakpoint, setBreakpoint] = useState<PreviewBreakpoint>(
+    DEFAULT_PREVIEW_BREAKPOINT,
+  );
   const screens = agentPilotSeed.screens;
   const personas = listPersonas(agentPilotSeed);
   const initialPersonaId = defaultPersonaId(agentPilotSeed) ?? "persona-alex";
   const [selectedPersonaId, setSelectedPersonaId] =
     useState<PersonaId>(initialPersonaId);
+  const [journeyStepIndex, setJourneyStepIndex] = useState(0);
+  const [journeyAnnouncement, setJourneyAnnouncement] = useState("");
   const knownScreenIds = new Set(screens.map((screen) => screen.id));
   const lensContext = derivePersonaLensContext(
     agentPilotSeed,
     selectedPersonaId,
     screenId,
   );
+  const journeyContext = appConfig.enableJourneyWalkthrough
+    ? deriveJourneyWalkthrough(
+        agentPilotSeed,
+        DEFAULT_JOURNEY_ID,
+        journeyStepIndex,
+      )
+    : null;
 
   if (screens.length === 0) {
     return (
@@ -73,6 +97,24 @@ export function ReviewWorkbench({ screenId, navigate }: ReviewWorkbenchProps) {
     dispatchAction: (action) => actionResolver.resolve(action),
   });
 
+  const showDesktopNav = breakpoint === "desktop" || breakpoint === "tablet";
+  const showMobileNav = breakpoint === "mobile";
+
+  const goToJourneyStep = (nextIndex: number, announce: string) => {
+    const next = deriveJourneyWalkthrough(
+      agentPilotSeed,
+      DEFAULT_JOURNEY_ID,
+      nextIndex,
+    );
+    if (!next) {
+      setJourneyAnnouncement("Journey could not be resolved.");
+      return;
+    }
+    setJourneyStepIndex(next.current.index);
+    setJourneyAnnouncement(announce);
+    navigate(`/review/${next.current.step.screenId}`);
+  };
+
   const previewContent = !screen || !screenId ? (
     <InvalidRouteState
       {...(screenId !== undefined ? { screenId } : {})}
@@ -86,18 +128,13 @@ export function ReviewWorkbench({ screenId, navigate }: ReviewWorkbenchProps) {
       }
     >
       <PreviewThemeRoot tokens={agentPilotSeed.designTokens}>
-        <div
-          className={cssClass(styles.previewFrame, "previewFrame")}
-          data-breakpoint={breakpoint}
-          data-screen-id={screen.id}
-          data-workbench-region="preview-canvas"
-        >
+        <PreviewViewport breakpoint={breakpoint} screenId={screen.id}>
           <ScreenComposer
             screen={screen}
             context={context}
             registry={registry}
           />
-        </div>
+        </PreviewViewport>
       </PreviewThemeRoot>
     </ErrorBoundary>
   );
@@ -119,18 +156,29 @@ export function ReviewWorkbench({ screenId, navigate }: ReviewWorkbenchProps) {
             activeScreenId={screen?.id ?? "screen-unknown"}
             knownScreenIds={knownScreenIds}
             mode="desktop"
-            visible={breakpoint === "desktop"}
+            visible={showDesktopNav}
           />
           <GeneratedNavigation
             navigation={agentPilotSeed.navigation}
             activeScreenId={screen?.id ?? "screen-unknown"}
             knownScreenIds={knownScreenIds}
             mode="mobile"
-            visible={breakpoint === "mobile"}
+            visible={showMobileNav}
           />
         </ScreenNavigationPanel>
 
-        <PreviewCanvas>{previewContent}</PreviewCanvas>
+        <PreviewCanvas>
+          <PreviewBreakpointControls
+            value={breakpoint}
+            onChange={setBreakpoint}
+            enableTabletPreview={appConfig.enableTabletPreview}
+          />
+          <p className={styles.breakpointMeta} data-preview-active-width="true">
+            Active preview: {PREVIEW_BREAKPOINT_LABELS[breakpoint]} (
+            {PREVIEW_WIDTHS[breakpoint]}px)
+          </p>
+          {previewContent}
+        </PreviewCanvas>
 
         <div className={styles.sidePanels}>
           <PersonaLensPanel
@@ -139,6 +187,36 @@ export function ReviewWorkbench({ screenId, navigate }: ReviewWorkbenchProps) {
             onSelectPersona={setSelectedPersonaId}
             context={lensContext}
           />
+          {appConfig.enableJourneyWalkthrough ? (
+            <JourneyWalkthroughPanel
+              context={journeyContext}
+              announcement={journeyAnnouncement}
+              onPrevious={() => {
+                if (!journeyContext || journeyContext.current.isFirst) {
+                  return;
+                }
+                goToJourneyStep(
+                  journeyContext.current.index - 1,
+                  `Journey step ${journeyContext.current.index} of ${journeyContext.current.total}`,
+                );
+              }}
+              onNext={() => {
+                if (!journeyContext || journeyContext.current.isLast) {
+                  return;
+                }
+                goToJourneyStep(
+                  journeyContext.current.index + 1,
+                  `Journey step ${journeyContext.current.index + 2} of ${journeyContext.current.total}`,
+                );
+              }}
+              onFinish={() => {
+                setJourneyAnnouncement("Journey finished.");
+              }}
+              onRestart={() => {
+                goToJourneyStep(0, "Journey restarted at step 1.");
+              }}
+            />
+          ) : null}
           <DecisionPanelPlaceholder />
         </div>
       </div>

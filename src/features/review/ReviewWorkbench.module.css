@@ -58,15 +58,8 @@
   font-size: 0.85rem;
 }
 
-.previewFrame {
-  border: 1px solid #d6d6d6;
-  border-radius: 0.75rem;
-  background: var(--uxds-color-surface, #ffffff);
-  color: var(--uxds-color-text, #1a1a1a);
-  padding: 1rem;
-  min-height: 24rem;
-}
-
-.previewFrame[data-breakpoint="mobile"] {
-  max-width: 24.375rem;
+.breakpointMeta {
+  margin: 0 0 0.65rem;
+  color: #5c5c5c;
+  font-size: 0.8rem;
 }
