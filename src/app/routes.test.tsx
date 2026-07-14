@@ -1,10 +1,12 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { ErrorBoundary } from "../app/error-boundary";
 import { AppProviders } from "../app/providers";
 import { AppRoutes } from "../app/routes";
+import { buildGovernanceStorageKey } from "../infrastructure/persistence";
+import { agentPilotSeed } from "../infrastructure/seed";
 
 function renderAt(path: string) {
   return render(
@@ -19,6 +21,16 @@ function renderAt(path: string) {
 }
 
 describe("application routes", () => {
+  beforeEach(() => {
+    window.localStorage.removeItem(
+      buildGovernanceStorageKey({
+        projectId: agentPilotSeed.projectId,
+        specId: agentPilotSeed.id,
+        baselineVersion: agentPilotSeed.baselineVersion,
+      }),
+    );
+  });
+
   it("redirects / to /overview", () => {
     renderAt("/");
     expect(screen.getByRole("heading", { name: "Overview" })).toBeInTheDocument();

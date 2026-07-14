@@ -1,9 +1,12 @@
 import type { GovernanceState } from "../../domain/governance";
-import type { GovernanceRepository } from "../../ports/governance-repository";
+import type {
+  GovernanceLoadResult,
+  GovernanceRepository,
+  GovernanceSaveResult,
+} from "../../ports/governance-repository";
 
 /**
- * Sync in-memory governance store for US-4.2.
- * localStorage persistence lands in US-4.4 behind the same port.
+ * Sync in-memory governance store for tests and storage fallbacks.
  */
 export class InMemoryGovernanceRepository implements GovernanceRepository {
   private state: GovernanceState;
@@ -12,12 +15,13 @@ export class InMemoryGovernanceRepository implements GovernanceRepository {
     this.state = cloneState(initial);
   }
 
-  load(): GovernanceState {
-    return cloneState(this.state);
+  load(): GovernanceLoadResult {
+    return { ok: true, state: cloneState(this.state) };
   }
 
-  save(state: GovernanceState): void {
+  save(state: GovernanceState): GovernanceSaveResult {
     this.state = cloneState(state);
+    return { ok: true };
   }
 
   reset(): void {

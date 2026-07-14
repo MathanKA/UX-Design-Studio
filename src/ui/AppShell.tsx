@@ -1,6 +1,8 @@
 import { NavLink, Outlet } from "react-router-dom";
 import { appConfig } from "../app/config";
 import { RoleSwitcher } from "../features/governance/RoleSwitcher";
+import { useGovernance } from "../features/governance";
+import { ShellStatePanel } from "./states";
 import styles from "./AppShell.module.css";
 
 const navItems = [
@@ -10,6 +12,8 @@ const navItems = [
 ] as const;
 
 export function AppShell() {
+  const { persistenceNotice, dismissPersistenceNotice } = useGovernance();
+
   return (
     <div className={styles.shell}>
       <a className={styles.skipLink} href="#main-content">
@@ -42,6 +46,26 @@ export function AppShell() {
           <RoleSwitcher />
         </div>
       </header>
+      {persistenceNotice ? (
+        <div className={styles.persistenceNotice} data-testid="persistence-notice">
+          <ShellStatePanel
+            title="Persistence recovery"
+            tone="warning"
+            role="status"
+            actions={
+              <button
+                type="button"
+                className={styles.dismissNotice}
+                onClick={dismissPersistenceNotice}
+              >
+                Dismiss
+              </button>
+            }
+          >
+            {persistenceNotice}
+          </ShellStatePanel>
+        </div>
+      ) : null}
       <main id="main-content" className={styles.main} tabIndex={-1}>
         <Outlet />
       </main>

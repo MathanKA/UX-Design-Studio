@@ -17,6 +17,8 @@ import {
 } from "../../domain/governance";
 import { listPersonas } from "../../domain/ux-spec";
 import { agentPilotSeed } from "../../infrastructure/seed";
+import { createGovernanceStateFromSpec } from "../../application/governance-session";
+import { InMemoryGovernanceRepository } from "../../infrastructure/persistence/in-memory-governance-repository";
 import {
   createFixedClock,
   createSequentialIdGenerator,
@@ -40,6 +42,12 @@ function installMatchMedia() {
   });
 }
 
+function createMemoryRepository() {
+  return new InMemoryGovernanceRepository(
+    createGovernanceStateFromSpec(agentPilotSeed, "2026-07-15T01:00:00.000Z"),
+  );
+}
+
 function renderWithDeterministicGovernance(pathName: string) {
   const clock = createFixedClock("2026-07-15T03:00:00.000Z");
   const idGenerator = createSequentialIdGenerator(1);
@@ -49,6 +57,7 @@ function renderWithDeterministicGovernance(pathName: string) {
         clock={clock}
         idGenerator={idGenerator}
         createdAt="2026-07-15T01:00:00.000Z"
+        repository={createMemoryRepository()}
       >
         <MemoryRouter initialEntries={[pathName]}>
           <AppRoutes />
@@ -61,6 +70,9 @@ function renderWithDeterministicGovernance(pathName: string) {
 describe("US-4.3 structured revisions and role enforcement", () => {
   beforeEach(() => {
     installMatchMedia();
+    window.localStorage.removeItem(
+      `uxds:v1:${agentPilotSeed.projectId}:${agentPilotSeed.id}:${agentPilotSeed.baselineVersion}`,
+    );
   });
 
   it("defaults to Demo Approver and labels the switcher as POC-only", () => {
@@ -219,6 +231,7 @@ describe("US-4.3 structured revisions and role enforcement", () => {
         idGenerator={createSequentialIdGenerator(1)}
         createdAt="2026-07-15T01:00:00.000Z"
         actor={DEMO_APPROVER}
+        repository={createMemoryRepository()}
       >
         <ReviewerBypassProbe />
       </GovernanceProvider>,
@@ -252,7 +265,9 @@ describe("US-4.3 structured revisions and role enforcement", () => {
       await user.click(screen.getByRole("link", { name: "Review" }));
       expect(screen.getByTestId("decision-panel")).toBeInTheDocument();
       await user.click(screen.getByRole("link", { name: "Audit" }));
-      expect(screen.getByRole("heading", { name: /audit/i })).toBeInTheDocument();
+      expect(
+        screen.getByRole("heading", { name: "Audit", level: 2 }),
+      ).toBeInTheDocument();
       await user.click(screen.getByRole("link", { name: "Overview" }));
     }
   });
@@ -277,6 +292,7 @@ describe("US-4.3 structured revisions and role enforcement", () => {
         clock={createFixedClock("2026-07-15T03:00:00.000Z")}
         idGenerator={createSequentialIdGenerator(1)}
         createdAt="2026-07-15T01:00:00.000Z"
+        repository={createMemoryRepository()}
       >
         <MemoryRouter initialEntries={["/review/screen-dashboard"]}>
           <AppRoutes />
