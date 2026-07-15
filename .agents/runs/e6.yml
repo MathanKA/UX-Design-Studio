@@ -1,0 +1,110 @@
+schemaVersion: 1
+runId: uxds-e6
+active: true
+
+epic:
+  key: E6
+  issue: 54
+  title: Quality, Documentation, Deployment and Demonstration
+  estimateHours: 8
+
+baseBranch: staging
+
+workspace:
+  mode: single-checkout
+  useWorktrees: false
+
+merge:
+  method: merge
+  retainFeatureBranch: true
+
+autonomy:
+  sequentialStories: true
+  automaticStoryMerge: true
+  automaticNextStory: true
+  finalReleasePR:
+    base: main
+    head: staging
+    open: true
+    merge: true
+
+release:
+  version: 0.1.0
+  tag: v0.1.0-poc
+  signedAnnotatedTag: true
+  createGitHubRelease: true
+  syncMainBackToStaging: true
+
+deployment:
+  provider: vercel
+  staticOutputDirectory: dist
+  requiresSecretsInApp: false
+  generatedDomainAllowed: true
+  verifyDeepLinks: true
+  productionDeployAfterMainMerge: true
+
+effort:
+  accounting: planned
+  e1: 6
+  e2: 16
+  e3: 6
+  e4: 8
+  e5: 6
+  e6: 8
+  total: 50
+
+evidenceReuse:
+  maintenanceIssue: 93
+  pullRequests: [94, 95, 96, 98]
+  reuseExistingCi: true
+  reuseExistingPlaywright: true
+  reuseExistingSignatureVerification: true
+  prohibitDuplicateImplementation: true
+
+documentation:
+  readmeBaselinePullRequest: 98
+  architectureDecisions: docs/architecture-decisions.md
+  traceability: docs/traceability.md
+  releaseAcceptance: docs/release-acceptance.md
+  demoScript: docs/demo-script.md
+
+stories:
+  - key: US-6.1
+    issue: 55
+    tasks: [56, 57]
+    branch: test/uxds-55-automate-critical-quality-gates-and-ci
+    dependsOn: [51]
+    evidenceReuse:
+      issue: 93
+      pullRequests: [94, 95, 96]
+    requiredGap:
+      criticalRtlFlow: true
+
+  - key: US-6.2
+    issue: 58
+    tasks: [59, 60]
+    branch: docs/uxds-58-document-deploy-rehearse-and-release-the-poc
+    dependsOn: [55]
+    deployment:
+      provider: vercel
+      verifyPreviewBeforeMerge: true
+      verifyProductionAfterMainMerge: true
+
+finalization:
+  deactivateManifest: true
+  closureBranch: chore/uxds-close-e6-autonomous-run
+  automaticClosureMerge: true
+
+retryBudget:
+  implementationRepair: 1
+  verifierRerun: 1
+  transientCiRerun: 1
+  deploymentRepair: 1
+
+stopAfter:
+  epic: 54
+  releaseTag: v0.1.0-poc
+  githubRelease: true
+  mainSyncedBackToStaging: true
+
+authorizationExpiry: release-complete-or-blocked
