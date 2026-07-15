@@ -11,7 +11,7 @@
     "integrationBranch": "staging",
     "featureBaseBranch": "staging",
     "releaseFlow": "staging -> main",
-    "mergeMethod": "squash"
+    "mergeMethod": "merge"
   },
   "project": {
     "owner": "MathanKA",
@@ -1998,7 +1998,7 @@
             "ADR records accepted architecture decisions and explicitly excludes real AI, backend, auth, and Module Federation.",
             "Static deployment works through direct and deep-linked routes without secrets or external services.",
             "The complete demo flow is rehearsed, timed, and validated against release acceptance.",
-            "All feature work merges to staging by squash PR; final staging to main release PR is tagged v0.1.0-poc."
+            "All feature work merges to staging by merge-commit PR (feature branches retained); final staging to main release PR is tagged v0.1.0-poc."
           ],
           "tasks": [
             {

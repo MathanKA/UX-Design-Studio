@@ -248,6 +248,51 @@ history, accessibility overlay, resilient studio states, or related hardening.
 
 - pending, cancellation, controlled failure, invalid result, empty metadata, partial metadata, retry, and screen-level render failure recover without shell failure
 
+## When E6 work is in scope
+
+Apply these E6-specific checks only when the active story, epic mode, or changed
+diff includes quality gates, critical RTL workflow evidence, CI verification,
+documentation, static deployment, demo rehearsal, release acceptance, tagging,
+or Hard Gate G5 convergence.
+
+### Evidence reuse
+
+- existing renderer, governance, contract, Playwright, and CI evidence is mapped
+  rather than duplicated
+- maintenance issue and credited PRs are cited when reuse is claimed
+- no duplicate frameworks, broad snapshots, or product-scope expansion appear
+
+### US-6.1 quality gates
+
+- renderer coverage remains complete (known, nested, unknown, invalid, depth guard, actions, five-screen path)
+- governance coverage remains complete (append, duplicates, version binding, revision, regeneration, reapproval, gate, roles, chronology, persistence, recovery)
+- contract coverage remains complete (seed, registry, provider, persistence)
+- one critical RTL workflow covers overview → review → breakpoint/persona → approval → revision → regeneration → reapproval → persisted reload → audit → Reviewer restriction
+- CI runs on staging and main with frozen lockfile install, lint, typecheck, tests, and production build
+- CI failures block merge
+- Playwright evidence generation remains intact
+- commit verification remains fail-closed
+- no test weakening and no production-scope capability
+
+### US-6.2 documentation and deployment
+
+- README remains accurate with production URL and documentation links
+- architecture-decisions, traceability, release-acceptance, and demo-script artifacts are committed
+- Vercel (or approved static host) configuration has no application secrets and no backend runtime
+- direct and deep routes work on the deployed SPA
+- demo reset uses only the managed governance key; `localStorage.clear()` remains absent
+- automated rehearsal evidence exists for local and/or deployed URLs
+- G1–G5 evidence is recorded with Hard Gate G5 PASS before tag/release
+- cut-line state is recorded; planned effort totals exactly 50 hours
+- product positioning remains a concept extension, not an official product
+- release PR targets main from staging; signed tag and GitHub Release occur only after G5 PASS
+
+### Release convergence
+
+- no real LLM, backend, production authentication, or Module Federation is introduced
+- no post-E6 epic starts automatically
+- autonomous run is deactivated after authorized finalization
+
 ## Verdict rules
 
 - `PASS` is valid only when `SAFE_TO_COMMIT: YES`
