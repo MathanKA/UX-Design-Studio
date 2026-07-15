@@ -1,8 +1,10 @@
 # UX Design Studio
 
-UX Design Studio is a proof-of-work concept extension for InsaneSDD 2.0. It visually renders a generated UX specification before Agile plan generation, and supports per-screen review, structured revision, mocked regeneration, approval, and audit traceability.
+UX Design Studio is a proof-of-work concept extension for InsaneSDD 2.0 that deepens UX review into a visual, per-screen approval workbench. It visually renders a generated UX specification before Agile plan generation, and supports per-screen review, structured revision, mocked regeneration, approval, and audit traceability.
 
 It is **not** an official InfoBeans product or feature. The deterministic demonstration project is **AgentPilot**. The POC delivery cap is 50 build hours. This repository must never be described as proof that the internal InsaneSDD product lacks a capability.
+
+It is not production-ready. It does not implement real authentication, a real LLM, real Agile plan generation, or a production InsaneSDD backend.
 
 ## What it does
 
@@ -111,7 +113,10 @@ pnpm run build
 pnpm run preview
 ```
 
-Preview defaults to Vite’s preview port **4173** unless overridden. Playwright E2E uses `http://127.0.0.1:4173`.
+- Production build command: `pnpm run build`
+- Output directory: `dist/`
+- Preview defaults to Vite’s preview port **4173** unless overridden
+- Playwright E2E defaults to `http://127.0.0.1:4173` (starts local preview unless `PLAYWRIGHT_BASE_URL` is set)
 
 ## Demo walkthrough
 
@@ -141,6 +146,8 @@ Behavior:
 - Does **not** call `localStorage.clear()`
 - Does not mutate the frozen AgentPilot UXSpec seed
 - Announces that demo governance state was reset
+
+Never paste arbitrary JSON into browser storage to prepare a demo. Use the UI to approve screens, then reset with the managed-key control only. See [`docs/demo-script.md`](docs/demo-script.md) for clean and prepared demo states.
 
 ## Routes
 
@@ -235,21 +242,24 @@ feature / fix / chore / test / docs branch from staging
 - Do not push directly to `staging` or `main`, and do not force-push protected branches.
 - Branch protection / rulesets require pull requests, conversation resolution, signed commits, and the three CI jobs above. Merge commits remain permitted; linear history is not required.
 
-## Non-goals
+## Non-goals / explicit exclusions
 
 Do not expect this POC to include:
 
 - Drag-and-drop or freeform design editing
 - A real LLM integration or production backend
-- Production authentication, SSO, or RBAC
-- Persistence beyond the approved browser-storage adapter
+- Production authentication, SSO, OIDC, or RBAC
+- Persistence beyond the approved browser-storage adapter (no durable signed audit store)
 - Multi-project or multi-repository support
-- Runtime Module Federation or production event streaming
-- Production APIs or a general-purpose low-code builder
+- Runtime Module Federation, route-level MFE packaging, or production event streaming / Live Terminal publication
+- Production APIs, a real Design Agent API, or a general-purpose low-code builder
 - Arbitrary React component execution
 - Arbitrary HTML, JavaScript, CSS, or dynamic imports from UXSpec data
 - Pixel-perfect production design
+- Real Agile plan generation (gate readiness is a POC signal only)
 - Unapproved dependencies or architecture frameworks
+
+Production evolution paths for OIDC/SSO, server RBAC, durable event storage, signed audit events, retention/legal hold, real Design Agent API, Live Terminal publication, and route-level MFE integration are documented in [`docs/architecture-decisions.md`](docs/architecture-decisions.md) and Architecture §29 — not implemented here.
 
 ## Controlling documents
 
@@ -264,8 +274,56 @@ Document authority order:
 
 Related planning tooling notes: [`docs/GitHub_Import_Instructions.md`](docs/GitHub_Import_Instructions.md).
 
+### Release documentation
+
+| Document | Purpose |
+|---|---|
+| [`docs/architecture-decisions.md`](docs/architecture-decisions.md) | Accepted ADR-001–008 with implementation and test evidence |
+| [`docs/traceability.md`](docs/traceability.md) | PRD → architecture → GitHub → code → tests → PR evidence |
+| [`docs/release-acceptance.md`](docs/release-acceptance.md) | Hard gates G1–G5, cut-line, PRD checklist, 50-hour accounting |
+| [`docs/demo-script.md`](docs/demo-script.md) | 75-second positioning, 6–8 minute live flow, rehearsal log |
+
 ## Deployment
 
-The approved target is a static SPA from `dist/` (Vercel or Netlify style hosting with SPA fallback to `index.html`). No application secrets are required.
+The approved target is a static SPA from `dist/` on Vercel. No application secrets are required. There are no serverless functions or API routes.
 
-This repository does **not** yet include host-specific deploy config (for example `vercel.json` / `netlify.toml`) or a published production URL. Those remain Epic 6 / US-6.2 documentation and release work—not claimed complete by this README.
+### Build
+
+```bash
+pnpm run build
+```
+
+Output: `dist/`.
+
+### Vercel / SPA deep links
+
+[`vercel.json`](vercel.json) configures:
+
+- `framework`: `vite`
+- `buildCommand`: `pnpm run build`
+- `outputDirectory`: `dist`
+- SPA rewrite to `/index.html` for non-asset routes (so `/overview`, `/review/:screenId`, and `/audit` survive refresh)
+
+Verify after deploy:
+
+- `/` → app redirect to `/overview`
+- `/overview`, `/review/screen-dashboard`, `/audit` load on direct navigation
+- Unknown paths show the controlled in-app not-found page
+- `/assets/*` continue to load as static files
+
+### Release URLs and tag
+
+| Item | Value |
+|---|---|
+| Preview / project domain | https://ux-design-studio-poc.vercel.app |
+| Production URL | https://ux-design-studio-poc.vercel.app |
+| Release tag | `v0.1.0-poc` — pending final main release |
+| GitHub Release | pending final main release |
+
+### Playwright against a deployment
+
+```bash
+PLAYWRIGHT_BASE_URL=https://example.vercel.app pnpm run test:e2e
+```
+
+When `PLAYWRIGHT_BASE_URL` is set, Playwright does not start the local Vite preview server.
