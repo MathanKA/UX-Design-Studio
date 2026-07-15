@@ -1086,6 +1086,10 @@ function upsertIssues(
     if (!issue) continue;
     const body = issueBody(plan, node, issue.number, byKey);
     if (body !== issue.body) {
+      if (dryRun) {
+        log(`[dry-run] Update managed body for ${node.key} (#${issue.number}).`);
+        continue;
+      }
       const updated = api<GitHubIssue>(
         `repos/${plan.repository.fullName}/issues/${issue.number}`,
         "PATCH",

@@ -28,6 +28,9 @@ type RunStory = {
   branchOverrideReason?: string;
   authorizedScope?: Record<string, unknown>;
   authorizedCutScope?: Record<string, unknown>;
+  evidenceReuse?: Record<string, unknown>;
+  requiredGap?: Record<string, unknown>;
+  deployment?: Record<string, unknown>;
 };
 
 type ProviderConfig = {
@@ -106,6 +109,7 @@ type RunManifest = {
     implementationRepair: number;
     verifierRerun: number;
     transientCiRerun: number;
+    deploymentRepair?: number;
   };
   roles?: {
     default: string;
@@ -134,6 +138,33 @@ type RunManifest = {
   regenerationPolicy?: RegenerationPolicy;
   scope?: RunScope;
   featureFlags?: FeatureFlags;
+  release?: {
+    version: string;
+    tag: string;
+    signedAnnotatedTag: boolean;
+    createGitHubRelease: boolean;
+    syncMainBackToStaging: boolean;
+  };
+  deployment?: {
+    provider: string;
+    staticOutputDirectory: string;
+    requiresSecretsInApp: boolean;
+    generatedDomainAllowed: boolean;
+    verifyDeepLinks: boolean;
+    productionDeployAfterMainMerge: boolean;
+  };
+  effort?: {
+    accounting: string;
+    e1: number;
+    e2: number;
+    e3: number;
+    e4: number;
+    e5: number;
+    e6: number;
+    total: number;
+  };
+  evidenceReuse?: Record<string, unknown>;
+  documentation?: Record<string, unknown>;
   stories: RunStory[];
   finalization?: {
     deactivateManifest: boolean;
@@ -142,8 +173,11 @@ type RunManifest = {
   };
   stopAfter: {
     epic: number;
-    openReleasePR: boolean;
-    mergeReleasePR: boolean;
+    openReleasePR?: boolean;
+    mergeReleasePR?: boolean;
+    releaseTag?: string;
+    githubRelease?: boolean;
+    mainSyncedBackToStaging?: boolean;
   };
   authorizationExpiry: string;
 };
@@ -413,6 +447,27 @@ function normalizeManifest(raw: Record<string, unknown>): RunManifest {
         );
       }
 
+      if (story.evidenceReuse !== undefined) {
+        normalized.evidenceReuse = asRecord(
+          story.evidenceReuse,
+          `stories[${index}].evidenceReuse`,
+        );
+      }
+
+      if (story.requiredGap !== undefined) {
+        normalized.requiredGap = asRecord(
+          story.requiredGap,
+          `stories[${index}].requiredGap`,
+        );
+      }
+
+      if (story.deployment !== undefined) {
+        normalized.deployment = asRecord(
+          story.deployment,
+          `stories[${index}].deployment`,
+        );
+      }
+
       return normalized;
     },
   );
@@ -638,6 +693,132 @@ function normalizeManifest(raw: Record<string, unknown>): RunManifest {
     };
   }
 
+  let release: RunManifest["release"];
+  if (raw.release !== undefined) {
+    const releaseRaw = asRecord(raw.release, "release");
+    release = {
+      version: asString(releaseRaw.version, "release.version"),
+      tag: asString(releaseRaw.tag, "release.tag"),
+      signedAnnotatedTag: asBoolean(
+        releaseRaw.signedAnnotatedTag,
+        "release.signedAnnotatedTag",
+      ),
+      createGitHubRelease: asBoolean(
+        releaseRaw.createGitHubRelease,
+        "release.createGitHubRelease",
+      ),
+      syncMainBackToStaging: asBoolean(
+        releaseRaw.syncMainBackToStaging,
+        "release.syncMainBackToStaging",
+      ),
+    };
+  }
+
+  let deployment: RunManifest["deployment"];
+  if (raw.deployment !== undefined) {
+    const deploymentRaw = asRecord(raw.deployment, "deployment");
+    deployment = {
+      provider: asString(deploymentRaw.provider, "deployment.provider"),
+      staticOutputDirectory: asString(
+        deploymentRaw.staticOutputDirectory,
+        "deployment.staticOutputDirectory",
+      ),
+      requiresSecretsInApp: asBoolean(
+        deploymentRaw.requiresSecretsInApp,
+        "deployment.requiresSecretsInApp",
+      ),
+      generatedDomainAllowed: asBoolean(
+        deploymentRaw.generatedDomainAllowed,
+        "deployment.generatedDomainAllowed",
+      ),
+      verifyDeepLinks: asBoolean(
+        deploymentRaw.verifyDeepLinks,
+        "deployment.verifyDeepLinks",
+      ),
+      productionDeployAfterMainMerge: asBoolean(
+        deploymentRaw.productionDeployAfterMainMerge,
+        "deployment.productionDeployAfterMainMerge",
+      ),
+    };
+  }
+
+  let effort: RunManifest["effort"];
+  if (raw.effort !== undefined) {
+    const effortRaw = asRecord(raw.effort, "effort");
+    effort = {
+      accounting: asString(effortRaw.accounting, "effort.accounting"),
+      e1: asNumber(effortRaw.e1, "effort.e1"),
+      e2: asNumber(effortRaw.e2, "effort.e2"),
+      e3: asNumber(effortRaw.e3, "effort.e3"),
+      e4: asNumber(effortRaw.e4, "effort.e4"),
+      e5: asNumber(effortRaw.e5, "effort.e5"),
+      e6: asNumber(effortRaw.e6, "effort.e6"),
+      total: asNumber(effortRaw.total, "effort.total"),
+    };
+  }
+
+  let evidenceReuse: RunManifest["evidenceReuse"];
+  if (raw.evidenceReuse !== undefined) {
+    evidenceReuse = asRecord(raw.evidenceReuse, "evidenceReuse");
+  }
+
+  let documentation: RunManifest["documentation"];
+  if (raw.documentation !== undefined) {
+    documentation = asRecord(raw.documentation, "documentation");
+  }
+
+  const stopAfterNormalized: RunManifest["stopAfter"] = {
+    epic: asNumber(stopAfter.epic, "stopAfter.epic"),
+  };
+  if (stopAfter.openReleasePR !== undefined) {
+    stopAfterNormalized.openReleasePR = asBoolean(
+      stopAfter.openReleasePR,
+      "stopAfter.openReleasePR",
+    );
+  }
+  if (stopAfter.mergeReleasePR !== undefined) {
+    stopAfterNormalized.mergeReleasePR = asBoolean(
+      stopAfter.mergeReleasePR,
+      "stopAfter.mergeReleasePR",
+    );
+  }
+  if (stopAfter.releaseTag !== undefined) {
+    stopAfterNormalized.releaseTag = asString(
+      stopAfter.releaseTag,
+      "stopAfter.releaseTag",
+    );
+  }
+  if (stopAfter.githubRelease !== undefined) {
+    stopAfterNormalized.githubRelease = asBoolean(
+      stopAfter.githubRelease,
+      "stopAfter.githubRelease",
+    );
+  }
+  if (stopAfter.mainSyncedBackToStaging !== undefined) {
+    stopAfterNormalized.mainSyncedBackToStaging = asBoolean(
+      stopAfter.mainSyncedBackToStaging,
+      "stopAfter.mainSyncedBackToStaging",
+    );
+  }
+
+  const retryBudgetNormalized: RunManifest["retryBudget"] = {
+    implementationRepair: asNumber(
+      retryBudget.implementationRepair,
+      "retryBudget.implementationRepair",
+    ),
+    verifierRerun: asNumber(retryBudget.verifierRerun, "retryBudget.verifierRerun"),
+    transientCiRerun: asNumber(
+      retryBudget.transientCiRerun,
+      "retryBudget.transientCiRerun",
+    ),
+  };
+  if (retryBudget.deploymentRepair !== undefined) {
+    retryBudgetNormalized.deploymentRepair = asNumber(
+      retryBudget.deploymentRepair,
+      "retryBudget.deploymentRepair",
+    );
+  }
+
   return {
     schemaVersion: asNumber(raw.schemaVersion, "schemaVersion"),
     runId: asString(raw.runId, "runId"),
@@ -677,20 +858,7 @@ function normalizeManifest(raw: Record<string, unknown>): RunManifest {
         merge: asBoolean(finalReleasePR.merge, "autonomy.finalReleasePR.merge"),
       },
     },
-    retryBudget: {
-      implementationRepair: asNumber(
-        retryBudget.implementationRepair,
-        "retryBudget.implementationRepair",
-      ),
-      verifierRerun: asNumber(
-        retryBudget.verifierRerun,
-        "retryBudget.verifierRerun",
-      ),
-      transientCiRerun: asNumber(
-        retryBudget.transientCiRerun,
-        "retryBudget.transientCiRerun",
-      ),
-    },
+    retryBudget: retryBudgetNormalized,
     roles,
     scopeBoundary,
     resetPolicy,
@@ -698,16 +866,14 @@ function normalizeManifest(raw: Record<string, unknown>): RunManifest {
     regenerationPolicy,
     scope,
     featureFlags,
+    release,
+    deployment,
+    effort,
+    evidenceReuse,
+    documentation,
     stories,
     finalization,
-    stopAfter: {
-      epic: asNumber(stopAfter.epic, "stopAfter.epic"),
-      openReleasePR: asBoolean(stopAfter.openReleasePR, "stopAfter.openReleasePR"),
-      mergeReleasePR: asBoolean(
-        stopAfter.mergeReleasePR,
-        "stopAfter.mergeReleasePR",
-      ),
-    },
+    stopAfter: stopAfterNormalized,
     authorizationExpiry: asString(raw.authorizationExpiry, "authorizationExpiry"),
   };
 }
@@ -771,10 +937,26 @@ function validateManifestStructure(
   if (
     manifest.autonomy.finalReleasePR.base !== "main" ||
     manifest.autonomy.finalReleasePR.head !== "staging" ||
-    manifest.autonomy.finalReleasePR.open !== true ||
-    manifest.autonomy.finalReleasePR.merge !== false
+    manifest.autonomy.finalReleasePR.open !== true
   ) {
-    fail(`${label}: finalReleasePR must open staging→main and must not merge.`);
+    fail(`${label}: finalReleasePR must open staging→main.`);
+  }
+
+  const releaseAuthorized =
+    manifest.release !== undefined &&
+    manifest.release.signedAnnotatedTag === true &&
+    manifest.release.createGitHubRelease === true;
+
+  if (manifest.autonomy.finalReleasePR.merge === true && !releaseAuthorized) {
+    fail(
+      `${label}: finalReleasePR.merge may be true only when release.signedAnnotatedTag and release.createGitHubRelease authorize the final merge.`,
+    );
+  }
+
+  if (manifest.autonomy.finalReleasePR.merge === false && releaseAuthorized) {
+    fail(
+      `${label}: release-authorized manifests must set finalReleasePR.merge to true.`,
+    );
   }
 
   if (
@@ -787,17 +969,124 @@ function validateManifestStructure(
     );
   }
 
+  if (
+    manifest.retryBudget.deploymentRepair !== undefined &&
+    !isPositiveBoundedInteger(manifest.retryBudget.deploymentRepair)
+  ) {
+    fail(
+      `${label}: retryBudget.deploymentRepair must be a positive integer between 1 and ${MAX_RETRY} when declared.`,
+    );
+  }
+
   if (manifest.stopAfter.epic !== manifest.epic.issue) {
     fail(`${label}: stopAfter.epic must match epic.issue.`);
   }
-  if (manifest.stopAfter.openReleasePR !== manifest.autonomy.finalReleasePR.open) {
-    fail(`${label}: stopAfter.openReleasePR must match autonomy.finalReleasePR.open.`);
-  }
-  if (manifest.stopAfter.mergeReleasePR !== manifest.autonomy.finalReleasePR.merge) {
+
+  const legacyStopAfter =
+    manifest.stopAfter.openReleasePR !== undefined ||
+    manifest.stopAfter.mergeReleasePR !== undefined;
+  const releaseStopAfter =
+    manifest.stopAfter.releaseTag !== undefined ||
+    manifest.stopAfter.githubRelease !== undefined ||
+    manifest.stopAfter.mainSyncedBackToStaging !== undefined;
+
+  if (legacyStopAfter && releaseStopAfter) {
     fail(
-      `${label}: stopAfter.mergeReleasePR must match autonomy.finalReleasePR.merge.`,
+      `${label}: stopAfter must use either legacy open/merge release PR fields or release-complete fields, not both.`,
     );
   }
+
+  if (!legacyStopAfter && !releaseStopAfter) {
+    fail(
+      `${label}: stopAfter must declare either openReleasePR/mergeReleasePR or releaseTag/githubRelease/mainSyncedBackToStaging.`,
+    );
+  }
+
+  if (legacyStopAfter) {
+    if (manifest.stopAfter.openReleasePR === undefined || manifest.stopAfter.mergeReleasePR === undefined) {
+      fail(
+        `${label}: legacy stopAfter requires both openReleasePR and mergeReleasePR.`,
+      );
+    } else {
+      if (manifest.stopAfter.openReleasePR !== manifest.autonomy.finalReleasePR.open) {
+        fail(`${label}: stopAfter.openReleasePR must match autonomy.finalReleasePR.open.`);
+      }
+      if (manifest.stopAfter.mergeReleasePR !== manifest.autonomy.finalReleasePR.merge) {
+        fail(
+          `${label}: stopAfter.mergeReleasePR must match autonomy.finalReleasePR.merge.`,
+        );
+      }
+    }
+  }
+
+  if (releaseStopAfter) {
+    if (!releaseAuthorized || !manifest.release) {
+      fail(
+        `${label}: release-complete stopAfter requires a release section with signedAnnotatedTag and createGitHubRelease.`,
+      );
+    } else {
+      if (manifest.stopAfter.releaseTag !== manifest.release.tag) {
+        fail(`${label}: stopAfter.releaseTag must match release.tag.`);
+      }
+      if (manifest.stopAfter.githubRelease !== true) {
+        fail(`${label}: stopAfter.githubRelease must be true for release-complete manifests.`);
+      }
+      if (manifest.stopAfter.mainSyncedBackToStaging !== true) {
+        fail(
+          `${label}: stopAfter.mainSyncedBackToStaging must be true for release-complete manifests.`,
+        );
+      }
+      if (manifest.release.syncMainBackToStaging !== true) {
+        fail(
+          `${label}: release.syncMainBackToStaging must be true when stopAfter.mainSyncedBackToStaging is declared.`,
+        );
+      }
+    }
+  }
+
+  if (manifest.release) {
+    if (!/^v?\d+\.\d+\.\d+(-[a-z0-9.]+)?$/i.test(manifest.release.tag)) {
+      fail(`${label}: release.tag must look like a semver tag.`);
+    }
+    if (manifest.release.signedAnnotatedTag !== true) {
+      fail(`${label}: release.signedAnnotatedTag must be true when release is declared.`);
+    }
+  }
+
+  if (manifest.deployment) {
+    if (manifest.deployment.requiresSecretsInApp !== false) {
+      fail(`${label}: deployment.requiresSecretsInApp must be false when declared.`);
+    }
+    if (manifest.deployment.staticOutputDirectory.trim().length === 0) {
+      fail(`${label}: deployment.staticOutputDirectory must be non-empty when declared.`);
+    }
+  }
+
+  if (manifest.effort) {
+    if (manifest.effort.accounting !== "planned") {
+      fail(`${label}: effort.accounting must be planned when declared.`);
+    }
+    const sum =
+      manifest.effort.e1 +
+      manifest.effort.e2 +
+      manifest.effort.e3 +
+      manifest.effort.e4 +
+      manifest.effort.e5 +
+      manifest.effort.e6;
+    if (manifest.effort.total !== sum) {
+      fail(`${label}: effort.total must equal the sum of e1–e6.`);
+    }
+    if (manifest.effort.total !== 50) {
+      fail(`${label}: effort.total must equal the approved 50-hour planned allocation.`);
+    }
+    if (
+      manifest.epic.key === "E6" &&
+      manifest.effort.e6 !== manifest.epic.estimateHours
+    ) {
+      fail(`${label}: effort.e6 must match epic.estimateHours for E6 release manifests.`);
+    }
+  }
+
   if (manifest.authorizationExpiry.trim().length === 0) {
     fail(`${label}: authorizationExpiry must be present.`);
   }
@@ -1218,6 +1507,9 @@ if (!verifier.includes("E4-specific") && !verifier.includes("When E4 work is in 
 if (!verifier.includes("E5-specific") && !verifier.includes("When E5 work is in scope")) {
   fail("Verifier must include E5-specific verification criteria.");
 }
+if (!verifier.includes("E6-specific") && !verifier.includes("When E6 work is in scope")) {
+  fail("Verifier must include E6-specific verification criteria.");
+}
 if (!verifier.includes("provider-backed regeneration") && !verifier.includes("DesignAgentProvider")) {
   fail("Verifier must include E4/E5 regeneration-boundary checks.");
 }
@@ -1226,6 +1518,12 @@ if (!verifier.includes("atomic") || !verifier.includes("duplicate generated vers
 }
 if (!verifier.includes("localStorage.clear()")) {
   fail("Verifier must prohibit localStorage.clear() for managed reset.");
+}
+if (!verifier.includes("critical RTL") && !verifier.includes("React Testing Library")) {
+  fail("Verifier must include E6 critical RTL workflow checks.");
+}
+if (!verifier.includes("G5") && !verifier.includes("Hard Gate G5")) {
+  fail("Verifier must include E6 Hard Gate G5 checks.");
 }
 
 const cursorRule = read(".cursor/rules/uxds-story-loop.mdc");
