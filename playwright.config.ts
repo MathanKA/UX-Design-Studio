@@ -1,7 +1,9 @@
 import { defineConfig, devices } from "@playwright/test";
 
 const isCI = Boolean(process.env.CI);
-const baseURL = process.env.PLAYWRIGHT_BASE_URL ?? "http://127.0.0.1:4173";
+const externalBaseURL = process.env.PLAYWRIGHT_BASE_URL?.trim();
+const baseURL = externalBaseURL || "http://127.0.0.1:4173";
+const useExternalServer = Boolean(externalBaseURL);
 
 export default defineConfig({
   testDir: "./e2e",
@@ -37,12 +39,18 @@ export default defineConfig({
       use: { ...devices["Desktop Chrome"] },
     },
   ],
-  webServer: {
-    command: isCI
-      ? "pnpm exec vite preview --host 127.0.0.1 --port 4173"
-      : "pnpm build && pnpm exec vite preview --host 127.0.0.1 --port 4173",
-    url: baseURL,
-    reuseExistingServer: !isCI,
-    timeout: 180_000,
-  },
+  // Local / CI default: build (non-CI) and serve Vite preview on 4173.
+  // When PLAYWRIGHT_BASE_URL is set, target that deployment and do not start webServer.
+  ...(useExternalServer
+    ? {}
+    : {
+        webServer: {
+          command: isCI
+            ? "pnpm exec vite preview --host 127.0.0.1 --port 4173"
+            : "pnpm build && pnpm exec vite preview --host 127.0.0.1 --port 4173",
+          url: baseURL,
+          reuseExistingServer: !isCI,
+          timeout: 180_000,
+        },
+      }),
 });
