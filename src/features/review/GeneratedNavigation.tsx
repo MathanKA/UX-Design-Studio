@@ -1,6 +1,8 @@
 import { NavLink } from "react-router-dom";
 import type { NavigationItem, NavigationSpec, ScreenId } from "../../domain/ux-spec";
+import type { ScreenReviewStatus } from "../../domain/governance";
 import { cssClass } from "../../renderer/styles/css-class";
+import { screenReviewStatusLabel } from "../governance/status-labels";
 import styles from "./ReviewPage.module.css";
 
 type GeneratedNavigationProps = {
@@ -9,6 +11,11 @@ type GeneratedNavigationProps = {
   knownScreenIds: ReadonlySet<ScreenId>;
   mode: "desktop" | "mobile";
   visible: boolean;
+  screenStatuses?: ReadonlyMap<ScreenId, ScreenReviewStatus>;
+  approvalProgress?: {
+    approvedCount: number;
+    totalRequired: number;
+  };
 };
 
 function isValidTarget(
@@ -18,12 +25,26 @@ function isValidTarget(
   return knownScreenIds.has(item.screenId);
 }
 
+function statusTone(
+  status: ScreenReviewStatus | undefined,
+): "approved" | "pending" | "attention" {
+  if (status === "approved") {
+    return "approved";
+  }
+  if (status === "changes_requested" || status === "ready_for_review") {
+    return "attention";
+  }
+  return "pending";
+}
+
 export function GeneratedNavigation({
   navigation,
   activeScreenId,
   knownScreenIds,
   mode,
   visible,
+  screenStatuses,
+  approvalProgress,
 }: GeneratedNavigationProps) {
   const items =
     mode === "desktop" ? navigation.desktop.items : navigation.mobile.items;
@@ -49,24 +70,68 @@ export function GeneratedNavigation({
       data-nav-visible={visible ? "true" : "false"}
       hidden={!visible}
     >
+      {mode === "desktop" && approvalProgress ? (
+        <div className={styles.progressHeader} data-nav-progress="true">
+          <p className={styles.progressLabel}>
+            {approvalProgress.approvedCount} of {approvalProgress.totalRequired}{" "}
+            approved
+          </p>
+          <div
+            className={styles.progressTrack}
+            role="progressbar"
+            aria-valuemin={0}
+            aria-valuemax={approvalProgress.totalRequired}
+            aria-valuenow={approvalProgress.approvedCount}
+            aria-label="Screen approval progress"
+          >
+            <div
+              className={styles.progressFill}
+              style={{
+                width:
+                  approvalProgress.totalRequired === 0
+                    ? "0%"
+                    : `${(approvalProgress.approvedCount /
+                        approvalProgress.totalRequired) *
+                      100}%`,
+              }}
+            />
+          </div>
+        </div>
+      ) : null}
       <ul className={listClass}>
-        {validItems.map((item) => (
-          <li key={item.id}>
-            <NavLink
-              to={`/review/${item.screenId}`}
-              className={({ isActive }) =>
-                isActive || activeScreenId === item.screenId
-                  ? `${cssClass(styles.navLink, "navLink")} ${cssClass(styles.navLinkActive, "navLinkActive")}`
-                  : cssClass(styles.navLink, "navLink")
-              }
-              aria-current={
-                activeScreenId === item.screenId ? "page" : undefined
-              }
-            >
-              {item.label}
-            </NavLink>
-          </li>
-        ))}
+        {validItems.map((item) => {
+          const status = screenStatuses?.get(item.screenId);
+          const tone = statusTone(status);
+          const statusLabel = status
+            ? screenReviewStatusLabel(status)
+            : "Not reviewed";
+          return (
+            <li key={item.id}>
+              <NavLink
+                to={`/review/${item.screenId}`}
+                className={({ isActive }) =>
+                  isActive || activeScreenId === item.screenId
+                    ? `${cssClass(styles.navLink, "navLink")} ${cssClass(styles.navLinkActive, "navLinkActive")}`
+                    : cssClass(styles.navLink, "navLink")
+                }
+                aria-current={
+                  activeScreenId === item.screenId ? "page" : undefined
+                }
+              >
+                <span className={styles.navLinkLabel}>{item.label}</span>
+                {screenStatuses ? (
+                  <span
+                    className={styles.statusDot}
+                    data-nav-status={tone}
+                    data-screen-status={status ?? "not_reviewed"}
+                    title={statusLabel}
+                    aria-hidden="true"
+                  />
+                ) : null}
+              </NavLink>
+            </li>
+          );
+        })}
       </ul>
     </nav>
   );

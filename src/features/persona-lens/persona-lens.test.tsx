@@ -11,6 +11,7 @@ import {
   listPersonas,
   resolveScreenTouchpoint,
 } from "../../domain/ux-spec";
+import { activateSidePanelTab } from "../review/activate-side-panel-tab";
 
 function renderAt(pathName: string) {
   return render(
@@ -53,6 +54,7 @@ describe("US-3.2 persona review lens", () => {
   it("defaults to Alex and allows selecting Jordan and Taylor accessibly", async () => {
     const user = userEvent.setup();
     renderAt("/review/screen-dashboard");
+    await activateSidePanelTab(user, "persona");
 
     const alex = screen.getByRole("radio", { name: "Alex" });
     expect(alex).toBeChecked();
@@ -73,6 +75,7 @@ describe("US-3.2 persona review lens", () => {
   it("derives goals, frustrations, touchpoints, and journey context from UXSpec", async () => {
     const user = userEvent.setup();
     renderAt("/review/screen-dashboard");
+    await activateSidePanelTab(user, "persona");
     const alex = agentPilotSeed.personas.find((persona) => persona.name === "Alex")!;
     expect(document.querySelector("[data-persona-goals]")).toHaveTextContent(
       alex.goals[0]!,
@@ -108,6 +111,7 @@ describe("US-3.2 persona review lens", () => {
   it("shows an empty touchpoint state when none exist for the persona", async () => {
     const user = userEvent.setup();
     renderAt("/review/screen-dashboard");
+    await activateSidePanelTab(user, "persona");
     await user.click(screen.getByRole("radio", { name: "Taylor" }));
     // Taylor has no touchpoint on dashboard in seed
     const taylorTouch = resolveScreenTouchpoint(
@@ -126,6 +130,7 @@ describe("US-3.2 persona review lens", () => {
     const frozenTitle = agentPilotSeed.title;
     const frozenPersonaCount = agentPilotSeed.personas.length;
     renderAt("/review/screen-dashboard");
+    await activateSidePanelTab(user, "persona");
     const before = document.querySelector('[data-screen-id="screen-dashboard"]')
       ?.innerHTML;
 
@@ -142,6 +147,7 @@ describe("US-3.2 persona review lens", () => {
   it("keeps preview controls keyboard operable beside the lens panel", async () => {
     const user = userEvent.setup();
     renderAt("/review/screen-dashboard");
+    await activateSidePanelTab(user, "persona");
     const createTask = screen.getByRole("button", { name: "Create task" });
     createTask.focus();
     expect(createTask).toHaveFocus();

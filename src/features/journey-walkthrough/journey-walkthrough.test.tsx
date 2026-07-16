@@ -7,6 +7,7 @@ import { AppRoutes } from "../../app/routes";
 import { ErrorBoundary } from "../../app/error-boundary";
 import { appConfig } from "../../app/config";
 import { agentPilotSeed } from "../../infrastructure/seed";
+import { activateSidePanelTab } from "../review/activate-side-panel-tab";
 import {
   DEFAULT_JOURNEY_ID,
   deriveJourneyWalkthrough,
@@ -59,8 +60,10 @@ describe("US-3.3 journey walkthrough", () => {
     ).toBeNull();
   });
 
-  it("renders journey controls below the persona lens with step metadata", () => {
+  it("renders journey controls below the persona lens with step metadata", async () => {
+    const user = userEvent.setup();
     renderAt("/review/screen-login");
+    await activateSidePanelTab(user, "journey");
 
     const panel = document.querySelector("[data-journey-walkthrough='true']");
     expect(panel).not.toBeNull();
@@ -95,11 +98,13 @@ describe("US-3.3 journey walkthrough", () => {
     const user = userEvent.setup();
     renderAt("/review/screen-login");
 
+    await activateSidePanelTab(user, "persona");
     await user.click(screen.getByRole("radio", { name: "Jordan" }));
     expect(screen.getByRole("radio", { name: "Jordan" })).toBeChecked();
     await user.click(screen.getByRole("radio", { name: "Mobile" }));
     expect(screen.getByRole("radio", { name: "Mobile" })).toBeChecked();
 
+    await activateSidePanelTab(user, "journey");
     const previous = screen.getByRole("button", { name: "Previous" });
     expect(previous).toBeDisabled();
 
@@ -110,7 +115,9 @@ describe("US-3.3 journey walkthrough", () => {
     expect(
       document.querySelector("[data-journey-progress='true']"),
     ).toHaveTextContent("Step 2 of 2");
-    expect(screen.getByRole("radio", { name: "Jordan" })).toBeChecked();
+    expect(
+      document.querySelector('[data-persona-option="persona-jordan"]'),
+    ).toBeChecked();
     expect(screen.getByRole("radio", { name: "Mobile" })).toBeChecked();
     expect(
       document.querySelector("[data-preview-viewport='true']"),
@@ -125,13 +132,16 @@ describe("US-3.3 journey walkthrough", () => {
     expect(
       document.querySelector("[data-journey-progress='true']"),
     ).toHaveTextContent("Step 1 of 2");
-    expect(screen.getByRole("radio", { name: "Jordan" })).toBeChecked();
+    expect(
+      document.querySelector('[data-persona-option="persona-jordan"]'),
+    ).toBeChecked();
     expect(screen.getByRole("radio", { name: "Mobile" })).toBeChecked();
   });
 
   it("restarts to step 1 and announces step changes", async () => {
     const user = userEvent.setup();
     renderAt("/review/screen-login");
+    await activateSidePanelTab(user, "journey");
 
     await user.click(screen.getByRole("button", { name: "Next" }));
     expect(
@@ -154,6 +164,7 @@ describe("US-3.3 journey walkthrough", () => {
   it("finishes on the last step without leaving the workbench", async () => {
     const user = userEvent.setup();
     renderAt("/review/screen-login");
+    await activateSidePanelTab(user, "journey");
     await user.click(screen.getByRole("button", { name: "Next" }));
     await user.click(screen.getByRole("button", { name: "Finish" }));
 
@@ -166,8 +177,10 @@ describe("US-3.3 journey walkthrough", () => {
     expect(live).toHaveTextContent(/Journey finished/);
   });
 
-  it("stays outside the composer registry and governance decision controls", () => {
+  it("stays outside the composer registry and governance decision controls", async () => {
+    const user = userEvent.setup();
     renderAt("/review/screen-dashboard");
+    await activateSidePanelTab(user, "journey");
     expect(
       document.querySelector("[data-journey-walkthrough='true']"),
     ).not.toBeNull();
@@ -181,6 +194,7 @@ describe("US-3.3 journey walkthrough", () => {
         "[data-journey-walkthrough='true'] [data-decision='approve']",
       ),
     ).toBeNull();
+    await activateSidePanelTab(user, "decision");
     expect(
       document.querySelector(
         '[data-workbench-region="decision-panel"] [data-decision="approve"]',

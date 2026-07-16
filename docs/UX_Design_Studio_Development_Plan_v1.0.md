@@ -724,3 +724,48 @@ The importer creates:
 - README, ADR, exclusions, deployment and demo reset instructions are present.
 - Total recorded plan estimate remains 50 hours.
 - Final release is merged from `staging` to `main` and tagged `v0.1.0-poc`.
+
+## 15. Authorized post-release extension (v0.1.1)
+
+The 50-hour v0.1.0 POC plan above is complete and released. The following
+extension was explicitly human-authorized after release. It carries its own
+6-hour allocation and does not modify the frozen 50-hour POC record, the
+release acceptance evidence, or any completed epic.
+
+### E7: Review Workbench Visual Revamp (6h)
+
+**Objective:** Revamp the `/review/:screenId` workbench into a modern,
+visually coherent review experience: a review toolbar, a screens sidebar with
+approval status, an elevated preview canvas, and a tabbed right panel.
+Presentation-only; governance, renderer safety, persistence, and audit
+behavior are unchanged.
+
+**Milestone:** `v0.1.1 Post-release UX polish`
+**Priority:** P1 | Mandatory (post-release extension) | Area: Workbench
+**PRD:** FR-003, FR-023, FR-033, FR-042, FR-050–053, FR-060–062, FR-070–075, NFR 16.1–16.3
+**Architecture:** §12.7, §23–26, §32
+
+#### US-7.1: Revamp the screen review workbench (6h)
+
+As a reviewer, I need the review workbench to present the preview, screen
+navigation, and review panels in a modern, scannable layout so that per-screen
+review is fast, pleasant, and demonstrably professional.
+
+**Acceptance criteria**
+
+- [ ] A review toolbar shows the active screen name, current screen-version identity, review status, and the mobile/tablet/desktop preview controls as a segmented control; status derives from existing governance selectors.
+- [ ] The screens sidebar lists generated navigation entries with a per-screen review-status indicator and an approval-progress header derived from existing gate selectors; no second status source is introduced.
+- [ ] The preview renders inside an elevated frame on a visually recessed canvas with a width caption; contrast badges remain visible; renderer and theming behavior are unchanged.
+- [ ] The right panel groups Decision, Persona, Journey, History, and Accessibility panels behind an accessible tab strip (WAI-ARIA tabs, arrow-key navigation, visible focus); Decision is the default tab; optional-feature flags still independently remove their tabs; panel state is preserved when switching tabs.
+- [ ] Studio chrome uses shared `--studio-*` CSS custom properties scoped outside the preview root; `--uxds-*` tokens remain scoped to the preview root only.
+- [ ] All existing renderer, governance, persistence, and audit behavior is unchanged; unit, integration, and e2e suites pass with assertions updated only for relocated or tabbed presentation.
+- [ ] Primary workflows remain keyboard accessible with visible focus and respected reduced-motion preferences.
+
+**Engineering tasks**
+
+| Key | Task | Hours | Outcome |
+|---|---|---:|---|
+| T-7.1.1 | Implement toolbar, sidebar status, preview frame and tabbed panel composition | 3 | A restructured presentation-only workbench layout. |
+| T-7.1.2 | Restyle panels on studio tokens and verify accessibility and regressions | 3 | A consistent visual language with verified keyboard accessibility and green suites. |
+
+**Depends on:** US-6.2 (released)

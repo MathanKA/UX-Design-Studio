@@ -46,6 +46,7 @@ import {
   createFixedClock,
   createSequentialIdGenerator,
 } from "../test/governance-ports";
+import { activateSidePanelTab } from "../features/review/activate-side-panel-tab";
 
 const identity = {
   projectId: agentPilotSeed.projectId,
@@ -200,6 +201,7 @@ describe("US-6.1 critical RTL demo flow", () => {
         document.querySelector("[data-preview-viewport='true']"),
       ).toHaveAttribute("data-breakpoint", "mobile");
 
+      await activateSidePanelTab(user, "persona");
       await user.click(screen.getByRole("radio", { name: "Taylor" }));
       expect(screen.getByRole("radio", { name: "Taylor" })).toBeChecked();
       expect(
@@ -211,6 +213,7 @@ describe("US-6.1 critical RTL demo flow", () => {
       expect(taylor).toBeDefined();
       expect(screen.getByText(taylor!.role)).toBeInTheDocument();
 
+      await activateSidePanelTab(user, "decision");
       expect(screen.getAllByTestId("role-switcher")[0]).toHaveAttribute(
         "data-active-role",
         "approver",
