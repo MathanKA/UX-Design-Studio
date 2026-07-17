@@ -176,66 +176,100 @@
   font-weight: 600;
 }
 
+/*
+ * Tone classes publish --uxds-tone; .badge and .feedback decide how the tone
+ * is applied (soft tinted background for badges, solid border for feedback).
+ * Neutral tone falls back to the muted text color via the var() fallback.
+ */
 .badge {
-  display: inline-flex;
+  display: flex;
   flex-direction: column;
-  gap: 0.15rem;
+  gap: 0.3rem;
+  min-width: 0;
   border-radius: var(--uxds-radius-md, 0.5rem);
-  border: 1px solid var(--uxds-color-border, #d0d5dd);
-  background: var(--uxds-color-surface-muted, #f2f4f7);
-  padding: 0.65rem 0.85rem;
+  border: 1px solid
+    color-mix(
+      in srgb,
+      var(--uxds-tone, var(--uxds-color-text-muted, #667085)) 30%,
+      var(--uxds-color-border, #d0d5dd)
+    );
+  border-left: 4px solid var(--uxds-tone, var(--uxds-color-text-muted, #667085));
+  background: color-mix(
+    in srgb,
+    var(--uxds-tone, var(--uxds-color-text-muted, #667085)) 8%,
+    var(--uxds-color-surface, #ffffff)
+  );
+  padding: 0.8rem 1rem;
 }
 
 .badgeLabel {
-  font-size: 0.8rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
   color: var(--uxds-color-text-muted, #667085);
+  overflow-wrap: anywhere;
 }
 
 .badgeValue {
-  font-size: 1.2rem;
-  font-weight: 600;
+  font-size: 1.55rem;
+  font-weight: 700;
+  line-height: 1.2;
   color: var(--uxds-color-text, #101828);
-}
-
-.toneSuccess {
-  border-color: var(--uxds-color-success, #039855);
-}
-
-.toneWarning {
-  border-color: var(--uxds-color-warning, #dc6803);
-}
-
-.toneDanger {
-  border-color: var(--uxds-color-danger, #d92d20);
-}
-
-.toneInfo {
-  border-color: var(--uxds-color-primary, #175cd3);
 }
 
 .feedback {
   border-radius: var(--uxds-radius-md, 0.5rem);
-  border: 1px solid var(--uxds-color-border, #d0d5dd);
+  border: 1px solid var(--uxds-tone, var(--uxds-color-border, #d0d5dd));
   background: var(--uxds-color-surface-muted, #f2f4f7);
   color: var(--uxds-color-text, #101828);
   padding: 0.75rem 0.9rem;
 }
 
+.toneSuccess {
+  --uxds-tone: var(--uxds-color-success, #039855);
+}
+
+.toneWarning {
+  --uxds-tone: var(--uxds-color-warning, #dc6803);
+}
+
+.toneDanger {
+  --uxds-tone: var(--uxds-color-danger, #d92d20);
+}
+
+.toneInfo {
+  --uxds-tone: var(--uxds-color-primary, #175cd3);
+}
+
 .chart {
-  border: 1px dashed var(--uxds-color-border, #d0d5dd);
+  margin: 0;
+  min-width: 0;
+  border: 1px dashed
+    color-mix(
+      in srgb,
+      var(--uxds-color-primary, #175cd3) 40%,
+      var(--uxds-color-border, #d0d5dd)
+    );
   border-radius: var(--uxds-radius-md, 0.5rem);
-  background: var(--uxds-color-surface-muted, #f2f4f7);
-  padding: 1rem;
+  background: color-mix(
+    in srgb,
+    var(--uxds-color-primary, #175cd3) 6%,
+    var(--uxds-color-surface, #ffffff)
+  );
+  padding: 0.8rem 1rem;
   min-height: 6rem;
 }
 
 .chartTitle {
   margin: 0 0 0.5rem;
   font-weight: 600;
+  overflow-wrap: anywhere;
 }
 
 .chartPlaceholder {
   margin: 0;
   color: var(--uxds-color-text-muted, #667085);
   font-size: 0.9rem;
+  overflow-wrap: anywhere;
 }
