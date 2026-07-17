@@ -113,10 +113,27 @@ pnpm run preview
 ```
 
 - Production build command: `pnpm run build:studio` (or `pnpm run build` for all workspace packages)
-- Output directory: `apps/ux-design-studio/dist/`
-- Vercel root directory for the standalone studio: `apps/ux-design-studio`
-- Preview defaults to Vite’s preview port **4173** unless overridden
-- Playwright E2E defaults to `http://127.0.0.1:4173` (starts local preview unless `PLAYWRIGHT_BASE_URL` is set)
+- Output directory: `apps/ux-design-studio/dist/` (includes `remoteEntry.js`)
+- Vercel root directory for the standalone/remote studio: `apps/ux-design-studio`
+- Standalone/remote preview port: **4174**
+- Simulated host preview port: **4173**
+- Playwright runs standalone (`4174`) and federation (`4173`) projects unless `PLAYWRIGHT_BASE_URL` is set
+
+### Federated host mode (E8)
+
+```bash
+pnpm run build:studio
+VITE_UXDS_REMOTE_ENTRY=http://127.0.0.1:4174/remoteEntry.js pnpm run build:host
+pnpm --filter @uxds/studio exec vite preview --host 127.0.0.1 --port 4174
+pnpm --filter @uxds/host exec vite preview --host 127.0.0.1 --port 4173
+```
+
+Open `http://127.0.0.1:4173/projects/project-agentpilot/ux-design-studio/overview`.
+
+- Host package: `apps/insanesdd-host` (`@uxds/host`)
+- Remote entry env: `VITE_UXDS_REMOTE_ENTRY`
+- Host is simulated; actor is synthetic Demo Approver; no real auth, backend, LLM, or Agile plan generation
+- See [`docs/Federated_Host_Integration_Architecture_v1.0.md`](docs/Federated_Host_Integration_Architecture_v1.0.md)
 
 ## Demo walkthrough
 
