@@ -19,7 +19,6 @@ import {
 } from "../../test/governance-ports";
 import { GovernanceProvider } from "./GovernanceProvider";
 import { useGovernance } from "./governance-context";
-import { DEMO_APPROVER } from "../../application/governance-session";
 
 function installMatchMedia() {
   Object.defineProperty(window, "matchMedia", {
@@ -131,9 +130,8 @@ describe("US-4.2 version-bound approval and UX gate", () => {
     const specBefore = structuredClone(agentPilotSeed);
     renderWithDeterministicGovernance("/review/screen-dashboard");
 
-    expect(
-      document.querySelector('[data-decision="actor"]'),
-    ).toHaveTextContent(`${DEMO_APPROVER.displayLabel} (${DEMO_APPROVER.role})`);
+    expect(document.querySelector('[data-decision="actor"]')).toBeNull();
+    expect(screen.queryByText(/demo approver/i)).not.toBeInTheDocument();
 
     await user.type(
       screen.getByLabelText(/approval comment/i),

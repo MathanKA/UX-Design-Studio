@@ -1,8 +1,8 @@
 .panel {
-  border: 1px solid #d6d6d6;
-  border-radius: 0.5rem;
-  background: #f7f4ef;
-  padding: 0.75rem;
+  border: 1px solid var(--studio-color-border);
+  border-radius: var(--studio-radius-md);
+  background: var(--studio-color-surface-muted);
+  padding: var(--studio-space-md);
 }
 
 .heading {

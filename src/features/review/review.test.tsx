@@ -146,6 +146,58 @@ describe("US-2.4 five-screen review rendering", () => {
     );
   });
 
+  it("presents the revamped toolbar, approval-progress sidebar, and accessible side tabs", async () => {
+    const user = userEvent.setup();
+    renderAt("/review/screen-dashboard");
+
+    expect(screen.getByTestId("review-toolbar")).toBeInTheDocument();
+    expect(document.querySelector('[data-toolbar="screen-version"]')).toHaveTextContent(
+      "sv-screen-dashboard-baseline",
+    );
+    expect(document.querySelector('[data-toolbar="review-status"]')).toHaveTextContent(
+      "Not reviewed",
+    );
+    expect(
+      document.querySelector("[data-nav-progress='true']"),
+    ).toHaveTextContent(/0 of 5 approved/i);
+
+    const tablist = screen.getByRole("tablist", { name: "Review panels" });
+    expect(within(tablist).getByRole("tab", { name: "Decision" })).toHaveAttribute(
+      "aria-selected",
+      "true",
+    );
+    expect(within(tablist).getByRole("tab", { name: "Persona" })).toBeInTheDocument();
+    expect(within(tablist).getByRole("tab", { name: "Journey" })).toBeInTheDocument();
+    expect(within(tablist).getByRole("tab", { name: "History" })).toBeInTheDocument();
+    expect(within(tablist).getByRole("tab", { name: "A11y" })).toBeInTheDocument();
+
+    await user.click(within(tablist).getByRole("tab", { name: "Persona" }));
+    expect(within(tablist).getByRole("tab", { name: "Persona" })).toHaveAttribute(
+      "aria-selected",
+      "true",
+    );
+    expect(screen.getByRole("radiogroup", { name: "Active persona" })).toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: /approve current version/i }),
+    ).toBeNull();
+
+    await user.click(within(tablist).getByRole("tab", { name: "Decision" }));
+    expect(
+      screen.getByRole("button", { name: /approve current version/i }),
+    ).toBeInTheDocument();
+
+    const decisionTab = within(tablist).getByRole("tab", { name: "Decision" });
+    decisionTab.focus();
+    await user.keyboard("{ArrowRight}");
+    expect(within(tablist).getByRole("tab", { name: "Persona" })).toHaveAttribute(
+      "aria-selected",
+      "true",
+    );
+    expect(document.activeElement).toBe(
+      within(tablist).getByRole("tab", { name: "Persona" }),
+    );
+  });
+
   it("renders required data, form, feedback, and chart nodes on representative screens", () => {
     const first = renderAt("/review/screen-dashboard");
     expect(screen.getByRole("table", { name: "Recent tasks" })).toBeInTheDocument();

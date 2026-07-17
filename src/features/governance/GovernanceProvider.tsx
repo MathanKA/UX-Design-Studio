@@ -13,7 +13,6 @@ import { approveScreen as executeApproveScreen } from "../../application/approve
 import {
   DEMO_APPROVER,
   createGovernanceStateFromSpec,
-  demoActorForRole,
   specGovernanceContext,
 } from "../../application/governance-session";
 import { regenerateScreen as executeRegenerateScreen } from "../../application/regenerate-screen";
@@ -33,7 +32,6 @@ import {
   selectLatestRevisionRequest,
   selectScreenStatus,
   type ActorSnapshot,
-  type DemoRole,
   type GovernanceState,
   type RevisionCategory,
 } from "../../domain/governance";
@@ -76,7 +74,7 @@ export type GovernanceProviderProps = {
   children: ReactNode;
   /** Injected UXSpec; defaults to AgentPilot seed. */
   spec?: UXSpec;
-  /** Initial demo actor; defaults to Approver. Role switches are ephemeral UI state. */
+  /** Injected actor for authorization tests; product composition defaults to Approver. */
   actor?: ActorSnapshot;
   clock?: Clock;
   idGenerator?: IdGenerator;
@@ -212,7 +210,7 @@ export function GovernanceProvider({
   const [resetAnnouncement, setResetAnnouncement] = useState<string | null>(
     null,
   );
-  const [actor, setActor] = useState<ActorSnapshot>(initialActor);
+  const actor = initialActor;
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isRegenerating, setIsRegenerating] = useState(false);
   const [controlledFailureArmed, setControlledFailureArmedState] =
@@ -221,10 +219,6 @@ export function GovernanceProvider({
 
   const dismissPersistenceNotice = useCallback(() => {
     setPersistenceNotice(null);
-  }, []);
-
-  const switchRole = useCallback((role: DemoRole) => {
-    setActor(demoActorForRole(role));
   }, []);
 
   const getScreen = useCallback(
@@ -463,8 +457,6 @@ export function GovernanceProvider({
       persistenceNotice,
       dismissPersistenceNotice,
       resetAnnouncement,
-      setActor,
-      switchRole,
       approveScreen,
       requestRevision,
       regenerateScreen,
@@ -497,7 +489,6 @@ export function GovernanceProvider({
       resetDemoState,
       setControlledFailureArmed,
       state,
-      switchRole,
     ],
   );
 

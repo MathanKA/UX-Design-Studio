@@ -46,6 +46,7 @@ import {
   createFixedClock,
   createSequentialIdGenerator,
 } from "../test/governance-ports";
+import { activateSidePanelTab } from "../features/review/activate-side-panel-tab";
 
 const identity = {
   projectId: agentPilotSeed.projectId,
@@ -150,7 +151,7 @@ describe("US-6.1 critical RTL demo flow", () => {
   });
 
   it(
-    "covers overview through review, governance, persistence, audit, and Reviewer restriction",
+    "covers overview through review, governance, persistence, audit, and fixed Approver composition",
     async () => {
       const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
       const repository = createPersistedRepository();
@@ -177,13 +178,8 @@ describe("US-6.1 critical RTL demo flow", () => {
       expect(
         document.querySelector('[data-approval="gate-readiness"]'),
       ).toHaveAttribute("data-gate-complete", "false");
-      expect(screen.getAllByTestId("role-switcher")[0]).toHaveAttribute(
-        "data-active-role",
-        "approver",
-      );
-      expect(
-        document.querySelector('[data-role-demo-only="true"]'),
-      ).toHaveTextContent(/not production authentication/i);
+      expect(screen.queryByTestId("role-switcher")).not.toBeInTheDocument();
+      expect(screen.queryByText(/demo approver/i)).not.toBeInTheDocument();
 
       await user.click(
         screen.getByRole("link", { name: "Open Dashboard review" }),
@@ -200,6 +196,7 @@ describe("US-6.1 critical RTL demo flow", () => {
         document.querySelector("[data-preview-viewport='true']"),
       ).toHaveAttribute("data-breakpoint", "mobile");
 
+      await activateSidePanelTab(user, "persona");
       await user.click(screen.getByRole("radio", { name: "Taylor" }));
       expect(screen.getByRole("radio", { name: "Taylor" })).toBeChecked();
       expect(
@@ -211,10 +208,8 @@ describe("US-6.1 critical RTL demo flow", () => {
       expect(taylor).toBeDefined();
       expect(screen.getByText(taylor!.role)).toBeInTheDocument();
 
-      expect(screen.getAllByTestId("role-switcher")[0]).toHaveAttribute(
-        "data-active-role",
-        "approver",
-      );
+      await activateSidePanelTab(user, "decision");
+      expect(screen.queryByTestId("role-switcher")).not.toBeInTheDocument();
 
       const baselineVersion = selectCurrentScreenVersion(
         loadState(repository),
@@ -361,32 +356,18 @@ describe("US-6.1 critical RTL demo flow", () => {
         ).getByText(/Priority operations view/i),
       ).toBeInTheDocument();
 
-      const eventsBeforeRoleSwitch = selectChronologicalEvents(
+      const eventsBeforeUiCheck = selectChronologicalEvents(
         loadState(remountRepository),
       ).length;
 
-      await user.click(
-        screen.getAllByRole("radio", { name: /demo reviewer/i })[0]!,
-      );
-      expect(screen.getAllByTestId("role-switcher")[0]).toHaveAttribute(
-        "data-active-role",
-        "reviewer",
-      );
+      expect(screen.queryByTestId("role-switcher")).not.toBeInTheDocument();
+      expect(screen.queryByText(/demo approver/i)).not.toBeInTheDocument();
       expect(
-        document.querySelector('[data-role-demo-only="true"]'),
-      ).toHaveTextContent(/POC role simulation/i);
-      expect(
-        document.querySelector('[data-role-demo-only="true"]'),
-      ).toHaveTextContent(/not production authentication/i);
-
-      expect(
-        screen.queryByRole("button", { name: /approve current version/i }),
-      ).toBeNull();
-      expect(screen.queryByTestId("revision-form")).toBeNull();
-      expect(screen.queryByTestId("regenerate-indicator")).toBeNull();
+        screen.getByRole("button", { name: /current version approved/i }),
+      ).toBeDisabled();
       expect(
         selectChronologicalEvents(loadState(remountRepository)).length,
-      ).toBe(eventsBeforeRoleSwitch);
+      ).toBe(eventsBeforeUiCheck);
 
       expect(window.localStorage.getItem(managedKey)).not.toBeNull();
       expect(agentPilotSeed.screens).toHaveLength(5);

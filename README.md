@@ -73,15 +73,10 @@ Demo reset removes only that managed key. It never calls `localStorage.clear()`.
 | Project | AgentPilot |
 | Screens | Dashboard, Login, Task Detail, Workflow Templates, Reports Export |
 | UX personas | Alex, Jordan, Taylor (review lens context; not auth) |
-| Demo roles | Demo Approver, Demo Reviewer, Demo Viewer |
+| Review actor | Demo Approver (fixed; no role-switching UI) |
 
-Demo roles are separate from UX personas. They are POC role simulation only—not production authentication, SSO, or RBAC.
-
-| Role | Typical capability |
-|---|---|
-| Demo Approver (default) | Approve, request revision, regenerate |
-| Demo Reviewer | View overview, preview, and audit |
-| Demo Viewer | View overview, preview, and audit |
+Demo Approver is separate from UX personas and is not production
+authentication, SSO, or RBAC.
 
 ## Prerequisites
 

@@ -157,7 +157,7 @@ Keep under ~90 seconds:
 Use when the happy path is interrupted:
 
 1. Reset demo state (managed key only).
-2. Re-select Demo Approver.
+2. Confirm the approval controls are available under the fixed Demo Approver.
 3. If regeneration fails unexpectedly, enable then disable controlled provider failure and retry once.
 4. If storage looks corrupt, use Reset demo state—never `localStorage.clear()`, never paste arbitrary JSON.
 5. If a deep link 404s on static hosting, confirm SPA rewrite (`vercel.json`) and reload `/overview`.
@@ -170,7 +170,7 @@ Use when the happy path is interrupted:
 |---|---|
 | Is this an InfoBeans product? | No. It is a proof-of-work concept extension for interview evaluation. |
 | Does this prove InsaneSDD is missing UX review? | No. Never frame it that way. |
-| Is the role switcher real auth? | No. Demo Approver / Reviewer / Viewer are POC simulation only. |
+| Is Demo Approver real auth? | No. It is a fixed synthetic review actor; the POC has no role-switching or production authentication. |
 | Is regeneration real AI? | No. Deterministic mock behind `DesignAgentProvider`; no network LLM. |
 | Does approval generate an Agile plan? | No. The gate signals readiness only; planning is outside this POC. |
 | Is localStorage production audit storage? | No. Port-shaped adapter for the POC; durable signed storage is a documented production path. |

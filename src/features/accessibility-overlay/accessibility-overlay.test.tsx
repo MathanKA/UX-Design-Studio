@@ -19,6 +19,7 @@ import {
   collectContrastAnnotations,
   deriveAccessibilityAnnotations,
 } from "./accessibility-selectors";
+import { activateSidePanelTab } from "../review/activate-side-panel-tab";
 import { AccessibilityOverlayPanel } from "./AccessibilityOverlayPanel";
 import { ContrastBadges } from "./ContrastBadges";
 
@@ -91,6 +92,7 @@ describe("US-5.2 accessibility overlay", () => {
     const user = userEvent.setup();
     const specBefore = structuredClone(agentPilotSeed);
     renderDashboard();
+    await activateSidePanelTab(user, "a11y");
 
     const panel = screen.getByTestId("accessibility-overlay-panel");
     const toggle = within(panel).getByRole("button", {
@@ -122,6 +124,7 @@ describe("US-5.2 accessibility overlay", () => {
     const user = userEvent.setup();
     const before = JSON.stringify(agentPilotSeed);
     renderDashboard();
+    await activateSidePanelTab(user, "a11y");
     await user.click(
       screen.getByRole("button", { name: /show accessibility overlay/i }),
     );
@@ -191,11 +194,13 @@ describe("US-5.2 accessibility overlay", () => {
     expect(screen.getByTestId("contrast-badges").textContent).toMatch(/Pass/i);
   });
 
-  it("shows contrast badges in the review workbench without requiring overlay on", () => {
+  it("shows contrast badges in the review workbench without requiring overlay on", async () => {
+    const user = userEvent.setup();
     renderDashboard();
     const badges = screen.getByTestId("contrast-badges");
     expect(badges).toHaveAttribute("data-contrast-badges", "true");
     expect(badges.textContent).toMatch(/Pass/i);
+    await activateSidePanelTab(user, "a11y");
     expect(
       screen.getByRole("button", { name: /show accessibility overlay/i }),
     ).toHaveAttribute("aria-pressed", "false");

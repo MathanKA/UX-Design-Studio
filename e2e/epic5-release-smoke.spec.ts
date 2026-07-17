@@ -67,13 +67,6 @@ async function resetManagedGovernanceKey(page: Page): Promise<void> {
   await expect(page.getByRole("heading", { name: "Overview", exact: true })).toBeVisible();
 }
 
-async function selectApprover(page: Page): Promise<void> {
-  const roleGroup = page.getByRole("radiogroup", { name: "POC demo role" }).first();
-  const approver = roleGroup.getByRole("radio", { name: /demo approver/i });
-  await approver.check();
-  await expect(approver).toBeChecked();
-}
-
 async function approveAllScreens(page: Page): Promise<void> {
   for (const [index, name] of SCREEN_NAMES.entries()) {
     await page.getByRole("link", { name: `Open ${name} review` }).click();
@@ -117,7 +110,7 @@ test.describe("Epic 5 release smoke", () => {
     const guard = installConsoleGuard(page);
 
     await resetManagedGovernanceKey(page);
-    await selectApprover(page);
+    await expect(page.getByTestId("role-switcher")).toHaveCount(0);
 
     await page.getByRole("link", { name: "Open Dashboard review" }).click();
     await expect(page.getByRole("heading", { name: "Screen review" })).toBeVisible();
@@ -181,6 +174,7 @@ test.describe("Epic 5 release smoke", () => {
     );
     await captureEvidence(page, "02-regenerated-dashboard.png");
 
+    await page.getByRole("tab", { name: "History" }).click();
     const history = page.getByTestId("version-history-panel");
     await expect(history).toHaveAttribute("data-version-count", "2");
     await expect(history.locator('[data-version-marker="current"]')).toBeVisible();
@@ -193,6 +187,7 @@ test.describe("Epic 5 release smoke", () => {
     await expect(history.getByText(/historical approval/i)).toBeVisible();
     await captureEvidence(page, "03-version-history.png");
 
+    await page.getByRole("tab", { name: "Decision" }).click();
     await expect(page.getByRole("button", { name: /approve current version/i })).toBeEnabled();
     await expect(page.locator('[data-decision="gate-readiness"]')).toHaveAttribute(
       "data-gate-complete",
@@ -211,6 +206,7 @@ test.describe("Epic 5 release smoke", () => {
     );
     await captureEvidence(page, "04-reapproval-restored.png");
 
+    await page.getByRole("tab", { name: "A11y" }).click();
     const overlayPanel = page.getByTestId("accessibility-overlay-panel");
     const overlayToggle = overlayPanel.getByRole("button", {
       name: /accessibility overlay/i,

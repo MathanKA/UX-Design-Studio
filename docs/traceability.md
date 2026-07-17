@@ -174,13 +174,13 @@ Managed reset: `ResetDemoStateControl.tsx` removes only `uxds:v1:project-agentpi
 
 ---
 
-## FR-110–112 — Demo roles
+## FR-110–112 — Fixed review actor
 
 | ID | PRD requirement (summary) | Architecture | GitHub | Implementation | Tests | Delivery evidence |
 |---|---|---|---|---|---|---|
-| FR-110 | Role switcher Approver / Reviewer / Viewer | Demo role model | US-4.3 #41, #43 | `RoleSwitcher.tsx` | `revision-roles.test.tsx` | #41 / #84 |
-| FR-111 | Only Approver may approve, revise, regenerate | Dual-layer enforcement | #43 | UI + application capability checks | `revision-roles.test.tsx`, critical RTL Reviewer restriction | #41 / #84; #100 |
-| FR-112 | Not production-secure authorization | Explicit labeling | #41; README | “POC demo role” labeling; docs exclusions | Documented in README + release-acceptance | #98 README baseline |
+| FR-110 | Fixed Demo Approver; no role-simulation UI | Fixed actor composition | US-4.3 #41, #43; v1.1 addendum | `GovernanceProvider.tsx`; role-switcher module removed | `revision-roles.test.tsx`; Playwright absence assertion | v1.1 product override |
+| FR-111 | Only Approver may approve, revise, regenerate | Command capability enforcement | #43 | Application capability checks | `revision-roles.test.tsx` unauthorized bypass coverage | #41 / #84; v1.1 verification |
+| FR-112 | Not production-secure authorization | Synthetic fixed actor | README; v1.1 addendum | No auth or identity UI/claim | Documentation review | v1.1 product override |
 
 ---
 

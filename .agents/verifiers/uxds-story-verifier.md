@@ -162,7 +162,8 @@ work.
 - UI restrictions exist for restricted controls
 - command-level restrictions exist and reject bypass attempts
 - unauthorized attempts append no event
-- role switcher is marked demo-only and is not production authentication
+- product composition uses fixed Demo Approver without role-simulation UI
+- Demo Approver is not presented as production authentication
 - demo roles are not UX personas
 - `screen.regenerate` capability may be modeled for Approver
 - provider-backed regeneration orchestration, DesignAgentProvider, and generated variants remain absent

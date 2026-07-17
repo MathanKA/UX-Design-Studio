@@ -5,7 +5,6 @@ import type { RequestRevisionResult } from "../../application/request-revision";
 import type {
   ActorSnapshot,
   ApprovalProgress,
-  DemoRole,
   GovernanceState,
   ScreenId,
   ScreenReviewStatus,
@@ -74,8 +73,6 @@ export type GovernanceContextValue = {
   dismissPersistenceNotice: () => void;
   /** aria-live announcement after demo-state reset. */
   resetAnnouncement: string | null;
-  setActor: (actor: ActorSnapshot) => void;
-  switchRole: (role: DemoRole) => void;
   approveScreen: (args: ApproveScreenArgs) => ApproveScreenAttemptResult;
   requestRevision: (args: RequestRevisionArgs) => RequestRevisionAttemptResult;
   regenerateScreen: (

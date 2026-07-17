@@ -11,11 +11,11 @@ import {
   DEMO_VIEWER,
 } from "../../application/governance-session";
 import {
+  type ActorSnapshot,
   hasCapability,
   selectEventsForScreen,
   selectScreenStatus,
 } from "../../domain/governance";
-import { listPersonas } from "../../domain/ux-spec";
 import { agentPilotSeed } from "../../infrastructure/seed";
 import { createGovernanceStateFromSpec } from "../../application/governance-session";
 import { InMemoryGovernanceRepository } from "../../infrastructure/persistence/in-memory-governance-repository";
@@ -48,7 +48,10 @@ function createMemoryRepository() {
   );
 }
 
-function renderWithDeterministicGovernance(pathName: string) {
+function renderWithDeterministicGovernance(
+  pathName: string,
+  actor?: ActorSnapshot,
+) {
   const clock = createFixedClock("2026-07-15T03:00:00.000Z");
   const idGenerator = createSequentialIdGenerator(1);
   return render(
@@ -58,6 +61,7 @@ function renderWithDeterministicGovernance(pathName: string) {
         idGenerator={idGenerator}
         createdAt="2026-07-15T01:00:00.000Z"
         repository={createMemoryRepository()}
+        {...(actor ? { actor } : {})}
       >
         <MemoryRouter initialEntries={[pathName]}>
           <AppRoutes />
@@ -75,49 +79,14 @@ describe("US-4.3 structured revisions and role enforcement", () => {
     );
   });
 
-  it("defaults to Demo Approver and labels the switcher as POC-only", () => {
-    renderWithDeterministicGovernance("/overview");
-    const switchers = screen.getAllByTestId("role-switcher");
-    expect(switchers.length).toBeGreaterThan(0);
-    expect(switchers[0]).toHaveAttribute("data-active-role", "approver");
-    expect(switchers[0]).toHaveTextContent(/POC role simulation/i);
+  it("defaults to Demo Approver without exposing role simulation UI", () => {
+    renderWithDeterministicGovernance("/review/screen-dashboard");
+
+    expect(screen.queryByTestId("role-switcher")).not.toBeInTheDocument();
+    expect(screen.queryByText(/demo approver/i)).not.toBeInTheDocument();
     expect(
-      document.querySelector('[data-role-demo-only="true"]'),
-    ).toHaveTextContent(/not production authentication/i);
-    expect(
-      document.querySelector('[data-role-demo-only="true"]'),
-    ).toHaveTextContent(/SSO/);
-    expect(
-      document.querySelector('[data-role-demo-only="true"]'),
-    ).toHaveTextContent(/identity verification/i);
-  });
-
-  it("exposes Approver, Reviewer, and Viewer without overlapping personas", async () => {
-    const user = userEvent.setup();
-    renderWithDeterministicGovernance("/overview");
-
-    expect(screen.getAllByTestId("role-option-approver").length).toBeGreaterThan(
-      0,
-    );
-    expect(screen.getAllByTestId("role-option-reviewer").length).toBeGreaterThan(
-      0,
-    );
-    expect(screen.getAllByTestId("role-option-viewer").length).toBeGreaterThan(0);
-
-    const personaNames = listPersonas(agentPilotSeed).map((persona) => persona.name);
-    expect(personaNames).toEqual(["Alex", "Jordan", "Taylor"]);
-    expect(personaNames).not.toContain(DEMO_APPROVER.displayLabel);
-    expect(personaNames).not.toContain(DEMO_REVIEWER.displayLabel);
-    expect(personaNames).not.toContain(DEMO_VIEWER.displayLabel);
-
-    const reviewerInputs = screen.getAllByRole("radio", {
-      name: /demo reviewer/i,
-    });
-    await user.click(reviewerInputs[0]!);
-    expect(screen.getAllByTestId("role-switcher")[0]).toHaveAttribute(
-      "data-active-role",
-      "reviewer",
-    );
+      screen.getByRole("button", { name: /approve current version/i }),
+    ).toBeEnabled();
   });
 
   it("lets Approver approve and request revision while owning regenerate capability", async () => {
@@ -170,14 +139,12 @@ describe("US-4.3 structured revisions and role enforcement", () => {
     ).toBeEnabled();
   });
 
-  it("hides approve, revision, and regenerate controls for Reviewer and Viewer", async () => {
-    const user = userEvent.setup();
-    renderWithDeterministicGovernance("/review/screen-dashboard");
-
-    for (const roleLabel of [/demo reviewer/i, /demo viewer/i]) {
-      const radios = screen.getAllByRole("radio", { name: roleLabel });
-      await user.click(radios[0]!);
-
+  it("hides mutation controls for internally injected read-only actors", () => {
+    for (const actor of [DEMO_REVIEWER, DEMO_VIEWER]) {
+      const view = renderWithDeterministicGovernance(
+        "/review/screen-dashboard",
+        actor,
+      );
       expect(
         screen.queryByRole("button", { name: /approve current version/i }),
       ).toBeNull();
@@ -187,6 +154,7 @@ describe("US-4.3 structured revisions and role enforcement", () => {
       expect(screen.queryByTestId("revision-form")).toBeNull();
       expect(screen.queryByTestId("regenerate-indicator")).toBeNull();
       expect(screen.getByTestId("role-restricted-message")).toBeInTheDocument();
+      view.unmount();
     }
   });
 
@@ -254,18 +222,10 @@ describe("US-4.3 structured revisions and role enforcement", () => {
     );
   });
 
-  it("allows all roles to view overview, preview, and audit routes", async () => {
-    const user = userEvent.setup();
-    renderWithDeterministicGovernance("/overview");
-
-    for (const roleLabel of [
-      /demo approver/i,
-      /demo reviewer/i,
-      /demo viewer/i,
-    ]) {
-      const radios = screen.getAllByRole("radio", { name: roleLabel });
-      await user.click(radios[0]!);
-
+  it("allows all internally injected roles to view overview, preview, and audit routes", async () => {
+    for (const actor of [DEMO_APPROVER, DEMO_REVIEWER, DEMO_VIEWER]) {
+      const user = userEvent.setup();
+      const view = renderWithDeterministicGovernance("/overview", actor);
       expect(screen.getByRole("heading", { name: /overview/i })).toBeInTheDocument();
       await user.click(screen.getByRole("link", { name: "Review" }));
       expect(screen.getByTestId("decision-panel")).toBeInTheDocument();
@@ -273,7 +233,7 @@ describe("US-4.3 structured revisions and role enforcement", () => {
       expect(
         screen.getByRole("heading", { name: "Audit", level: 2 }),
       ).toBeInTheDocument();
-      await user.click(screen.getByRole("link", { name: "Overview" }));
+      view.unmount();
     }
   });
 
