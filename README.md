@@ -15,10 +15,6 @@ An independent proof-of-work concept extension for InsaneSDD 2.0. It is **not** 
 - It turns a structured UX specification into responsive screen previews that reviewers can inspect, revise, regenerate, and approve.
 - It also shows how the module can run on its own or integrate into a React host using Module Federation.
 
-<p align="center">
-  <img src="docs/assets/insanesdd-ux-design-stage.png" alt="InsaneSDD UX Design stage showing AgentPilot screens and review actions" width="900" />
-</p>
-
 ### Architecture at a glance
 
 Two entry paths reach the same React app: a standalone Vite SPA, and a simulated InsaneSDD host that loads the studio through Module Federation. A validated AgentPilot UXSpec drives an allowlisted renderer and runtime `--uxds-*` tokens. Reviewers approve, revise, or regenerate screens; those actions append governance events. Regeneration uses a deterministic mock provider. State rehydrates through a validated localStorage adapter. Selectors derive the audit log and approval gate. In federated mode, gate completion updates the host and opens a simulated Agile Editor — not a real Agile plan, backend, LLM, or authentication flow.
@@ -37,20 +33,21 @@ flowchart LR
     Output --> Handoff["Simulated Agile Editor handoff"]
 ```
 
-### Layering
+### Repository structure
 
-The studio keeps clear boundaries so UI, domain rules, adapters, and host integration stay separate:
+A pnpm monorepo with the core modules kept at the top level so apps, shared packages, docs, and tooling stay separate:
 
 ```text
-src/app            bootstrap, routes, providers, feature flags
-src/features       overview, review, governance UI, audit, lenses, overlays
-src/application    command orchestration (approve, revise, regenerate)
-src/domain         UXSpec model + governance rules (framework-free)
-src/ports          persistence, provider, clock, ID contracts
-src/infrastructure seed data, browser persistence, mock design-agent provider
-src/renderer       allowlisted registry, recursive composer, theming, actions
-src/ui             shared shell and presentation primitives
-src/integration    host contract mount boundary and gate-event handoff
+apps/
+  ux-design-studio/    standalone Vite SPA (@uxds/studio): renderer, governance, review workflow
+  insanesdd-host/      simulated InsaneSDD host (@uxds/host) that loads the studio via Module Federation
+packages/
+  uxds-host-contract/  Zod-validated host ↔ remote contract (@uxds/host-contract)
+docs/                  PRD, technical architecture, ADRs, traceability, release notes
+e2e/                   cross-app Playwright specs (standalone + federation)
+scripts/               GitHub Project import, CI signature checks, agent tooling
+.agents/               run manifests, story-loop skill, independent verifier
+.github/               CI quality gate, PR template, plan import data
 ```
 
 ## Best practices showcase (senior frontend checklist)
