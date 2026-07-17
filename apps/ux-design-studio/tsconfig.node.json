@@ -15,9 +15,5 @@
     "noFallthroughCasesInSwitch": true,
     "types": ["node"]
   },
-  "include": [
-    "playwright.config.ts",
-    "eslint.config.js",
-    "vitest.scripts.config.ts"
-  ]
+  "include": ["vite.config.ts", "vitest.config.ts"]
 }

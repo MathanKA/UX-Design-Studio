@@ -88,6 +88,9 @@ The application itself requires **no environment variables and no secrets**.
 
 ## Install and run
 
+This repository is a pnpm workspace. The standalone UX Design Studio app lives in
+`apps/ux-design-studio` (`@uxds/studio`).
+
 ```bash
 corepack enable
 corepack pnpm install
@@ -97,6 +100,7 @@ corepack pnpm install
 
 ```bash
 pnpm run dev
+# equivalent: pnpm run dev:standalone
 ```
 
 Open [http://127.0.0.1:5173](http://127.0.0.1:5173) (Vite `server.port` is `5173`).
@@ -104,12 +108,13 @@ Open [http://127.0.0.1:5173](http://127.0.0.1:5173) (Vite `server.port` is `5173
 ### Production build and local preview
 
 ```bash
-pnpm run build
+pnpm run build:studio
 pnpm run preview
 ```
 
-- Production build command: `pnpm run build`
-- Output directory: `dist/`
+- Production build command: `pnpm run build:studio` (or `pnpm run build` for all workspace packages)
+- Output directory: `apps/ux-design-studio/dist/`
+- Vercel root directory for the standalone studio: `apps/ux-design-studio`
 - Preview defaults to Vite’s preview port **4173** unless overridden
 - Playwright E2E defaults to `http://127.0.0.1:4173` (starts local preview unless `PLAYWRIGHT_BASE_URL` is set)
 

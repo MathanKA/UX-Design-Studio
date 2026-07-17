@@ -172,6 +172,7 @@ Keep journey walkthrough, screen-version history UI, full accessibility overlay,
 Optional features may observe or wrap core behavior. They must not own renderer, governance, approval, persistence, or audit foundations.
 
 ## Target repository structure
+Under the E8 pnpm workspace, the studio application lives in `apps/ux-design-studio/src` (`@uxds/studio`). Paths below are relative to that package unless noted.
 - `src/app`: bootstrap, routes, providers, configuration, and error boundaries.
 - `src/domain`: framework-independent UXSpec, governance, identity, and capability rules.
 - `src/application`: use cases and command orchestration.
@@ -182,9 +183,7 @@ Optional features may observe or wrap core behavior. They must not own renderer,
 - `src/ui`: reusable presentation primitives, layouts, dialogs, icons, and styles.
 - `src/integration`: host contract and mount boundary.
 - `src/test`: shared fixtures and test helpers.
-- `docs`: controlling product and architecture documents.
-- `scripts`: repository automation and validation.
-- `.github`: issue, pull-request, import, workflow, and release configuration.
+- Repository root also keeps `apps/insanesdd-host` (E8), `packages/uxds-host-contract` (E8), `docs`, `scripts`, `.agents`, `.github`, and cross-app Playwright.
 
 Dependency direction:
 - UI and infrastructure depend on application.

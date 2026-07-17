@@ -91,7 +91,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Production build
-        run: pnpm run build
+        run: pnpm run build:studio
 
       - name: Install Playwright Chromium
         run: pnpm exec playwright install --with-deps chromium

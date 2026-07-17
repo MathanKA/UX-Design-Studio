@@ -46,8 +46,8 @@ export default defineConfig({
     : {
         webServer: {
           command: isCI
-            ? "pnpm exec vite preview --host 127.0.0.1 --port 4173"
-            : "pnpm build && pnpm exec vite preview --host 127.0.0.1 --port 4173",
+            ? "pnpm --filter @uxds/studio exec vite preview --host 127.0.0.1 --port 4173"
+            : "pnpm --filter @uxds/studio build && pnpm --filter @uxds/studio exec vite preview --host 127.0.0.1 --port 4173",
           url: baseURL,
           reuseExistingServer: !isCI,
           timeout: 180_000,
