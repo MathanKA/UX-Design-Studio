@@ -2,8 +2,9 @@ import { defineConfig, devices } from "@playwright/test";
 
 const isCI = Boolean(process.env.CI);
 const externalBaseURL = process.env.PLAYWRIGHT_BASE_URL?.trim();
-const baseURL = externalBaseURL || "http://127.0.0.1:4173";
 const useExternalServer = Boolean(externalBaseURL);
+const remoteURL = "http://127.0.0.1:4174";
+const hostURL = externalBaseURL || "http://127.0.0.1:4173";
 
 export default defineConfig({
   testDir: "./e2e",
@@ -26,7 +27,6 @@ export default defineConfig({
       ],
   outputDir: "test-results",
   use: {
-    baseURL,
     trace: isCI ? "on" : "retain-on-failure",
     video: isCI ? "on" : "retain-on-failure",
     screenshot: "only-on-failure",
@@ -35,22 +35,46 @@ export default defineConfig({
   },
   projects: [
     {
-      name: "chromium",
-      use: { ...devices["Desktop Chrome"] },
+      name: "standalone",
+      testDir: "./e2e/standalone",
+      use: {
+        ...devices["Desktop Chrome"],
+        baseURL: remoteURL,
+      },
+    },
+    {
+      name: "federation",
+      testDir: "./e2e/federation",
+      use: {
+        ...devices["Desktop Chrome"],
+        baseURL: hostURL,
+      },
     },
   ],
-  // Local / CI default: build (non-CI) and serve Vite preview on 4173.
-  // When PLAYWRIGHT_BASE_URL is set, target that deployment and do not start webServer.
   ...(useExternalServer
     ? {}
     : {
-        webServer: {
-          command: isCI
-            ? "pnpm --filter @uxds/studio exec vite preview --host 127.0.0.1 --port 4173"
-            : "pnpm --filter @uxds/studio build && pnpm --filter @uxds/studio exec vite preview --host 127.0.0.1 --port 4173",
-          url: baseURL,
-          reuseExistingServer: !isCI,
-          timeout: 180_000,
-        },
+        webServer: [
+          {
+            command: isCI
+              ? "pnpm --filter @uxds/studio exec vite preview --host 127.0.0.1 --port 4174"
+              : "pnpm --filter @uxds/studio build && pnpm --filter @uxds/studio exec vite preview --host 127.0.0.1 --port 4174",
+            url: remoteURL,
+            reuseExistingServer: !isCI,
+            timeout: 180_000,
+          },
+          {
+            command: isCI
+              ? "pnpm --filter @uxds/host exec vite preview --host 127.0.0.1 --port 4173"
+              : "VITE_UXDS_REMOTE_ENTRY=http://127.0.0.1:4174/remoteEntry.js pnpm --filter @uxds/host build && VITE_UXDS_REMOTE_ENTRY=http://127.0.0.1:4174/remoteEntry.js pnpm --filter @uxds/host exec vite preview --host 127.0.0.1 --port 4173",
+            url: hostURL,
+            reuseExistingServer: !isCI,
+            timeout: 180_000,
+            env: {
+              ...process.env,
+              VITE_UXDS_REMOTE_ENTRY: "http://127.0.0.1:4174/remoteEntry.js",
+            },
+          },
+        ],
       }),
 });

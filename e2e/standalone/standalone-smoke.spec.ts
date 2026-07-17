@@ -36,7 +36,12 @@ function installConsoleGuard(page: Page): ConsoleGuard {
 
   page.on("response", (response: Response) => {
     const url = response.url();
-    if (!url.startsWith("http://127.0.0.1:4173") && !url.startsWith("http://localhost:4173")) {
+    if (
+      !url.startsWith("http://127.0.0.1:4174") &&
+      !url.startsWith("http://localhost:4174") &&
+      !url.startsWith("http://127.0.0.1:4173") &&
+      !url.startsWith("http://localhost:4173")
+    ) {
       return;
     }
     const status = response.status();
