@@ -245,8 +245,8 @@ Do not expect this POC to include:
 - A real LLM integration or production backend
 - Production authentication, SSO, OIDC, or RBAC
 - Persistence beyond the approved browser-storage adapter (no durable signed audit store)
-- Multi-project or multi-repository support
-- Runtime Module Federation, route-level MFE packaging, or production event streaming / Live Terminal publication
+- Multi-project or multi-repository support (E8 may reject unsupported project IDs in the simulated host only)
+- Runtime Module Federation outside the authorized E8 post-release demonstration, or production event streaming / Live Terminal publication
 - Production APIs, a real Design Agent API, or a general-purpose low-code builder
 - Arbitrary React component execution
 - Arbitrary HTML, JavaScript, CSS, or dynamic imports from UXSpec data
@@ -254,18 +254,23 @@ Do not expect this POC to include:
 - Real Agile plan generation (gate readiness is a POC signal only)
 - Unapproved dependencies or architecture frameworks
 
-Production evolution paths for OIDC/SSO, server RBAC, durable event storage, signed audit events, retention/legal hold, real Design Agent API, Live Terminal publication, and route-level MFE integration are documented in [`docs/architecture-decisions.md`](docs/architecture-decisions.md) and Architecture §29 — not implemented here.
+`v0.1.0-poc` shipped as a standalone SPA under ADR-001. Post-release E8 (SoT v1.2, ADR-009) authorizes a separate federated demo with `@module-federation/vite`, a simulated InsaneSDD host, and preserved standalone execution. See [`docs/Federated_Host_Integration_Architecture_v1.0.md`](docs/Federated_Host_Integration_Architecture_v1.0.md).
+
+Production evolution paths for OIDC/SSO, server RBAC, durable event storage, signed audit events, retention/legal hold, real Design Agent API, and Live Terminal publication remain documented in [`docs/architecture-decisions.md`](docs/architecture-decisions.md) and Architecture §29 — not implemented here.
 
 ## Controlling documents
 
 Document authority order:
 
-1. Frozen Source of Truth: [`docs/UX Design Studio — Source of Truth.pdf`](docs/UX%20Design%20Studio%20—%20Source%20of%20Truth.pdf)
-2. [`docs/UX_Design_Studio_PRD_v1.0.md`](docs/UX_Design_Studio_PRD_v1.0.md)
-3. [`docs/UX_Design_Studio_Technical_Architecture_v1.0.md`](docs/UX_Design_Studio_Technical_Architecture_v1.0.md)
-4. [`docs/UX_Design_Studio_Development_Plan_v1.0.md`](docs/UX_Design_Studio_Development_Plan_v1.0.md)
-5. Approved GitHub stories and acceptance criteria
-6. [`AGENTS.md`](AGENTS.md) for repository-wide agent and delivery policy
+1. SoT v1.2 addendum: [`docs/UX Design Studio — Source of Truth v1.2 Addendum.md`](docs/UX%20Design%20Studio%20—%20Source%20of%20Truth%20v1.2%20Addendum.md)
+2. SoT v1.1 addendum: [`docs/UX Design Studio — Source of Truth v1.1 Addendum.md`](docs/UX%20Design%20Studio%20—%20Source%20of%20Truth%20v1.1%20Addendum.md)
+3. Frozen Source of Truth: [`docs/UX Design Studio — Source of Truth.pdf`](docs/UX%20Design%20Studio%20—%20Source%20of%20Truth.pdf)
+4. [`docs/UX_Design_Studio_PRD_v1.0.md`](docs/UX_Design_Studio_PRD_v1.0.md)
+5. [`docs/Federated_Host_Integration_Architecture_v1.0.md`](docs/Federated_Host_Integration_Architecture_v1.0.md) (E8)
+6. [`docs/UX_Design_Studio_Technical_Architecture_v1.0.md`](docs/UX_Design_Studio_Technical_Architecture_v1.0.md)
+7. [`docs/UX_Design_Studio_Development_Plan_v1.0.md`](docs/UX_Design_Studio_Development_Plan_v1.0.md)
+8. Approved GitHub stories and acceptance criteria
+9. [`AGENTS.md`](AGENTS.md) for repository-wide agent and delivery policy
 
 Related planning tooling notes: [`docs/GitHub_Import_Instructions.md`](docs/GitHub_Import_Instructions.md).
 

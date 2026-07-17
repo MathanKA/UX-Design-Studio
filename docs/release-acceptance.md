@@ -190,7 +190,7 @@ Confirmed for this POC release:
 - No real LLM evaluation
 - No production backend
 - No production authentication, SSO, or RBAC
-- No runtime Module Federation
+- No runtime Module Federation in the `v0.1.0-poc` release (route-level federation is a separate post-release E8 track under ADR-009 / SoT v1.2)
 - No production Live Terminal / event-stream integration
 - Demo roles are simulation only
 - Browser storage is not durable regulated audit storage

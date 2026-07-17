@@ -174,7 +174,7 @@ Use when the happy path is interrupted:
 | Is regeneration real AI? | No. Deterministic mock behind `DesignAgentProvider`; no network LLM. |
 | Does approval generate an Agile plan? | No. The gate signals readiness only; planning is outside this POC. |
 | Is localStorage production audit storage? | No. Port-shaped adapter for the POC; durable signed storage is a documented production path. |
-| Why not Module Federation? | Unknown host; SPA with MFE-ready boundaries first (ADR-001). |
+| Why not Module Federation in the POC? | Unknown host at POC time; SPA with MFE-ready boundaries first (ADR-001). Post-release E8 demonstrates route-level federation with a simulated host (ADR-009). |
 | What was cut? | Nothing. Cut line activated: No. Optional journey, history, overlay, and tablet are retained. |
 
 ---

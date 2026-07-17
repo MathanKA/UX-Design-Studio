@@ -1,11 +1,11 @@
 # UX Design Studio POC Development Plan
 
-> **Version:** 1.0  
-> **Repository:** `MathanKA/UX-Design-Studio`  
-> **Delivery model:** Solo Scrumban, two increments  
-> **Effort cap:** 50 build hours  
-> **Integration branch:** `staging`  
-> **Release flow:** `staging` to `main`  
+> **Version:** 1.0
+> **Repository:** `MathanKA/UX-Design-Studio`
+> **Delivery model:** Solo Scrumban, two increments
+> **Effort cap:** 50 build hours
+> **Integration branch:** `staging`
+> **Release flow:** `staging` to `main`
 > **Release tag:** `v0.1.0-poc`
 
 ## 1. Purpose
@@ -162,9 +162,9 @@ Every imported issue receives a stable plan key marker. GitHub supplies the repo
 
 **Objective:** Establish the reproducible SPA foundation, immutable domain contracts, runtime validation, and AgentPilot seed baseline.
 
-**Increment:** A - Walking Skeleton  
-**Priority:** P0  
-**PRD:** FR-001–004, FR-010, FR-015, SC-001, SC-011  
+**Increment:** A - Walking Skeleton
+**Priority:** P0
+**PRD:** FR-001–004, FR-010, FR-015, SC-001, SC-011
 **Architecture:** §8, §10–13, §28, ADR-001, ADR-003
 
 #### US-1.1: Bootstrap the frontend engineering foundation (1.5h)
@@ -187,7 +187,7 @@ As an engineer, I need a strict, reproducible React and TypeScript workspace so 
 | T-1.1.1 | Initialize Vite, React, TypeScript and quality tooling | 0.75 | A reproducible pnpm workspace with strict compiler and quality checks. |
 | T-1.1.2 | Create application shell, routes and root boundaries | 0.75 | A navigable shell with isolated route failure handling. |
 
-**PRD:** FR-001, FR-004, FR-015, NFR 16.5, SC-011  
+**PRD:** FR-001, FR-004, FR-015, NFR 16.5, SC-011
 **Architecture:** §8, §10, §11, §24, §28
 
 #### US-1.2: Define and validate immutable UXSpec contracts (2h)
@@ -212,7 +212,7 @@ As the rendering system, I need a typed and runtime-validated UX specification s
 
 **Depends on:** US-1.1
 
-**PRD:** FR-010, FR-013, FR-015, BR-003, NFR 16.3, NFR 16.4  
+**PRD:** FR-010, FR-013, FR-015, BR-003, NFR 16.3, NFR 16.4
 **Architecture:** §5.1–5.3, §12, §13, ADR-003, ADR-004
 
 #### US-1.3: Author and verify the AgentPilot seed baseline (2.5h)
@@ -237,16 +237,16 @@ As a reviewer, I need the POC to use a faithful AgentPilot UXSpec so that the de
 
 **Depends on:** US-1.2
 
-**PRD:** FR-002, FR-004, FR-012–014, SC-001, SC-012  
+**PRD:** FR-002, FR-004, FR-012–014, SC-001, SC-012
 **Architecture:** §12–14, §27.3, §33
 
 ### E2: Spec-Driven Rendering and Runtime Theming (16h)
 
 **Objective:** Prove the highest-risk technical capability: safely compose every screen through one renderer and apply one runtime token source.
 
-**Increment:** A - Walking Skeleton  
-**Priority:** P0  
-**PRD:** FR-010–023, FR-030–033, SC-001, SC-002  
+**Increment:** A - Walking Skeleton
+**Priority:** P0
+**PRD:** FR-010–023, FR-030–033, SC-001, SC-002
 **Architecture:** §14–15, §21, §24–27, ADR-002, ADR-008
 
 #### US-2.1: Implement the allowlisted component registry (4h)
@@ -271,7 +271,7 @@ As the composer, I need an immutable registry of reusable primitives so that UXS
 
 **Depends on:** US-1.3
 
-**PRD:** FR-011, FR-012, FR-015, SC-001  
+**PRD:** FR-011, FR-012, FR-015, SC-001
 **Architecture:** §14.2, §14.5–14.6, §24, §26
 
 #### US-2.2: Implement recursive composition and safe actions (4h)
@@ -296,7 +296,7 @@ As a reviewer, I need every selected screen recursively composed from UXSpec dat
 
 **Depends on:** US-2.1
 
-**PRD:** FR-010, FR-013–015, FR-032, SC-001, SC-010  
+**PRD:** FR-010, FR-013–015, FR-032, SC-001, SC-010
 **Architecture:** §14.1–14.5, §24, §27.1
 
 #### US-2.3: Apply safe runtime design tokens (3h)
@@ -321,7 +321,7 @@ As a design reviewer, I need specification tokens to reskin the preview instantl
 
 **Depends on:** US-2.2
 
-**PRD:** FR-020–023, SC-002  
+**PRD:** FR-020–023, SC-002
 **Architecture:** §15, §26, ADR-008
 
 #### US-2.4: Render five screens with generated navigation (5h)
@@ -346,16 +346,16 @@ As a Product Owner, I need to move through all five rendered AgentPilot screens 
 
 **Depends on:** US-2.3
 
-**PRD:** FR-004, FR-013, FR-030–033, SC-001, SC-003  
+**PRD:** FR-004, FR-013, FR-030–033, SC-001, SC-003
 **Architecture:** §10, §14, §21, §27
 
 ### E3: Review Workbench and Contextual Lenses (6h)
 
 **Objective:** Turn the renderer into a review experience with overview, persona, responsive, and optional journey context.
 
-**Increment:** A - Walking Skeleton  
-**Priority:** P1  
-**PRD:** FR-001–004, FR-040–053, FR-034, SC-003  
+**Increment:** A - Walking Skeleton
+**Priority:** P1
+**PRD:** FR-001–004, FR-040–053, FR-034, SC-003
 **Architecture:** §10, §21–24, §32
 
 #### US-3.1: Deliver specification overview and review workbench (2h)
@@ -380,7 +380,7 @@ As a Product Owner, I need a summary and screen review workspace so that I can u
 
 **Depends on:** US-2.4
 
-**PRD:** FR-001–004, FR-015, US-1.1, US-1.2  
+**PRD:** FR-001–004, FR-015, US-1.1, US-1.2
 **Architecture:** §7, §10–11, §24
 
 #### US-3.2: Add persona review lens (2h)
@@ -405,7 +405,7 @@ As a stakeholder, I need to review a screen as Alex, Jordan, or Taylor so that g
 
 **Depends on:** US-3.1
 
-**PRD:** FR-040–042, SC-003  
+**PRD:** FR-040–042, SC-003
 **Architecture:** §22, §23
 
 #### US-3.3: Add responsive preview and optional journey walkthrough (2h)
@@ -430,16 +430,16 @@ As a design reviewer, I need mobile, tablet, and desktop simulation, with an opt
 
 **Depends on:** US-3.1
 
-**PRD:** FR-034, FR-050–053, SC-003, BR-010  
+**PRD:** FR-034, FR-050–053, SC-003, BR-010
 **Architecture:** §21, §28, §32
 
 ### E4: Screen-Level Governance, Roles and Audit (8h)
 
 **Objective:** Deliver version-bound approvals, structured revisions, append-only audit truth, browser recovery, and mocked role enforcement.
 
-**Increment:** B - Governance and Release  
-**Priority:** P0  
-**PRD:** FR-070–083, FR-100–112, SC-004, SC-005, SC-007–009  
+**Increment:** B - Governance and Release
+**Priority:** P0
+**PRD:** FR-070–083, FR-100–112, SC-004, SC-005, SC-007–009
 **Architecture:** §12.6–12.7, §16–18, §20, §27, ADR-004–006
 
 #### US-4.1: Implement event-driven governance domain (2h)
@@ -464,7 +464,7 @@ As the application, I need pure commands, events, reducer transitions, and selec
 
 **Depends on:** US-2.4
 
-**PRD:** FR-070, FR-074–075, FR-101–103, BR-001–003, BR-007  
+**PRD:** FR-070, FR-074–075, FR-101–103, BR-001–003, BR-007
 **Architecture:** §12.6–12.7, §16, §27.1, ADR-004
 
 #### US-4.2: Approve current screen versions and complete the UX gate (2h)
@@ -489,7 +489,7 @@ As an Approver, I need to approve one current screen version independently so th
 
 **Depends on:** US-4.1
 
-**PRD:** FR-070–075, US-4.1, US-4.5, SC-004, SC-009  
+**PRD:** FR-070–075, US-4.1, US-4.5, SC-004, SC-009
 **Architecture:** §16.3–16.5, §20
 
 #### US-4.3: Request structured revisions with actor enforcement (2h)
@@ -517,7 +517,7 @@ role-simulation UI.
 
 **Depends on:** US-4.2
 
-**PRD:** FR-080–083, FR-110–112, BR-006, SC-005  
+**PRD:** FR-080–083, FR-110–112, BR-006, SC-005
 **Architecture:** §16.3, §18, §20
 
 #### US-4.4: Persist governance state and expose the audit log (2h)
@@ -542,16 +542,16 @@ As a reviewer, I need governance history to survive reload and remain inspectabl
 
 **Depends on:** US-4.3
 
-**PRD:** FR-100–105, NFR 16.3, SC-007–008  
+**PRD:** FR-100–105, NFR 16.3, SC-007–008
 **Architecture:** §17, §24, §27.3, ADR-006
 
 ### E5: Mock Regeneration and Review Hardening (6h)
 
 **Objective:** Demonstrate replaceable AI regeneration, version invalidation, accessibility evidence, studio states, and InsaneSDD-aligned polish.
 
-**Increment:** B - Governance and Release  
-**Priority:** P1  
-**PRD:** FR-060–062, FR-090–095, SC-006, SC-010  
+**Increment:** B - Governance and Release
+**Priority:** P1
+**PRD:** FR-060–062, FR-090–095, SC-006, SC-010
 **Architecture:** §19, §23–26, §32, ADR-007
 
 #### US-5.1: Regenerate one screen through the provider boundary (2.5h)
@@ -576,7 +576,7 @@ As an Approver, I need a structured revision to produce a deterministic new scre
 
 **Depends on:** US-4.4
 
-**PRD:** FR-090–095, SC-006  
+**PRD:** FR-090–095, SC-006
 **Architecture:** §19, §24, ADR-007
 
 #### US-5.2: Enforce reapproval and finish accessibility and studio states (3.5h)
@@ -602,16 +602,16 @@ As a reviewer, I need regenerated output to require fresh approval and the studi
 
 **Depends on:** US-5.1
 
-**PRD:** FR-015, FR-060–062, FR-093–094, NFR 16.1–16.3, SC-010  
+**PRD:** FR-015, FR-060–062, FR-093–094, NFR 16.1–16.3, SC-010
 **Architecture:** §12.7, §23–26, §32
 
 ### E6: Quality, Documentation, Deployment and Demonstration (8h)
 
 **Objective:** Produce verifiable engineering evidence, reproducible delivery, static deployment, release traceability, and a rehearsed interview workflow.
 
-**Increment:** B - Governance and Release  
-**Priority:** P0  
-**PRD:** NFR 16.1–16.6, SC-010–012, Release acceptance checklist  
+**Increment:** B - Governance and Release
+**Priority:** P0
+**PRD:** NFR 16.1–16.6, SC-010–012, Release acceptance checklist
 **Architecture:** §27–30, §35–38
 
 #### US-6.1: Automate critical quality gates and CI (4h)
@@ -637,7 +637,7 @@ As an engineering lead, I need targeted automated evidence so that renderer safe
 
 **Depends on:** US-5.2
 
-**PRD:** NFR 16.5–16.6, SC-010–011  
+**PRD:** NFR 16.5–16.6, SC-010–011
 **Architecture:** §27, §28
 
 #### US-6.2: Document, deploy, rehearse and release the POC (4h)
@@ -663,7 +663,7 @@ As an evaluator, I need a deployed, explainable and correctly positioned artifac
 
 **Depends on:** US-6.1
 
-**PRD:** SC-010–012, Release acceptance checklist, BR-009–010  
+**PRD:** SC-010–012, Release acceptance checklist, BR-009–010
 **Architecture:** §28, §34–39
 
 ## 10. Dependency and execution order
@@ -772,3 +772,148 @@ review is fast, pleasant, and demonstrably professional.
 | T-7.1.2 | Restyle panels on studio tokens and verify accessibility and regressions | 3 | A consistent visual language with verified keyboard accessibility and green suites. |
 
 **Depends on:** US-6.2 (released)
+
+---
+
+## 16. Authorized post-release extension (v0.2.0 Federated Demo)
+
+The 50-hour v0.1.0 POC plan above remains complete and released. The E7
+workbench revamp remains a separate post-release polish track. The following
+E8 extension is explicitly human-authorized after release. It carries its own
+allocation and does **not** modify the frozen 50-hour POC record, the importer
+JSON expectations (six epics / 18 stories / 36 tasks / 50 hours), or
+`v0.1.0-poc` acceptance evidence.
+
+### E8: Federated Host Integration
+
+**Objective:** Convert the repository into a pnpm monorepo, keep UX Design Studio
+independently runnable, expose it as a route-level Module Federation remote, and
+consume it through a simulated InsaneSDD host shell with Agile Editor handoff.
+
+**Milestone:** `v0.2.0 Federated Demo`
+**Release tag:** `v0.2.0-federated-demo`
+**Priority:** P1 | Mandatory (post-release extension) | Area: Foundation / Deployment
+**PRD:** Host-integration readiness; FR overview/review/audit flows preserved
+**Architecture:** ADR-009; `docs/Federated_Host_Integration_Architecture_v1.0.md`; SoT v1.2
+**Approved dependency:** `@module-federation/vite`
+**GitHub:** Epic #110
+
+#### US-8.1: Authorize post-release federation
+
+As a product engineer, I need controlling documents and backlog authority so E8
+can proceed without rewriting historical POC decisions.
+
+**Acceptance criteria**
+
+- [ ] Source of Truth v1.2 addendum approved
+- [ ] Federation architecture addendum exists
+- [ ] ADR-009 exists
+- [ ] E8 exists in this Markdown development plan
+- [ ] Original 50-hour plan and import JSON remain untouched
+- [ ] GitHub epic, stories and tasks exist
+- [ ] `AGENTS.md` permits E8 without weakening historical rules
+- [ ] `@module-federation/vite` is explicitly approved
+- [ ] No implementation code is changed in this story
+
+**Engineering tasks**
+
+| Key | Task | Outcome |
+|---|---|---|
+| T-8.1.1 | Authorize E8 controlling documents | SoT v1.2, federation architecture, ADR-009, plan section |
+| T-8.1.2 | Create E8 GitHub hierarchy and agent policy | Epic/stories/tasks; `AGENTS.md` E8 permission |
+
+**Depends on:** Released `v0.1.0-poc` + E7 workbench baseline
+**Branch:** `docs/uxds-111-authorize-federated-host-integration`
+**GitHub:** #111 (tasks #116, #117)
+
+#### US-8.2: Migrate to pnpm workspace
+
+As a maintainer, I need the existing application moved into a workspace package
+so host and remote can coexist without changing standalone behavior.
+
+**Acceptance criteria**
+
+- [ ] Valid pnpm workspace with `apps/ux-design-studio`
+- [ ] Standalone lint/typecheck/test/build/Playwright remain green
+- [ ] No federation dependency introduced yet
+
+**Engineering tasks**
+
+| Key | Task | Outcome |
+|---|---|---|
+| T-8.2.1 | Create pnpm workspace and move studio app | `@uxds/studio` package |
+| T-8.2.2 | Update paths/CI and prove standalone unchanged | Green quality gates |
+
+**Depends on:** US-8.1 #111
+**Branch:** `chore/uxds-112-migrate-pnpm-workspace`
+**GitHub:** #112 (tasks #118, #119)
+
+#### US-8.3: Expose UX Design Studio remote
+
+As a host integrator, I need a route-level remote that validates host props,
+owns relative Overview/Review/Audit routes, and reports gate status safely.
+
+**Acceptance criteria**
+
+- [ ] `remoteEntry.js` exposes `uxDesignStudio/App`
+- [ ] No nested `BrowserRouter`
+- [ ] Relative routes; runtime-validated contract; scoped CSS
+- [ ] Gate callback dedupe and no auto-navigate on approved hydration
+
+**Engineering tasks**
+
+| Key | Task | Outcome |
+|---|---|---|
+| T-8.3.1 | Create host contract and app composition split | `@uxds/host-contract`, `UxDesignStudioApp` |
+| T-8.3.2 | Configure federation producer, CSS, and gate events | Remote entry + integration hooks |
+
+**Depends on:** US-8.2 #112
+**Branch:** `feat/uxds-113-expose-federated-remote`
+**GitHub:** #113 (tasks #120, #121)
+
+#### US-8.4: Build simulated InsaneSDD host
+
+As a demo operator, I need a simulated host shell with left project navigation
+that loads the remote and hands off to Agile Editor after approval.
+
+**Acceptance criteria**
+
+- [ ] Runtime remote load under project path
+- [ ] No InsaneSDD header; simulated host labeling
+- [ ] Accessible loading/error fallbacks
+- [ ] Approval navigates to `/projects/:projectId/agile-editor`
+
+**Engineering tasks**
+
+| Key | Task | Outcome |
+|---|---|---|
+| T-8.4.1 | Build simulated host shell and routes | Project sidebar + placeholders |
+| T-8.4.2 | Wire remote consumption and Agile Editor handoff | Lazy federation consumer |
+
+**Depends on:** US-8.3 #113
+**Branch:** `feat/uxds-114-build-simulated-host`
+**GitHub:** #114 (tasks #122, #123)
+
+#### US-8.5: Verify, deploy and release
+
+As a release owner, I need dual-mode verification, independent deployments, and
+`v0.2.0-federated-demo` evidence without renaming protected CI jobs.
+
+**Acceptance criteria**
+
+- [ ] Standalone + federated + remote-failure E2E pass
+- [ ] CI job names unchanged
+- [ ] Host and remote deploy independently
+- [ ] Documentation states simulated limitations
+- [ ] Release tag `v0.2.0-federated-demo`
+
+**Engineering tasks**
+
+| Key | Task | Outcome |
+|---|---|---|
+| T-8.5.1 | Add dual-mode E2E and CI workspace gates | Playwright topology + CI |
+| T-8.5.2 | Document deploy topology and release evidence | README/demo/release artifacts |
+
+**Depends on:** US-8.4 #114
+**Branch:** `test/uxds-115-verify-federated-integration`
+**GitHub:** #115 (tasks #124, #125)
