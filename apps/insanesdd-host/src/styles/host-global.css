@@ -1,0 +1,36 @@
+:root {
+  color-scheme: light;
+  font-family: "Segoe UI", "Helvetica Neue", sans-serif;
+  line-height: 1.5;
+  color: #1f2430;
+  background: #f5f6f8;
+  --host-accent: #c8102e;
+  --host-surface: #ffffff;
+  --host-border: #e3e6eb;
+  --host-muted: #6b7280;
+  --host-sidebar-active: #fdecef;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+a {
+  color: inherit;
+}
+
+:focus-visible {
+  outline: 3px solid #0b6e4f;
+  outline-offset: 2px;
+}
