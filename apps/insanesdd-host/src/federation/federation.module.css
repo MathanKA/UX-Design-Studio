@@ -1,0 +1,58 @@
+.remotePane {
+  min-width: 0;
+  min-height: 100%;
+  display: grid;
+  grid-template-rows: auto 1fr;
+}
+
+.gateStatus {
+  margin: 0;
+  padding: 0.5rem 1rem;
+  font-size: 0.8rem;
+  color: var(--host-muted);
+  border-bottom: 1px solid var(--host-border);
+  background: #fafafa;
+}
+
+.panel {
+  margin: 1.25rem;
+  padding: 1.25rem;
+  background: var(--host-surface);
+  border: 1px solid var(--host-border);
+  border-radius: 0.5rem;
+}
+
+.panel h2 {
+  margin: 0 0 0.5rem;
+  font-size: 1.15rem;
+}
+
+.panel p {
+  margin: 0 0 1rem;
+  color: #374151;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.actions button,
+.actions a {
+  font: inherit;
+  font-weight: 600;
+  padding: 0.45rem 0.8rem;
+  border-radius: 0.375rem;
+  border: 1px solid var(--host-border);
+  background: #fff;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.actions button {
+  background: var(--host-accent);
+  border-color: var(--host-accent);
+  color: #fff;
+}
