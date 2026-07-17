@@ -9,13 +9,16 @@
 
 ## Document authority
 Use this order, with higher entries overriding lower entries:
-1. Frozen UX Design Studio Source of Truth v1.0: `docs/UX Design Studio — Source of Truth.pdf`.
-2. `docs/UX_Design_Studio_PRD_v1.0.md`.
-3. `docs/UX_Design_Studio_Technical_Architecture_v1.0.md`.
-4. `docs/UX_Design_Studio_Development_Plan_v1.0.md`.
-5. The approved GitHub story and its acceptance criteria.
-6. Engineering tasks and implementation notes.
-7. Existing implementation patterns.
+1. Approved Source of Truth v1.2 addendum: `docs/UX Design Studio — Source of Truth v1.2 Addendum.md` (supersedes v1.0/v1.1 only where explicit; authorizes E8 federation).
+2. Approved Source of Truth v1.1 addendum: `docs/UX Design Studio — Source of Truth v1.1 Addendum.md` (supersedes v1.0 only where explicit).
+3. Frozen UX Design Studio Source of Truth v1.0: `docs/UX Design Studio — Source of Truth.pdf`.
+4. `docs/UX_Design_Studio_PRD_v1.0.md`.
+5. `docs/Federated_Host_Integration_Architecture_v1.0.md` (E8 federation only).
+6. `docs/UX_Design_Studio_Technical_Architecture_v1.0.md`.
+7. `docs/UX_Design_Studio_Development_Plan_v1.0.md`.
+8. The approved GitHub story and its acceptance criteria.
+9. Engineering tasks and implementation notes.
+10. Existing implementation patterns.
 
 - Do not invent Source of Truth content beyond what that PDF and the controlling Markdown documents establish.
 - Prefer the Markdown PRD, architecture, and development plan for day-to-day implementation detail.
@@ -61,8 +64,8 @@ Do not implement:
 - A real LLM integration or production backend.
 - Production authentication, SSO, or RBAC.
 - Persistence beyond the approved browser-storage adapter.
-- Multi-project or multi-repository support.
-- Runtime Module Federation or production event streaming.
+- Multi-project or multi-repository support beyond E8’s reject-unsupported-project demo behavior.
+- Runtime Module Federation or production event streaming, except route-level Module Federation explicitly authorized under E8 below.
 - Production APIs or a general-purpose low-code builder.
 - Arbitrary React component execution.
 - Arbitrary HTML, JavaScript, CSS, or dynamic imports from UXSpec data.
@@ -70,6 +73,19 @@ Do not implement:
 - Unapproved dependencies or architecture frameworks.
 
 Production paths may be documented only where the architecture permits them.
+
+## Authorized E8 Module Federation exception
+Route-level Module Federation is permitted only when all of the following are true:
+- E8 is explicitly approved by SoT v1.2, ADR-009, the federation architecture addendum, and the active GitHub story.
+- Implementation remains route-level (`uxDesignStudio/App` under `/projects/:projectId/ux-design-studio/*`).
+- Standalone UX Design Studio remains independently runnable.
+- React, React DOM, and React Router DOM are shared as singletons at aligned versions.
+- The approved dependency `@module-federation/vite` is used; no alternate federation stack without approval.
+- No production authentication claim is introduced; host-supplied actors remain synthetic.
+- The host shell remains visibly documented as simulated; never claim it is the actual InsaneSDD product.
+- No host cookies, DOM, or private globals are accessed outside the integration contract.
+- The remote can fail without crashing the host.
+- Historical `v0.1.0-poc` records, ADR-001 history, and the frozen 50-hour import plan remain unchanged.
 
 ## Current repository state
 - Inspect `package.json` before running any script; available scripts change as stories land.
@@ -144,10 +160,11 @@ The bootstrap story targets:
 ## Ports, adapters, and host isolation
 - Keep persistence, time, ID generation, design-agent regeneration, future APIs, and host integration behind interfaces.
 - Domain modules must not import React, browser storage, routing, or provider implementations.
-- Build a standalone SPA; do not introduce Module Federation.
+- Build a standalone SPA; do not introduce Module Federation outside the Authorized E8 Module Federation exception.
+- Under E8, preserve the standalone SPA and add a route-level remote producer plus simulated host consumer; do not replace the standalone app with the host shell.
 - Avoid global application state and global CSS leakage.
 - Do not access host DOM, cookies, storage keys, or globals outside the module boundary.
-- Keep host integration behind the architecture's documented contract.
+- Keep host integration behind the architecture's documented contract and `@uxds/host-contract` runtime validation.
 
 ## Optional-feature isolation
 Keep journey walkthrough, screen-version history UI, full accessibility overlay, and tablet breakpoint independently removable through modules and flags.
@@ -155,6 +172,7 @@ Keep journey walkthrough, screen-version history UI, full accessibility overlay,
 Optional features may observe or wrap core behavior. They must not own renderer, governance, approval, persistence, or audit foundations.
 
 ## Target repository structure
+Under the E8 pnpm workspace, the studio application lives in `apps/ux-design-studio/src` (`@uxds/studio`). Paths below are relative to that package unless noted.
 - `src/app`: bootstrap, routes, providers, configuration, and error boundaries.
 - `src/domain`: framework-independent UXSpec, governance, identity, and capability rules.
 - `src/application`: use cases and command orchestration.
@@ -165,9 +183,7 @@ Optional features may observe or wrap core behavior. They must not own renderer,
 - `src/ui`: reusable presentation primitives, layouts, dialogs, icons, and styles.
 - `src/integration`: host contract and mount boundary.
 - `src/test`: shared fixtures and test helpers.
-- `docs`: controlling product and architecture documents.
-- `scripts`: repository automation and validation.
-- `.github`: issue, pull-request, import, workflow, and release configuration.
+- Repository root also keeps `apps/insanesdd-host` (E8), `packages/uxds-host-contract` (E8), `docs`, `scripts`, `.agents`, `.github`, and cross-app Playwright.
 
 Dependency direction:
 - UI and infrastructure depend on application.
@@ -318,7 +334,7 @@ Stop and report rather than bypassing the condition when:
 - Work exceeds the selected story or requires an excluded capability.
 - An architecture invariant, primary-flow accessibility, or renderer safety would regress.
 - Story-caused tests, validation, or build failures remain unresolved within scope.
-- A real backend, LLM, authentication system, or Module Federation becomes necessary.
+- A real backend, LLM, authentication system, or Module Federation outside the Authorized E8 exception becomes necessary.
 - A dependency or architecture change lacks approval.
 - Commit signing fails.
 - The next story would start automatically outside an active authorized autonomous epic run.

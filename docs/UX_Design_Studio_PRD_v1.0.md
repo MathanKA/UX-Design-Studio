@@ -415,13 +415,13 @@ When every required screen is approved, the product displays:
 | FR-104 | Audit events must survive page reload through browser persistence. | Must |
 | FR-105 | The reviewer should be able to inspect events associated with an individual screen. | Must |
 
-### 12.12 Demonstrated role model
+### 12.12 Fixed review actor
 
 | ID | Requirement | Priority |
 |---|---|---|
-| FR-110 | The POC must include a role switcher for Approver, Reviewer, and Viewer. | Must |
+| FR-110 | The POC must use Demo Approver as the fixed review actor without exposing role-simulation UI. | Must |
 | FR-111 | Only the Approver role may approve screens, request revision, or trigger regeneration. | Must |
-| FR-112 | Reviewer and Viewer roles must not be presented as production-secure authorization. | Must |
+| FR-112 | The fixed Demo Approver must not be presented as production authentication, SSO, RBAC, or identity verification. | Must |
 
 ---
 
@@ -622,20 +622,21 @@ When every required screen is approved, the product displays:
 
 ---
 
-### Epic E5: Role-aware demonstration
+### Epic E5: Fixed-actor governance demonstration
 
-#### US-5.1: Switch demonstration roles
+#### US-5.1: Use the fixed Demo Approver
 
 **As a** demonstration evaluator  
-**I want** to switch among product roles  
-**So that** I can inspect how permissions affect the workflow.
+**I want** governance actions to use one deterministic review actor
+**So that** the workflow stays focused on screen decisions rather than role simulation.
 
 **Acceptance criteria**
 
-- Approver, Reviewer, and Viewer roles are selectable.
-- Only Approver can approve, request revision, or regenerate.
-- Restricted actions are hidden or disabled for other roles.
-- The UI labels this as a mocked POC role model rather than production authentication.
+- Demo Approver is the default product actor.
+- No role switcher, role choices, or active-actor label appears in the UI.
+- Approval, revision, and regeneration events remain actor-attributed.
+- Command-level capability enforcement remains covered by internal tests.
+- Demo Approver is not presented as production authentication.
 
 ---
 
@@ -706,7 +707,7 @@ No strict production SLA is asserted because this is a static POC with seeded da
 - The POC must not contain production credentials or repository secrets.
 - No production user or customer data may be required.
 - Seed data must be synthetic and limited to the AgentPilot demonstration context.
-- The role switcher must be explicitly treated as a demonstration mechanism, not secure authorization.
+- Demo Approver must be treated as a synthetic review actor, not secure authorization.
 
 ### 16.5 Maintainability and quality
 
@@ -842,7 +843,7 @@ Remove optional scope in this exact order when required:
 - [ ] Mock regeneration works.
 - [ ] Audit events persist across reloads.
 - [ ] Gate-completion state works.
-- [ ] Role switcher demonstrates restricted actions.
+- [ ] Demo Approver is fixed and no role-simulation UI is exposed.
 
 ### Quality
 

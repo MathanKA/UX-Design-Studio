@@ -124,7 +124,7 @@ and the current story is Done.
 - For provider-bound stories, verify async cancellation, controlled failure, provider-result schema evidence, stale-response rejection, and atomic version activation
 - No test deletion or type-safety / lint / accessibility / security weakening
 - Domain modules remain framework-independent
-- When `roles` metadata is present, keep demo roles separate from UX personas and label role switching as demonstration-only
+- Keep governance actors separate from UX personas; under the v1.1 Source of Truth addendum, product composition uses fixed Demo Approver and exposes no role-switching UI
 - When `resetPolicy` metadata is present, reset only the managed governance persistence key and preserve declared seed and configuration surfaces
 
 ## Focused verification

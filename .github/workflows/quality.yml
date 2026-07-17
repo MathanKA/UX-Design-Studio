@@ -91,15 +91,18 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Production build
-        run: pnpm run build
+        run: |
+          pnpm run build:studio
+          VITE_UXDS_REMOTE_ENTRY=http://127.0.0.1:4174/remoteEntry.js pnpm run build:host
 
       - name: Install Playwright Chromium
         run: pnpm exec playwright install --with-deps chromium
 
-      - name: Run Playwright Epic 5 smoke
+      - name: Run Playwright standalone and federation suites
         run: pnpm run test:e2e
         env:
           CI: "true"
+          VITE_UXDS_REMOTE_ENTRY: http://127.0.0.1:4174/remoteEntry.js
 
       - name: Upload Playwright evidence
         if: always()

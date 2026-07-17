@@ -1,0 +1,109 @@
+import { createContext, useContext } from "react";
+import type { ApproveScreenResult } from "../../application/approve-screen";
+import type { RegenerateScreenResult } from "../../application/regenerate-screen";
+import type { RequestRevisionResult } from "../../application/request-revision";
+import type {
+  ActorSnapshot,
+  ApprovalProgress,
+  GovernanceState,
+  ScreenId,
+  ScreenReviewStatus,
+  ScreenVersionId,
+  ScreenVersionRecord,
+} from "../../domain/governance";
+import type { ScreenNodeOption, ScreenSpec } from "../../domain/ux-spec";
+
+export type ApproveScreenArgs = {
+  screenId: ScreenId;
+  expectedScreenVersionId: ScreenVersionId;
+  comment?: string;
+  actor?: ActorSnapshot;
+};
+
+export type RequestRevisionArgs = {
+  screenId: ScreenId;
+  expectedScreenVersionId: ScreenVersionId;
+  affectedNodeIds: readonly string[];
+  category: string;
+  description: string;
+  actor?: ActorSnapshot;
+};
+
+export type RegenerateScreenArgs = {
+  screenId: ScreenId;
+  expectedScreenVersionId: ScreenVersionId;
+  actor?: ActorSnapshot;
+};
+
+export type ApproveScreenAttemptResult =
+  | ApproveScreenResult
+  | {
+      ok: false;
+      error: { code: "SUBMIT_IN_PROGRESS"; message: string };
+    };
+
+export type RequestRevisionAttemptResult =
+  | RequestRevisionResult
+  | {
+      ok: false;
+      error: { code: "SUBMIT_IN_PROGRESS"; message: string };
+    };
+
+export type RegenerateScreenAttemptResult =
+  | RegenerateScreenResult
+  | {
+      ok: false;
+      outcome: "failed";
+      state?: GovernanceState;
+      error: { code: "SUBMIT_IN_PROGRESS"; message: string };
+    };
+
+export type GovernanceContextValue = {
+  state: GovernanceState;
+  actor: ActorSnapshot;
+  isSubmitting: boolean;
+  isRegenerating: boolean;
+  canApprove: boolean;
+  canRequestRevision: boolean;
+  canRegenerate: boolean;
+  controlledFailureArmed: boolean;
+  setControlledFailureArmed: (armed: boolean) => void;
+  /** Non-blocking notice when persisted governance could not be restored or saved. */
+  persistenceNotice: string | null;
+  dismissPersistenceNotice: () => void;
+  /** aria-live announcement after demo-state reset. */
+  resetAnnouncement: string | null;
+  approveScreen: (args: ApproveScreenArgs) => ApproveScreenAttemptResult;
+  requestRevision: (args: RequestRevisionArgs) => RequestRevisionAttemptResult;
+  regenerateScreen: (
+    args: RegenerateScreenArgs,
+  ) => Promise<RegenerateScreenAttemptResult>;
+  cancelRegeneration: () => void;
+  /** Remove managed governance key and restore clean baseline in-memory state. */
+  resetDemoState: () => void;
+  getScreen: (screenId: ScreenId) => ScreenSpec | undefined;
+  listScreenNodes: (screenId: ScreenId) => readonly ScreenNodeOption[];
+  getScreenStatus: (screenId: ScreenId) => ScreenReviewStatus;
+  getCurrentScreenVersion: (
+    screenId: ScreenId,
+  ) => ScreenVersionRecord | undefined;
+  getLatestRevisionForScreen: (
+    screenId: ScreenId,
+  ) =>
+    | import("../../domain/governance").RevisionRequestedEvent
+    | undefined;
+  getApprovalProgress: () => ApprovalProgress;
+  isGateComplete: () => boolean;
+};
+
+export const GovernanceContext = createContext<GovernanceContextValue | null>(
+  null,
+);
+
+export function useGovernance(): GovernanceContextValue {
+  const value = useContext(GovernanceContext);
+  if (!value) {
+    throw new Error("useGovernance must be used within GovernanceProvider");
+  }
+  return value;
+}

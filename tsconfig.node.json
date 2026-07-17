@@ -16,9 +16,8 @@
     "types": ["node"]
   },
   "include": [
-    "vite.config.ts",
-    "vitest.config.ts",
     "playwright.config.ts",
-    "eslint.config.js"
+    "eslint.config.js",
+    "vitest.scripts.config.ts"
   ]
 }

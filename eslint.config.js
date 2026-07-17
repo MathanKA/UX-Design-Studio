@@ -10,7 +10,9 @@ export default tseslint.config(
   {
     ignores: [
       "dist/**",
+      "**/dist/**",
       "node_modules/**",
+      "**/node_modules/**",
       "coverage/**",
       "scripts/**",
       "playwright-report/**",

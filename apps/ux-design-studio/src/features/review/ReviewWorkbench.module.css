@@ -1,0 +1,116 @@
+.workbench {
+  display: flex;
+  flex-direction: column;
+  gap: var(--studio-space-md);
+}
+
+.heading {
+  margin: 0;
+  font-size: var(--studio-font-size-lg);
+}
+
+.meta {
+  margin: 0;
+  color: var(--studio-color-text-muted);
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.layout {
+  display: grid;
+  gap: var(--studio-space-lg);
+}
+
+@media (min-width: 960px) {
+  .layout {
+    grid-template-columns: 15rem minmax(0, 1fr) 22rem;
+    align-items: stretch;
+  }
+}
+
+.navRegion {
+  border: 1px solid var(--studio-color-border);
+  border-radius: var(--studio-radius-lg);
+  background: var(--studio-color-surface);
+  box-shadow: var(--studio-shadow-sm);
+  padding: var(--studio-space-md);
+  align-self: start;
+}
+
+@media (min-width: 960px) {
+  .navRegion {
+    position: sticky;
+    top: 7.2rem;
+  }
+}
+
+.previewRegion {
+  position: relative;
+  min-width: 0;
+  border: 1px solid var(--studio-color-border);
+  border-radius: var(--studio-radius-lg);
+  background-color: var(--studio-color-canvas);
+  background-image: radial-gradient(
+    var(--studio-canvas-dot) 1px,
+    transparent 1.5px
+  );
+  background-size: 18px 18px;
+  box-shadow: inset 0 1px 6px rgba(20, 33, 61, 0.07);
+  padding: var(--studio-space-xl) var(--studio-space-lg);
+  display: flex;
+  flex-direction: column;
+  gap: var(--studio-space-lg);
+}
+
+.regionHeading {
+  margin: 0 0 0.65rem;
+  font-size: var(--studio-font-size-md);
+}
+
+.sidePanels {
+  min-width: 0;
+}
+
+.breakpointMeta {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.previewStack {
+  position: relative;
+  min-width: 0;
+}
+
+.previewStack[data-accessibility-overlay-active="true"] {
+  box-shadow: inset 0 0 0 2px rgba(200, 16, 46, 0.22);
+  border-radius: var(--studio-radius-sm);
+  transition: box-shadow 160ms ease-out;
+}
+
+.badgesSlot {
+  display: flex;
+  justify-content: center;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .previewStack[data-accessibility-overlay-active="true"] {
+    transition: none;
+  }
+}

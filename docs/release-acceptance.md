@@ -125,7 +125,7 @@ Feature flags in `src/app/config.ts` keep optional modules independently removab
 | Mock regeneration works | PASS | Regenerate tests; Playwright |
 | Audit events persist across reloads | PASS | Persistence tests; critical RTL remount; Playwright |
 | Gate-completion state works | PASS | Gate selectors; critical RTL; Playwright |
-| Role switcher demonstrates restricted actions | PASS | `revision-roles.test.tsx`; critical RTL Reviewer path |
+| Fixed Demo Approver with no role-simulation UI | PASS | `revision-roles.test.tsx`; critical RTL; Playwright absence assertion |
 
 ### Quality
 
@@ -190,7 +190,7 @@ Confirmed for this POC release:
 - No real LLM evaluation
 - No production backend
 - No production authentication, SSO, or RBAC
-- No runtime Module Federation
+- No runtime Module Federation in the `v0.1.0-poc` release (route-level federation is a separate post-release E8 track under ADR-009 / SoT v1.2)
 - No production Live Terminal / event-stream integration
 - Demo roles are simulation only
 - Browser storage is not durable regulated audit storage

@@ -434,6 +434,64 @@ Retain namespaced variables and CSS Modules (or equivalent encapsulation) under 
 
 ---
 
+## ADR-009: Route-level Module Federation integration
+
+**Status:** Accepted for post-release E8 only
+
+### Context
+
+ADR-001 correctly deferred runtime Module Federation for `v0.1.0-poc` because the
+InsaneSDD host build tool, React version, routing model, authentication contract,
+and deployment pipeline were unknown. After the POC release, a simulated host with
+explicit React 18 and React Router contracts makes a route-level federation demo
+feasible without rewriting the standalone product hypothesis.
+
+### Decision
+
+Authorize a separate post-release federated integration demonstration (E8) that:
+
+- Preserves the standalone SPA execution path.
+- Exposes UX Design Studio as a Vite Module Federation remote (`uxDesignStudio/App`).
+- Consumes it from a simulated InsaneSDD host under
+  `/projects/:projectId/ux-design-studio/*`.
+- Shares React, React DOM, and React Router DOM as singletons.
+- Uses `@module-federation/vite` as the approved dependency.
+
+**ADR-001 remains historically correct for `v0.1.0-poc`.**
+
+**ADR-009 authorizes a separate post-release federated integration demonstration
+after the host assumptions were explicitly declared.**
+
+### Rationale
+
+- Proves the MFE-ready boundary claimed by ADR-001 without invalidating release evidence.
+- Keeps renderer and governance invariants inside the remote.
+- Isolates host chrome and navigation callbacks at a typed contract boundary.
+
+### Consequences
+
+- Repository becomes a pnpm monorepo with independent host and remote deployables.
+- Controlling documents must distinguish historical POC exclusions from E8 authorization.
+- Shared dependency versions must stay aligned; dual React runtimes are forbidden.
+- The host shell must remain labeled as simulated; no production auth claim is allowed.
+
+### Explicit exclusions
+
+- Claiming the simulated shell is the actual InsaneSDD product
+- Production SSO / OIDC / RBAC
+- Real LLM, backend, or Agile plan generation
+- Rewriting ADR-001 or `v0.1.0-poc` acceptance records
+- Full UXSpec transport in the shared host contract
+- Nested `BrowserRouter` inside the remote
+
+### Implementation evidence (E8)
+
+- `docs/Federated_Host_Integration_Architecture_v1.0.md`
+- `docs/UX Design Studio — Source of Truth v1.2 Addendum.md`
+- GitHub epic E8 #110 and stories US-8.1–US-8.5
+
+---
+
 ## Production capabilities documented but not implemented
 
 The following appear in Architecture §26 and §29 as production evolution only. They are **out of scope** for v0.1.0-poc:
@@ -448,7 +506,7 @@ The following appear in Architecture §26 and §29 as production evolution only.
 | Retention / legal-hold policies | Documented only |
 | Real Design Agent API | Documented only |
 | Live Terminal event publication | Documented only |
-| Route-level MFE integration | Documented only |
+| Route-level MFE integration | Authorized for post-release E8 under ADR-009; still not part of `v0.1.0-poc` |
 
 ---
 

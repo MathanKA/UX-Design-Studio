@@ -1,28 +1,45 @@
 # UX Design Studio
 
-UX Design Studio is a proof-of-work concept extension for InsaneSDD 2.0 that deepens UX review into a visual, per-screen approval workbench. It visually renders a generated UX specification before Agile plan generation, and supports per-screen review, structured revision, mocked regeneration, approval, and audit traceability.
+An independent proof-of-work concept extension for InsaneSDD 2.0. It is **not** an official InfoBeans product or feature, and it is not a production system.
 
-It is **not** an official InfoBeans product or feature. The deterministic demonstration project is **AgentPilot**. The POC delivery cap is 50 build hours. This repository must never be described as proof that the internal InsaneSDD product lacks a capability.
+## Why this demo?
 
-It is not production-ready. It does not implement real authentication, a real LLM, real Agile plan generation, or a production InsaneSDD backend.
+- This demo shows lead ability to own the full frontend lifecycle: requirements, architecture, implementation, testing, deployment, and presentation.
+- It is a practical way to showcase React, TypeScript, micro-frontend, accessibility, performance, and enterprise workflow experience.
+- More than showing screens, it demonstrates how I make engineering decisions, define boundaries, manage risk, and build something that can integrate with a larger SaaS platform.
+- This is an independent proof-of-work created specifically to demonstrate engineering and product-thinking capabilities.
 
-## What it does
+## What this is about
 
-Mandatory capabilities preserved by the released POC:
+- Inspired by InsaneSDD, this POC explores how its UX design stage could become more visual and interactive.
+- It turns a structured UX specification into responsive screen previews that reviewers can inspect, revise, regenerate, and approve.
+- It also shows how the module can run on its own or integrate into a React host using Module Federation.
 
-- Specification-driven rendering of all five AgentPilot screens through one common path
-- Runtime design-token theming with namespaced `--uxds-*` CSS custom properties
-- Per-screen, version-bound approval
-- Append-only audit log derived from governance events
-- AgentPilot seed-data fidelity
-- Approval bound only to the current screen version
-- Agile-plan readiness only after every required current screen version is approved
+<p align="center">
+  <img src="docs/assets/insanesdd-ux-design-stage.png" alt="InsaneSDD UX Design stage showing AgentPilot screens and review actions" width="900" />
+</p>
 
-Optional surfaces present in the current build include persona review lens, responsive preview (including tablet), journey walkthrough, screen-version history UI, and the full accessibility evidence overlay.
+### Architecture at a glance
 
-## How it works
+Two entry paths reach the same React app: a standalone Vite SPA, and a simulated InsaneSDD host that loads the studio through Module Federation. A validated AgentPilot UXSpec drives an allowlisted renderer and runtime `--uxds-*` tokens. Reviewers approve, revise, or regenerate screens; those actions append governance events. Regeneration uses a deterministic mock provider. State rehydrates through a validated localStorage adapter. Selectors derive the audit log and approval gate. In federated mode, gate completion updates the host and opens a simulated Agile Editor — not a real Agile plan, backend, LLM, or authentication flow.
+
+```mermaid
+flowchart LR
+    Host["Simulated InsaneSDD host"] -->|"Module Federation remote"| Studio["UX Design Studio"]
+    Standalone["Standalone Vite SPA"] --> Studio
+    Spec["Validated AgentPilot UXSpec"] --> Renderer["Allowlisted renderer and runtime tokens"]
+    Renderer --> Studio
+    Studio --> Review["Five-screen review workflow"]
+    Review --> Governance["Approve, revise, regenerate events"]
+    Governance --> Mock["Deterministic mock provider"]
+    Governance --> Storage["Validated localStorage adapter"]
+    Governance --> Output["Audit log and approval gate"]
+    Output --> Handoff["Simulated Agile Editor handoff"]
+```
 
 ### Layering
+
+The studio keeps clear boundaries so UI, domain rules, adapters, and host integration stay separate:
 
 ```text
 src/app            bootstrap, routes, providers, feature flags
@@ -33,297 +50,122 @@ src/ports          persistence, provider, clock, ID contracts
 src/infrastructure seed data, browser persistence, mock design-agent provider
 src/renderer       allowlisted registry, recursive composer, theming, actions
 src/ui             shared shell and presentation primitives
+src/integration    host contract mount boundary and gate-event handoff
 ```
 
-Dependency direction: UI and infrastructure depend on application; application depends on domain and ports; renderer depends on the UXSpec domain model; domain stays free of React, routing, and browser APIs.
+## Best practices showcase (senior frontend checklist)
 
-### UXSpec boundary
+Interview-oriented checklist of practices that are **practically implemented** in this repository. Each item links to evidence so claims can be verified in code or docs. A short honest "deliberately not used" list follows.
 
-- Seed UXSpec, persisted browser state, and provider output are treated as untrusted.
-- Structured data is runtime-validated and normalized once at the application boundary.
-- The validated source UXSpec remains immutable.
-- Approval, revision, regeneration, and audit state are **not** stored inside UXSpec.
+### Engineering and delivery process
 
-### Renderer and theming
+- [x] Agile plan with epics, stories, tasks, stable keys, DoR/DoD, and WIP limit 1 — [`docs/UX_Design_Studio_Development_Plan_v1.0.md`](docs/UX_Design_Studio_Development_Plan_v1.0.md), [`.github/import/development-plan.json`](.github/import/development-plan.json)
+- [x] GitHub Projects plan validation and import automation — [`scripts/import-github-project.ts`](scripts/import-github-project.ts)
+- [x] Branching convention `<type>/uxds-<issue>-<slug>`, `staging` / `main` flow, merge commits, retained feature branches — [`AGENTS.md`](AGENTS.md)
+- [x] Conventional Commits with signed commits and fail-closed CI signature verification — [`scripts/ci/verify-commit-signatures.ts`](scripts/ci/verify-commit-signatures.ts)
+- [x] Pull request template with summary, acceptance criteria, and verification table — [`.github/pull_request_template.md`](.github/pull_request_template.md)
+- [x] CI quality gate: lint, typecheck, unit tests, build, Playwright e2e, signature check; SHA-pinned Actions; concurrency cancellation — [`.github/workflows/quality.yml`](.github/workflows/quality.yml)
+- [x] ADRs, PRD → architecture → issue → code → test traceability, release acceptance gates, release notes, tag `v0.1.0-poc` — [`docs/architecture-decisions.md`](docs/architecture-decisions.md), [`docs/traceability.md`](docs/traceability.md), [`docs/release-acceptance.md`](docs/release-acceptance.md), [`docs/release-notes-v0.1.0-poc.md`](docs/release-notes-v0.1.0-poc.md)
+- [x] Agent-governed delivery: run manifests, independent read-only verifier, CI-validated agent-control files — [`.agents/`](.agents), [`.agents/skills/uxds-story-loop/SKILL.md`](.agents/skills/uxds-story-loop/SKILL.md), [`.agents/verifiers/uxds-story-verifier.md`](.agents/verifiers/uxds-story-verifier.md), [`scripts/agent/validate-agent-control.ts`](scripts/agent/validate-agent-control.ts)
+- [x] Static SPA deploy config with deep-link rewrites (Vercel) — [`apps/ux-design-studio/vercel.json`](apps/ux-design-studio/vercel.json)
+- [x] Branch protection / required checks documented for GitHub settings (rulesets live on the remote, not in-repo) — [`AGENTS.md`](AGENTS.md)
 
-- Every screen is composed by the same recursive composer and allowlisted component registry.
-- Registry entries validate props. Unknown types and invalid props fail safely without crashing the full screen.
-- Component-tree depth is bounded. There is no `eval`, `dangerouslySetInnerHTML`, runtime-generated JavaScript, or model-generated event handlers.
-- Semantic design tokens map only to allowlisted values and are scoped to the preview root as `--uxds-*` variables.
+### Architecture
 
-### Governance, regeneration, and persistence
+- [x] Hexagonal (ports and adapters) layering: `domain` / `application` / `ports` / `infrastructure` / `renderer` / `features` / `ui` / `integration` — [`apps/ux-design-studio/src/`](apps/ux-design-studio/src/)
+- [x] Framework-free domain (purity asserted by test; injected clock and ID generation) — [`apps/ux-design-studio/src/domain/governance/governance.test.ts`](apps/ux-design-studio/src/domain/governance/governance.test.ts)
+- [x] Micro-frontend via route-level Module Federation (`@module-federation/vite`): remote exposes `./App`, host consumes it; React, React DOM, and React Router shared as singletons — [`apps/ux-design-studio/module-federation.config.ts`](apps/ux-design-studio/module-federation.config.ts), [`apps/insanesdd-host/module-federation.config.ts`](apps/insanesdd-host/module-federation.config.ts)
+- [x] Graceful remote failure: host error boundary, retry, and e2e proof — [`apps/insanesdd-host/src/federation/RemoteErrorBoundary.tsx`](apps/insanesdd-host/src/federation/RemoteErrorBoundary.tsx), [`e2e/federation/remote-failure.spec.ts`](e2e/federation/remote-failure.spec.ts)
+- [x] Zod-validated host ↔ remote contract package — [`packages/uxds-host-contract/src/parse-contract.ts`](packages/uxds-host-contract/src/parse-contract.ts)
+- [x] pnpm monorepo workspace (`apps/*`, `packages/*`) — [`pnpm-workspace.yaml`](pnpm-workspace.yaml)
+- [x] Feature flags for independently removable optional modules — [`apps/ux-design-studio/src/app/config.ts`](apps/ux-design-studio/src/app/config.ts)
 
-- Approval, revision, and regeneration append domain events. Visible review status and audit history derive from that event stream.
-- Approval belongs to one screen version and is effective only for that current version.
-- Regeneration uses a mocked `DesignAgentProvider` (no real LLM, no provider network, no secrets). Dashboard is the regeneration target in this POC.
-- A successful regeneration creates a new current version; prior approvals do not carry forward.
-- A later revision request invalidates effective approval for that screen version.
-- Governance persistence uses one managed browser-storage key for AgentPilot:
+### Frontend (React) patterns
 
-```text
-uxds:v1:project-agentpilot:spec-agentpilot:1.0.0
-```
+- [x] Hooks in production use: `useState`, `useMemo`, `useCallback`, `useContext`, `useRef`, `useId`, `useEffect` with cleanup, and custom hooks (`useGovernance`, `useStudioRouting`, `useGateEvents`) — [`apps/ux-design-studio/src/features/governance/GovernanceProvider.tsx`](apps/ux-design-studio/src/features/governance/GovernanceProvider.tsx), [`apps/ux-design-studio/src/features/governance/governance-context.ts`](apps/ux-design-studio/src/features/governance/governance-context.ts), [`apps/ux-design-studio/src/app/studio-routing.tsx`](apps/ux-design-studio/src/app/studio-routing.tsx), [`apps/ux-design-studio/src/integration/use-gate-events.ts`](apps/ux-design-studio/src/integration/use-gate-events.ts)
+- [x] `AbortController` for cancellable async regeneration through a provider port — [`apps/ux-design-studio/src/features/governance/GovernanceProvider.tsx`](apps/ux-design-studio/src/features/governance/GovernanceProvider.tsx)
+- [x] Error boundaries at three levels: route, per-render-node, and federated remote — [`apps/ux-design-studio/src/app/error-boundary.tsx`](apps/ux-design-studio/src/app/error-boundary.tsx), [`apps/ux-design-studio/src/renderer/composer/NodeErrorBoundary.tsx`](apps/ux-design-studio/src/renderer/composer/NodeErrorBoundary.tsx), [`apps/insanesdd-host/src/federation/RemoteErrorBoundary.tsx`](apps/insanesdd-host/src/federation/RemoteErrorBoundary.tsx)
+- [x] `React.lazy` + `Suspense` for the federated remote — [`apps/insanesdd-host/src/federation/FederatedUxDesignStudio.tsx`](apps/insanesdd-host/src/federation/FederatedUxDesignStudio.tsx)
+- [x] Event-sourced state: pure reducer, append-only events, derived selectors (single source of truth), deep-frozen spec and tokens — [`apps/ux-design-studio/src/domain/governance/governance-reducer.ts`](apps/ux-design-studio/src/domain/governance/governance-reducer.ts), [`apps/ux-design-studio/src/domain/governance/selectors.ts`](apps/ux-design-studio/src/domain/governance/selectors.ts)
+- [x] Spec-driven rendering: recursive composer, allowlisted registry with per-type prop validation, depth guard, unknown/invalid safe fallbacks, declarative action allowlist — [`apps/ux-design-studio/src/renderer/composer/RecursiveComposer.tsx`](apps/ux-design-studio/src/renderer/composer/RecursiveComposer.tsx), [`apps/ux-design-studio/src/renderer/registry/create-registry.ts`](apps/ux-design-studio/src/renderer/registry/create-registry.ts), [`apps/ux-design-studio/src/renderer/actions/create-action-resolver.ts`](apps/ux-design-studio/src/renderer/actions/create-action-resolver.ts)
+- [x] CSS Modules + runtime `--uxds-*` design tokens scoped to the preview root, with token value validation — [`apps/ux-design-studio/src/renderer/theming/token-mapper.ts`](apps/ux-design-studio/src/renderer/theming/token-mapper.ts)
 
-Demo reset removes only that managed key. It never calls `localStorage.clear()`.
+### TypeScript rigor
 
-## Demo project
+- [x] `strict` plus `noUncheckedIndexedAccess`, `exactOptionalPropertyTypes`, and `noUnusedLocals` / `noUnusedParameters` — [`apps/ux-design-studio/tsconfig.app.json`](apps/ux-design-studio/tsconfig.app.json)
+- [x] Discriminated unions, exhaustive `never` checks, Result-style error types over thrown control flow, and `satisfies` / `as const` — [`apps/ux-design-studio/src/domain/governance/governance-reducer.ts`](apps/ux-design-studio/src/domain/governance/governance-reducer.ts), [`apps/ux-design-studio/src/domain/governance/selectors.ts`](apps/ux-design-studio/src/domain/governance/selectors.ts)
 
-| Item | Value |
-|---|---|
-| Project | AgentPilot |
-| Screens | Dashboard, Login, Task Detail, Workflow Templates, Reports Export |
-| UX personas | Alex, Jordan, Taylor (review lens context; not auth) |
-| Demo roles | Demo Approver, Demo Reviewer, Demo Viewer |
+### Security
 
-Demo roles are separate from UX personas. They are POC role simulation only—not production authentication, SSO, or RBAC.
+- [x] Untrusted structured data (UXSpec, provider output, localStorage, host props) validated with Zod at the boundary and frozen — [`apps/ux-design-studio/src/domain/ux-spec/load-ux-spec.ts`](apps/ux-design-studio/src/domain/ux-spec/load-ux-spec.ts), [`packages/uxds-host-contract/src/parse-contract.ts`](packages/uxds-host-contract/src/parse-contract.ts)
+- [x] No `dangerouslySetInnerHTML` / `eval` (test-enforced), URL protocol allowlist, CSS-injection-hardened tokens — [`apps/ux-design-studio/src/domain/ux-spec/schemas.ts`](apps/ux-design-studio/src/domain/ux-spec/schemas.ts), [`apps/ux-design-studio/src/renderer/registry/registry.test.tsx`](apps/ux-design-studio/src/renderer/registry/registry.test.tsx), [`apps/ux-design-studio/src/renderer/theming/token-mapper.ts`](apps/ux-design-studio/src/renderer/theming/token-mapper.ts)
+- [x] Versioned persistence envelope with corruption recovery; scoped demo-state reset (never `localStorage.clear()`) — [`apps/ux-design-studio/src/infrastructure/persistence/persisted-governance-envelope.ts`](apps/ux-design-studio/src/infrastructure/persistence/persisted-governance-envelope.ts), [`apps/ux-design-studio/src/infrastructure/persistence/local-storage-governance-repository.ts`](apps/ux-design-studio/src/infrastructure/persistence/local-storage-governance-repository.ts)
 
-| Role | Typical capability |
-|---|---|
-| Demo Approver (default) | Approve, request revision, regenerate |
-| Demo Reviewer | View overview, preview, and audit |
-| Demo Viewer | View overview, preview, and audit |
+### Accessibility (WCAG 2.1 AA target)
 
-## Prerequisites
+- [x] Semantic roles / ARIA, dialog focus trap with restore, arrow-key tab navigation, `aria-live` announcements, `prefers-reduced-motion` support — [`apps/ux-design-studio/src/features/audit/ResetDemoStateControl.tsx`](apps/ux-design-studio/src/features/audit/ResetDemoStateControl.tsx)
+- [x] Behavioral accessibility assertions in unit and e2e tests (roles, keyboard flows, reduced-motion CSS) — [`e2e/standalone/standalone-smoke.spec.ts`](e2e/standalone/standalone-smoke.spec.ts), [`.github/workflows/quality.yml`](.github/workflows/quality.yml)
 
-- Node.js **22** or newer (CI uses Node 22)
-- pnpm via Corepack, pinned as `pnpm@10.13.1` in `package.json`
-- Optional: GitHub CLI (`gh`) for planning/import and agent Project helpers
+### Testing
 
-The application itself requires **no environment variables and no secrets**.
+- [x] Vitest + React Testing Library + user-event — [`apps/ux-design-studio/vitest.config.ts`](apps/ux-design-studio/vitest.config.ts), [`.github/workflows/quality.yml`](.github/workflows/quality.yml)
+- [x] Contract / boundary tests for UXSpec, registry, persistence, host contract, and provider port — [`apps/ux-design-studio/src/domain/ux-spec/load-ux-spec.test.ts`](apps/ux-design-studio/src/domain/ux-spec/load-ux-spec.test.ts), [`apps/ux-design-studio/src/infrastructure/persistence/local-storage-governance-repository.test.ts`](apps/ux-design-studio/src/infrastructure/persistence/local-storage-governance-repository.test.ts), [`packages/uxds-host-contract/src/parse-contract.ts`](packages/uxds-host-contract/src/parse-contract.ts)
+- [x] Critical-path integration test — [`apps/ux-design-studio/src/app/critical-demo-flow.integration.test.tsx`](apps/ux-design-studio/src/app/critical-demo-flow.integration.test.tsx)
+- [x] Cross-app Playwright e2e (standalone + federation projects) — [`playwright.config.ts`](playwright.config.ts), [`e2e/federation/remote-failure.spec.ts`](e2e/federation/remote-failure.spec.ts)
 
-## Install and run
+### Deliberately not used (and why)
+
+These common senior-interview topics are **intentionally absent** here; they are not missing by accident:
+
+- **`useReducer` in React** — the pure reducer lives in the framework-free domain (`reduceGovernance`); React holds state via `useState` + provider wiring.
+- **`React.memo` / portals** — no measured need at POC scale; isolation uses error boundaries and scoped CSS Modules instead.
+- **Studio SPA route-level code splitting** — five-screen SPA; the Module Federation remote is the intentional split point (`React.lazy` in the host).
+- **axe / jest-axe CI scans** — accessibility is covered by behavioral unit and Playwright assertions rather than an automated axe gate.
+- **Coverage thresholds, commitlint, husky** — quality is enforced by CI lint/typecheck/test/build/e2e plus fail-closed signature verification, not local git hooks or coverage gates.
+- **Real backend, LLM, or production auth** — explicit POC boundaries; see [Run the demo](#run-the-demo).
+
+## Run the demo
+
+Prerequisites: Node.js **22+**, pnpm via Corepack (`pnpm@10.13.1`). No app secrets or environment variables are required for the standalone studio.
 
 ```bash
 corepack enable
 corepack pnpm install
-```
-
-### Development server
-
-```bash
 pnpm run dev
 ```
 
-Open [http://127.0.0.1:5173](http://127.0.0.1:5173) (Vite `server.port` is `5173`).
+Open [http://127.0.0.1:5173](http://127.0.0.1:5173).
 
-### Production build and local preview
-
-```bash
-pnpm run build
-pnpm run preview
-```
-
-- Production build command: `pnpm run build`
-- Output directory: `dist/`
-- Preview defaults to Vite’s preview port **4173** unless overridden
-- Playwright E2E defaults to `http://127.0.0.1:4173` (starts local preview unless `PLAYWRIGHT_BASE_URL` is set)
-
-## Demo walkthrough
-
-1. Open **Overview** (`/overview`) and confirm AgentPilot summary, five screen cards, and gate progress.
-2. Use **POC demo role** to select **Demo Approver** when exercising approval or regeneration.
-3. Open each screen review (or start with Dashboard via **Review** / `Open Dashboard review`).
-4. Approve current versions until the gate shows readiness for Agile plan generation, or intentionally leave the gate incomplete to explore status UI.
-5. On Dashboard, submit a structured revision (node selection, category, description ≥ 8 characters).
-6. Optionally enable **Simulate controlled provider failure**, click **Regenerate**, confirm the failure announcement and that the prior current version is retained, then disable the failure toggle.
-7. Regenerate successfully; confirm loading / live announcement, regenerated content (for example **Priority operations view**), and a new current version.
-8. Inspect **Version history** for baseline vs regenerated entries, source labels, and timestamps.
-9. Confirm the gate is incomplete until the new current Dashboard version is reapproved; approve it to restore the gate when other required screens remain approved.
-10. Open **Accessibility evidence**, exercise markers with keyboard focus, and confirm the preview remains operable.
-11. Open **Audit** (`/audit`) to review the append-only event history.
-12. Use **Reset demo state** on Audit to return to the deterministic seed governance state.
-
-## Reset demo state
-
-On `/audit`:
-
-1. Choose **Reset demo state**.
-2. Confirm in the dialog (**Confirm reset**).
-
-Behavior:
-
-- Removes only the managed governance key `uxds:v1:project-agentpilot:spec-agentpilot:1.0.0`
-- Does **not** call `localStorage.clear()`
-- Does not mutate the frozen AgentPilot UXSpec seed
-- Announces that demo governance state was reset
-
-Never paste arbitrary JSON into browser storage to prepare a demo. Use the UI to approve screens, then reset with the managed-key control only. See [`docs/demo-script.md`](docs/demo-script.md) for clean and prepared demo states.
-
-## Routes
-
-```text
-/                 -> redirect to /overview
-/overview         -> specification overview and approval gate summary
-/review/:screenId -> per-screen review workbench (preview, decision panel, optional overlays)
-/audit            -> append-only audit log and demo reset
-*                 -> controlled not-found page
-```
-
-Application and route error boundaries keep the shell available after feature failures.
-
-Canonical review IDs include `screen-dashboard`, `screen-login`, `screen-task-detail`, `screen-workflow-templates`, and `screen-reports-export`.
-
-## Scripts
-
-### Application
-
-| Script | Purpose |
-|---|---|
-| `pnpm run dev` | Start the Vite development server |
-| `pnpm run build` | Type-check the app project and create the production build in `dist/` |
-| `pnpm run preview` | Preview the production build locally |
-| `pnpm run lint` | Run ESLint |
-| `pnpm run typecheck` | Strict TypeScript checks (`tsconfig.app`, `tsconfig.node`, `tsconfig.scripts`) |
-
-### Testing
-
-| Script | Purpose |
-|---|---|
-| `pnpm run test` | Vitest unit/integration suite |
-| `pnpm run test:watch` | Vitest watch mode |
-| `pnpm run test:e2e` | Playwright Chromium Epic 5 smoke against production preview |
-| `pnpm run test:e2e:headed` | Playwright headed smoke |
-| `pnpm run test:e2e:report` | Open the Playwright HTML report |
-
-Before first E2E run locally, install the Chromium browser Playwright expects:
+Optional federated host mode:
 
 ```bash
-pnpm exec playwright install chromium
+pnpm run build:studio
+VITE_UXDS_REMOTE_ENTRY=http://127.0.0.1:4174/remoteEntry.js pnpm run build:host
+pnpm --filter @uxds/studio exec vite preview --host 127.0.0.1 --port 4174
+pnpm --filter @uxds/host exec vite preview --host 127.0.0.1 --port 4173
 ```
 
-Generated Playwright evidence (`playwright-report/`, `test-results/`) is gitignored.
+Then open `http://127.0.0.1:4173/projects/project-agentpilot/ux-design-studio/overview`.
 
-### Planning and agent tooling
+POC boundaries: no real backend, LLM, authentication, or Agile-plan generation. The host is simulated; demo reset only clears the managed governance storage key.
 
-| Script | Purpose |
-|---|---|
-| `pnpm run plan:validate` | Validate `.github/import/development-plan.json` |
-| `pnpm run github:import:dry` | Dry-run GitHub Project import |
-| `pnpm run github:import` | Execute GitHub Project import |
-| `pnpm run github:import:verbose` | Verbose import |
-| `pnpm run agent:validate` | Validate the agent-control layer and run manifests |
-| `pnpm run agent:project-status` | Update one GitHub Project status item (`--issue` required) |
-| `pnpm run ci:verify-signatures` | Verify GitHub commit signature status for a commit range |
-
-Import commands can mutate GitHub. Run them only when explicitly authorized.
+## Test and build
 
 ```bash
-gh auth login -h github.com
-gh auth refresh -h github.com -s repo,project,workflow
-corepack pnpm run plan:validate
-corepack pnpm run github:import:dry
-```
-
-## Testing and CI
-
-- **Vitest** covers domain governance, renderer safety, application commands, feature flows (approval, revision, regeneration, version history, accessibility overlay, audit reset), seed/persistence contracts, and routes.
-- **Playwright** (`e2e/epic5-release-smoke.spec.ts`) exercises the released Epic 5 browser journey against the production preview, including managed-key reset, controlled provider failure, regeneration, reapproval, accessibility overlay keyboard use, and reload persistence.
-
-GitHub Actions workflow [`.github/workflows/quality.yml`](.github/workflows/quality.yml) runs on pull requests and pushes to `staging` / `main`, plus `workflow_dispatch`. Stable required job names:
-
-| Job | What it enforces |
-|---|---|
-| Quality gate | `agent:validate`, `plan:validate`, lint, typecheck, test, build |
-| Playwright E2E | Chromium install, `test:e2e`, evidence artifact upload |
-| Commit signatures | Fail-closed GitHub commit verification for the PR or push range |
-
-## Branch and release
-
-```text
-feature / fix / chore / test / docs branch from staging
-  -> pull request to staging
-      -> merge commit (retain feature branch; no squash)
-          -> release pull request from staging to main
-              -> tag v0.1.0-poc
-```
-
-- `main` is the accepted POC release branch; `staging` is the integration branch.
-- Use signed commits (`git commit -S`); local `git verify-commit` and CI Commit signatures complement each other.
-- Do not push directly to `staging` or `main`, and do not force-push protected branches.
-- Branch protection / rulesets require pull requests, conversation resolution, signed commits, and the three CI jobs above. Merge commits remain permitted; linear history is not required.
-
-## Non-goals / explicit exclusions
-
-Do not expect this POC to include:
-
-- Drag-and-drop or freeform design editing
-- A real LLM integration or production backend
-- Production authentication, SSO, OIDC, or RBAC
-- Persistence beyond the approved browser-storage adapter (no durable signed audit store)
-- Multi-project or multi-repository support
-- Runtime Module Federation, route-level MFE packaging, or production event streaming / Live Terminal publication
-- Production APIs, a real Design Agent API, or a general-purpose low-code builder
-- Arbitrary React component execution
-- Arbitrary HTML, JavaScript, CSS, or dynamic imports from UXSpec data
-- Pixel-perfect production design
-- Real Agile plan generation (gate readiness is a POC signal only)
-- Unapproved dependencies or architecture frameworks
-
-Production evolution paths for OIDC/SSO, server RBAC, durable event storage, signed audit events, retention/legal hold, real Design Agent API, Live Terminal publication, and route-level MFE integration are documented in [`docs/architecture-decisions.md`](docs/architecture-decisions.md) and Architecture §29 — not implemented here.
-
-## Controlling documents
-
-Document authority order:
-
-1. Frozen Source of Truth: [`docs/UX Design Studio — Source of Truth.pdf`](docs/UX%20Design%20Studio%20—%20Source%20of%20Truth.pdf)
-2. [`docs/UX_Design_Studio_PRD_v1.0.md`](docs/UX_Design_Studio_PRD_v1.0.md)
-3. [`docs/UX_Design_Studio_Technical_Architecture_v1.0.md`](docs/UX_Design_Studio_Technical_Architecture_v1.0.md)
-4. [`docs/UX_Design_Studio_Development_Plan_v1.0.md`](docs/UX_Design_Studio_Development_Plan_v1.0.md)
-5. Approved GitHub stories and acceptance criteria
-6. [`AGENTS.md`](AGENTS.md) for repository-wide agent and delivery policy
-
-Related planning tooling notes: [`docs/GitHub_Import_Instructions.md`](docs/GitHub_Import_Instructions.md).
-
-### Release documentation
-
-| Document | Purpose |
-|---|---|
-| [`docs/architecture-decisions.md`](docs/architecture-decisions.md) | Accepted ADR-001–008 with implementation and test evidence |
-| [`docs/traceability.md`](docs/traceability.md) | PRD → architecture → GitHub → code → tests → PR evidence |
-| [`docs/release-acceptance.md`](docs/release-acceptance.md) | Hard gates G1–G5, cut-line, PRD checklist, 50-hour accounting |
-| [`docs/demo-script.md`](docs/demo-script.md) | 75-second positioning, 6–8 minute live flow, rehearsal log |
-
-## Deployment
-
-The approved target is a static SPA from `dist/` on Vercel. No application secrets are required. There are no serverless functions or API routes.
-
-### Build
-
-```bash
+pnpm run lint
+pnpm run typecheck
+pnpm run test
+pnpm run test:e2e
 pnpm run build
 ```
 
-Output: `dist/`.
+CI runs the same quality gate (lint, typecheck, unit tests, build), Playwright e2e, and fail-closed commit-signature checks on pull requests and pushes to `staging` / `main`. See [`.github/workflows/quality.yml`](.github/workflows/quality.yml).
 
-### Vercel / SPA deep links
+## Project documents
 
-[`vercel.json`](vercel.json) configures:
-
-- `framework`: `vite`
-- `buildCommand`: `pnpm run build`
-- `outputDirectory`: `dist`
-- SPA rewrite to `/index.html` for non-asset routes (so `/overview`, `/review/:screenId`, and `/audit` survive refresh)
-
-Verify after deploy:
-
-- `/` → app redirect to `/overview`
-- `/overview`, `/review/screen-dashboard`, `/audit` load on direct navigation
-- Unknown paths show the controlled in-app not-found page
-- `/assets/*` continue to load as static files
-
-### Release URLs and tag
-
-| Item | Value |
-|---|---|
-| Preview / project domain | https://ux-design-studio-poc.vercel.app |
-| Production URL | https://ux-design-studio-poc.vercel.app |
-| Release tag | `v0.1.0-poc` — pending final main release |
-| GitHub Release | pending final main release |
-
-### Playwright against a deployment
-
-```bash
-PLAYWRIGHT_BASE_URL=https://example.vercel.app pnpm run test:e2e
-```
-
-When `PLAYWRIGHT_BASE_URL` is set, Playwright does not start the local Vite preview server.
+- [`docs/UX_Design_Studio_PRD_v1.0.md`](docs/UX_Design_Studio_PRD_v1.0.md)
+- [`docs/UX_Design_Studio_Technical_Architecture_v1.0.md`](docs/UX_Design_Studio_Technical_Architecture_v1.0.md)
+- [`docs/Federated_Host_Integration_Architecture_v1.0.md`](docs/Federated_Host_Integration_Architecture_v1.0.md)
+- [`docs/architecture-decisions.md`](docs/architecture-decisions.md)
+- [`docs/demo-script.md`](docs/demo-script.md)
+- [`AGENTS.md`](AGENTS.md)

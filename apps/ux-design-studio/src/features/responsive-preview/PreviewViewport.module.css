@@ -1,0 +1,39 @@
+.scrollHost {
+  overflow-x: auto;
+  max-width: 100%;
+}
+
+.viewport {
+  box-sizing: border-box;
+  max-width: 100%;
+  margin: 0 auto;
+  min-height: 24rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.widthIndicator {
+  align-self: center;
+  margin: 0;
+  padding: 0.25rem 0.75rem;
+  border: 1px solid var(--studio-color-border);
+  border-radius: 999px;
+  background: var(--studio-color-surface);
+  box-shadow: var(--studio-shadow-sm);
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--studio-color-text-subtle);
+  white-space: nowrap;
+}
+
+.frame {
+  min-width: 0;
+  flex: 1 1 auto;
+  border: 1px solid var(--studio-color-border);
+  border-radius: 1rem;
+  background: var(--uxds-color-surface, #ffffff);
+  color: var(--uxds-color-text, #1a1a1a);
+  box-shadow: var(--studio-shadow-lg);
+  padding: 1rem 1.25rem 1.25rem;
+}

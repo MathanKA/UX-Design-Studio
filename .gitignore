@@ -13,3 +13,7 @@ test-results/
 blob-report/
 playwright/.cache/
 .vercel
+
+# Module Federation local diagnostics
+**/.mf/
+apps/*/dist/

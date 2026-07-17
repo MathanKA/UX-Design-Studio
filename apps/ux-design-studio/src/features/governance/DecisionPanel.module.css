@@ -1,0 +1,316 @@
+.panel {
+  border: 1px solid var(--studio-color-border);
+  border-radius: var(--studio-radius-md);
+  background: var(--studio-color-surface);
+  padding: var(--studio-space-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--studio-space-lg);
+}
+
+.heading {
+  margin: 0;
+  font-size: var(--studio-font-size-md);
+}
+
+.lede {
+  margin: 0;
+  color: var(--studio-color-text-muted);
+  font-size: var(--studio-font-size-xs);
+}
+
+.body {
+  margin: 0;
+  color: var(--studio-color-text-subtle);
+  font-size: 0.92rem;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  border-top: 1px solid var(--studio-color-border);
+  padding-top: var(--studio-space-md);
+}
+
+.meta {
+  margin: 0;
+  display: grid;
+  gap: 0.55rem;
+  border-top: 1px solid var(--studio-color-border);
+  padding-top: var(--studio-space-md);
+}
+
+.meta div {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.meta dt {
+  margin: 0;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--studio-color-text-muted);
+  white-space: nowrap;
+}
+
+.meta dd {
+  margin: 0;
+  font-size: 0.82rem;
+  word-break: break-word;
+  text-align: right;
+}
+
+.meta dd[data-decision="screen-version"] {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.72rem;
+  border: 1px solid var(--studio-color-border);
+  border-radius: 999px;
+  background: var(--studio-color-surface-muted);
+  padding: 0.15rem 0.5rem;
+}
+
+.meta dd[data-decision="status"] {
+  font-weight: 600;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.field label {
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.field textarea {
+  resize: vertical;
+  min-height: 4.5rem;
+  padding: 0.5rem;
+  border: 1px solid var(--studio-color-border-strong);
+  border-radius: var(--studio-radius-sm);
+  font: inherit;
+}
+
+.field textarea:focus-visible {
+  outline: 2px solid var(--studio-color-accent);
+  outline-offset: 2px;
+}
+
+.hint {
+  margin: 0;
+  color: var(--studio-color-text-muted);
+  font-size: 0.75rem;
+}
+
+.approve,
+.revise,
+.regenerateButton,
+.cancelButton,
+.retryButton {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.55rem 0.85rem;
+  border-radius: var(--studio-radius-md);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.approve {
+  border: 1px solid var(--studio-color-accent);
+  background: var(--studio-color-accent);
+  color: #ffffff;
+  width: 100%;
+  text-align: center;
+  box-shadow: var(--studio-shadow-sm);
+}
+
+.approve:hover:not(:disabled) {
+  background: var(--studio-color-accent-hover);
+}
+
+.revise {
+  border: 1px solid var(--studio-color-accent);
+  background: var(--studio-color-surface);
+  color: var(--studio-color-accent);
+  width: 100%;
+  text-align: center;
+}
+
+.revise:hover:not(:disabled) {
+  background: var(--studio-color-accent-soft);
+}
+
+.approve:focus-visible,
+.revise:focus-visible,
+.regenerateButton:focus-visible,
+.cancelButton:focus-visible,
+.retryButton:focus-visible,
+.field select:focus-visible {
+  outline: 2px solid var(--studio-color-focus);
+  outline-offset: 2px;
+}
+
+.approve:disabled,
+.revise:disabled,
+.regenerateButton:disabled,
+.cancelButton:disabled,
+.retryButton:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.sectionHeading {
+  margin: 0;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--studio-color-text-subtle);
+}
+
+.roleMessage {
+  margin: 0;
+  padding: 0.55rem 0.65rem;
+  border: 1px solid var(--studio-color-border);
+  border-radius: var(--studio-radius-sm);
+  background: var(--studio-color-surface-muted);
+  color: var(--studio-color-text-subtle);
+  font-size: 0.85rem;
+}
+
+.fieldset {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  min-width: 0;
+}
+
+.fieldset legend {
+  padding: 0;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.nodeList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  max-height: 10rem;
+  overflow: auto;
+  margin-top: 0.35rem;
+  padding: 0.45rem;
+  border: 1px solid var(--studio-color-border);
+  border-radius: var(--studio-radius-sm);
+  background: var(--studio-color-surface);
+}
+
+.nodeOption {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.4rem;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+
+.nodeOption input {
+  accent-color: var(--studio-color-accent);
+}
+
+.field select {
+  padding: 0.45rem 0.5rem;
+  border: 1px solid var(--studio-color-border-strong);
+  border-radius: var(--studio-radius-sm);
+  font: inherit;
+  background: #ffffff;
+}
+
+.regenerate {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  border-top: 1px solid var(--studio-color-border);
+  padding-top: var(--studio-space-md);
+}
+
+.regenerateButton {
+  border: 1px solid var(--studio-color-border-strong);
+  background: var(--studio-color-surface-muted);
+  color: var(--studio-color-text-subtle);
+}
+
+.regenerateButton:hover:not(:disabled) {
+  border-color: var(--studio-color-accent);
+  color: var(--studio-color-accent);
+}
+
+.cancelButton {
+  border: 1px solid #8a1f1f;
+  background: #ffffff;
+  color: #8a1f1f;
+}
+
+.retryButton {
+  border: 1px solid var(--studio-color-text);
+  background: #ffffff;
+  color: var(--studio-color-text);
+}
+
+.regenerateActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.controlledFailure {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.4rem;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+
+.progress {
+  border-top: 1px solid var(--studio-color-border);
+  padding-top: var(--studio-space-md);
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.progressHeading {
+  margin: 0;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--studio-color-text-subtle);
+}
+
+.progress p {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--studio-color-text-subtle);
+}
+
+.feedback,
+.feedbackError {
+  margin: 0;
+  min-height: 1.25rem;
+  font-size: 0.85rem;
+}
+
+.feedback {
+  color: #1f4d2e;
+}
+
+.feedbackError {
+  color: #8a1f1f;
+}
