@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { useStudioRouting } from "../../app/studio-routing";
 import type { OverviewScreenCard } from "../../domain/ux-spec/overview-selectors";
 import styles from "./OverviewPage.module.css";
 
@@ -8,6 +9,7 @@ type OverviewCardProps = {
 };
 
 export function OverviewCard({ screen, statusLabel }: OverviewCardProps) {
+  const { toStudio } = useStudioRouting();
   return (
     <article className={styles.card} data-screen-card={screen.id}>
       <h3 className={styles.cardTitle}>{screen.name}</h3>
@@ -24,7 +26,7 @@ export function OverviewCard({ screen, statusLabel }: OverviewCardProps) {
       </p>
       <Link
         className={styles.cardAction}
-        to={screen.reviewHref}
+        to={toStudio(screen.reviewHref)}
         aria-label={`Open ${screen.name} review`}
       >
         Open review

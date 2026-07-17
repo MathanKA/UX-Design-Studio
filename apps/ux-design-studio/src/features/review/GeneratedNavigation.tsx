@@ -1,4 +1,5 @@
 import { NavLink } from "react-router-dom";
+import { useStudioRouting } from "../../app/studio-routing";
 import type { NavigationItem, NavigationSpec, ScreenId } from "../../domain/ux-spec";
 import type { ScreenReviewStatus } from "../../domain/governance";
 import { cssClass } from "../../renderer/styles/css-class";
@@ -47,6 +48,7 @@ export function GeneratedNavigation({
   screenStatuses,
   approvalProgress,
 }: GeneratedNavigationProps) {
+  const { toStudio } = useStudioRouting();
   const items =
     mode === "desktop" ? navigation.desktop.items : navigation.mobile.items;
   const validItems = items.filter((item) => isValidTarget(item, knownScreenIds));
@@ -109,7 +111,7 @@ export function GeneratedNavigation({
           return (
             <li key={item.id}>
               <NavLink
-                to={`/review/${item.screenId}`}
+                to={toStudio(`review/${item.screenId}`)}
                 className={({ isActive }) =>
                   isActive || activeScreenId === item.screenId
                     ? `${cssClass(styles.navLink, "navLink")} ${cssClass(styles.navLinkActive, "navLinkActive")}`

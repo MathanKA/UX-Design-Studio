@@ -21,6 +21,7 @@ import {
 } from "../../renderer";
 import { appConfig } from "../../app/config";
 import { ErrorBoundary } from "../../app/error-boundary";
+import { useStudioRouting } from "../../app/studio-routing";
 import {
   EmptyState,
   FailureState,
@@ -78,6 +79,7 @@ function statusTone(
 }
 
 export function ReviewWorkbench({ screenId, navigate }: ReviewWorkbenchProps) {
+  const { toStudio } = useStudioRouting();
   const {
     getScreen,
     state,
@@ -155,7 +157,7 @@ export function ReviewWorkbench({ screenId, navigate }: ReviewWorkbenchProps) {
 
   const actionResolver = createActionResolver(knownScreenIds, {
     navigate: (target) => {
-      navigate(`/review/${target}`);
+      navigate(toStudio(`review/${target}`));
     },
   });
 
@@ -180,13 +182,13 @@ export function ReviewWorkbench({ screenId, navigate }: ReviewWorkbenchProps) {
     }
     setJourneyStepIndex(next.current.index);
     setJourneyAnnouncement(announce);
-    navigate(`/review/${next.current.step.screenId}`);
+    navigate(toStudio(`review/${next.current.step.screenId}`));
   };
 
   const previewContent = !screen || !screenId ? (
     <InvalidRouteState
       {...(screenId !== undefined ? { screenId } : {})}
-      actions={<Link to="/overview">Return to overview</Link>}
+      actions={<Link to={toStudio("overview")}>Return to overview</Link>}
     />
   ) : (
     <ErrorBoundary
