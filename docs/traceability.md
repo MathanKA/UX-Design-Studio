@@ -229,9 +229,26 @@ Managed reset: `ResetDemoStateControl.tsx` removes only `uxds:v1:project-agentpi
 
 ---
 
+---
+
+## E8 — Federated Host Integration (post-release)
+
+| Item | Evidence |
+|---|---|
+| SoT authorization | `docs/UX Design Studio — Source of Truth v1.2 Addendum.md` |
+| Federation architecture | `docs/Federated_Host_Integration_Architecture_v1.0.md` |
+| ADR | ADR-009 in `docs/architecture-decisions.md` |
+| Development plan | §16 in `docs/UX_Design_Studio_Development_Plan_v1.0.md` |
+| GitHub | Epic #110; stories #111–#115; tasks #116–#125 |
+| Milestone / tag | `v0.2.0 Federated Demo` / `v0.2.0-federated-demo` |
+| Historical integrity | ADR-001 and `v0.1.0-poc` records unchanged; frozen 50-hour import plan untouched |
+
+---
+
 ## Related artifacts
 
 - [`docs/architecture-decisions.md`](architecture-decisions.md)
+- [`docs/Federated_Host_Integration_Architecture_v1.0.md`](Federated_Host_Integration_Architecture_v1.0.md)
 - [`docs/release-acceptance.md`](release-acceptance.md)
 - [`docs/demo-script.md`](demo-script.md)
 - [`README.md`](../README.md)
