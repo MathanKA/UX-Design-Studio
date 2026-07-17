@@ -1,8 +1,8 @@
 import { NavLink, Outlet } from "react-router-dom";
 import { appConfig } from "../app/config";
-import { RoleSwitcher } from "../features/governance/RoleSwitcher";
 import { useGovernance } from "../features/governance";
 import { ShellStatePanel } from "./states";
+import { StudioIcon } from "./icons";
 import styles from "./AppShell.module.css";
 
 const navItems = [
@@ -21,30 +21,30 @@ export function AppShell() {
       </a>
       <header className={styles.header}>
         <div className={styles.brand}>
-          <p className={styles.eyebrow}>InsaneSDD proof-of-work concept</p>
+          <span className={styles.brandMark} aria-hidden="true">
+            <StudioIcon name="monitor" size={18} />
+          </span>
           <h1 className={styles.title}>{appConfig.appName}</h1>
+          <span className={styles.eyebrow}>InsaneSDD proof-of-work concept</span>
         </div>
-        <div className={styles.headerTools}>
-          <nav aria-label="Studio">
-            <ul className={styles.navList}>
-              {navItems.map((item) => (
-                <li key={item.to}>
-                  <NavLink
-                    to={item.to}
-                    className={({ isActive }) =>
-                      isActive
-                        ? `${styles.navLink} ${styles.navLinkActive}`
-                        : styles.navLink
-                    }
-                  >
-                    {item.label}
-                  </NavLink>
-                </li>
-              ))}
-            </ul>
-          </nav>
-          <RoleSwitcher />
-        </div>
+        <nav aria-label="Studio" className={styles.nav}>
+          <ul className={styles.navList}>
+            {navItems.map((item) => (
+              <li key={item.to}>
+                <NavLink
+                  to={item.to}
+                  className={({ isActive }) =>
+                    isActive
+                      ? `${styles.navLink} ${styles.navLinkActive}`
+                      : styles.navLink
+                  }
+                >
+                  {item.label}
+                </NavLink>
+              </li>
+            ))}
+          </ul>
+        </nav>
       </header>
       {persistenceNotice ? (
         <div className={styles.persistenceNotice} data-testid="persistence-notice">

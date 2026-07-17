@@ -8,7 +8,6 @@ import {
   selectIsGateComplete,
   type RevisionCategory,
 } from "../../domain/governance";
-import { RoleSwitcher } from "./RoleSwitcher";
 import { useGovernance } from "./governance-context";
 import { screenReviewStatusLabel } from "./status-labels";
 import styles from "./DecisionPanel.module.css";
@@ -198,7 +197,6 @@ export function DecisionPanel({ screenId, screenName }: DecisionPanelProps) {
       <h3 id="decision-panel-heading" className={styles.heading}>
         Decision panel
       </h3>
-      <RoleSwitcher />
       <p className={styles.lede}>
         Approval and revision apply only to the current screen version. Other
         screens are unchanged.
@@ -223,12 +221,6 @@ export function DecisionPanel({ screenId, screenName }: DecisionPanelProps) {
               <dt>Review status</dt>
               <dd data-decision="status">{screenReviewStatusLabel(status)}</dd>
             </div>
-            <div>
-              <dt>Actor</dt>
-              <dd data-decision="actor">
-                {actor.displayLabel} ({actor.role})
-              </dd>
-            </div>
           </dl>
 
           {roleRestricted ? (
@@ -237,9 +229,8 @@ export function DecisionPanel({ screenId, screenName }: DecisionPanelProps) {
               data-decision="role-restricted"
               data-testid="role-restricted-message"
             >
-              The current POC demo role ({actor.displayLabel}) is read-only for
-              approval and revision. Switch to Demo Approver to submit decisions.
-              Viewing overview, preview, and audit remains available.
+              This session is read-only for approval and revision. Viewing
+              overview, preview, and audit remains available.
             </p>
           ) : null}
 

@@ -300,15 +300,8 @@ export function ReviewWorkbench({ screenId, navigate }: ReviewWorkbenchProps) {
 
   return (
     <section aria-labelledby="review-heading" className={styles.workbench}>
-      <h2 id="review-heading" className={cssClass(styles.heading, "heading")}>
-        Screen review
-      </h2>
-      <p className={cssClass(styles.meta, "meta")}>
-        Spec-driven AgentPilot preview. Navigation is generated from the seed
-        UXSpec and is separate from studio chrome.
-      </p>
-
       <ReviewToolbar
+        headingId="review-heading"
         screenName={screen?.name ?? screenId ?? "Unknown screen"}
         {...(currentVersion?.id
           ? { screenVersionId: currentVersion.id }
@@ -348,18 +341,16 @@ export function ReviewWorkbench({ screenId, navigate }: ReviewWorkbenchProps) {
             Active preview: {PREVIEW_BREAKPOINT_LABELS[breakpoint]} (
             {PREVIEW_WIDTHS[breakpoint]}px)
           </p>
-          <div className={styles.previewFrame}>
-            <div
-              className={styles.previewStack}
-              data-accessibility-overlay-active={
-                appConfig.enableAccessibilityOverlay &&
-                accessibilityOverlayEnabled
-                  ? "true"
-                  : "false"
-              }
-            >
-              {previewContent}
-            </div>
+          <div
+            className={styles.previewStack}
+            data-accessibility-overlay-active={
+              appConfig.enableAccessibilityOverlay &&
+              accessibilityOverlayEnabled
+                ? "true"
+                : "false"
+            }
+          >
+            {previewContent}
           </div>
           {appConfig.enableContrastBadges ? (
             <div className={styles.badgesSlot}>
@@ -398,7 +389,7 @@ function PreviewCanvas({ children }: { children: ReactNode }) {
       aria-labelledby="preview-canvas-heading"
       data-workbench-region="preview-canvas-shell"
     >
-      <h3 id="preview-canvas-heading" className={styles.regionHeading}>
+      <h3 id="preview-canvas-heading" className={styles.srOnly}>
         Preview canvas
       </h3>
       {children}

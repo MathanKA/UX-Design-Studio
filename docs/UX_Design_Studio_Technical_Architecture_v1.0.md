@@ -1046,10 +1046,11 @@ export type Capability =
 
 ### Enforcement
 
-- UI hides or disables restricted actions.
+- Product composition injects Demo Approver as the fixed actor.
+- No role-switching or active-actor UI is rendered.
 - Application commands re-check capability before creating events.
-- The role switcher is clearly labeled as a demo mechanism.
-- No security claim is made for client-side role switching.
+- Reviewer and Viewer fixtures remain internal to authorization tests.
+- No security claim is made for the synthetic Demo Approver identity.
 
 ---
 

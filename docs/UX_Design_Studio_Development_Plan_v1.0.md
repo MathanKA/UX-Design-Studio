@@ -492,9 +492,11 @@ As an Approver, I need to approve one current screen version independently so th
 **PRD:** FR-070–075, US-4.1, US-4.5, SC-004, SC-009  
 **Architecture:** §16.3–16.5, §20
 
-#### US-4.3: Request structured revisions with role enforcement (2h)
+#### US-4.3: Request structured revisions with actor enforcement (2h)
 
-As an Approver, I need to submit component-specific revision evidence, while Reviewer and Viewer remain read-only, so that feedback is actionable and the permission model is demonstrable.
+As the fixed Demo Approver, I need to submit component-specific revision
+evidence so that feedback is actionable and actor-attributed without adding
+role-simulation UI.
 
 **Classification:** P0 | Mandatory | B - Governance and Release | Area: Governance
 
@@ -502,15 +504,16 @@ As an Approver, I need to submit component-specific revision evidence, while Rev
 
 - [ ] Revision form captures affected node IDs, category, and required description.
 - [ ] The request references active screen, screen version, spec version, baseline, actor, and timestamp.
-- [ ] Approver can approve, revise, and regenerate; Reviewer and Viewer cannot invoke those commands.
-- [ ] The role switcher is explicitly identified as a POC demonstration mechanism.
+- [ ] Demo Approver can approve, revise, and regenerate.
+- [ ] No role switcher, role choices, or active-actor label appears in the UI.
+- [ ] Internal authorization tests retain command-level rejection coverage for non-Approver fixtures.
 
 **Engineering tasks**
 
 | Key | Task | Hours | Outcome |
 |---|---|---:|---|
 | T-4.3.1 | Build revision form, validation and request use case | 1 | Structured screen-level feedback recorded as a governance event. |
-| T-4.3.2 | Implement role capabilities and dual-layer enforcement | 1 | Mocked role behavior enforced in both UI and application commands. |
+| T-4.3.2 | Implement actor capabilities and command enforcement | 1 | Fixed Demo Approver composition with internal authorization-test coverage. |
 
 **Depends on:** US-4.2
 

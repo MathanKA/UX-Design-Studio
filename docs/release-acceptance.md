@@ -125,7 +125,7 @@ Feature flags in `src/app/config.ts` keep optional modules independently removab
 | Mock regeneration works | PASS | Regenerate tests; Playwright |
 | Audit events persist across reloads | PASS | Persistence tests; critical RTL remount; Playwright |
 | Gate-completion state works | PASS | Gate selectors; critical RTL; Playwright |
-| Role switcher demonstrates restricted actions | PASS | `revision-roles.test.tsx`; critical RTL Reviewer path |
+| Fixed Demo Approver with no role-simulation UI | PASS | `revision-roles.test.tsx`; critical RTL; Playwright absence assertion |
 
 ### Quality
 

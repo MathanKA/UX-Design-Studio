@@ -9,13 +9,14 @@
 
 ## Document authority
 Use this order, with higher entries overriding lower entries:
-1. Frozen UX Design Studio Source of Truth v1.0: `docs/UX Design Studio — Source of Truth.pdf`.
-2. `docs/UX_Design_Studio_PRD_v1.0.md`.
-3. `docs/UX_Design_Studio_Technical_Architecture_v1.0.md`.
-4. `docs/UX_Design_Studio_Development_Plan_v1.0.md`.
-5. The approved GitHub story and its acceptance criteria.
-6. Engineering tasks and implementation notes.
-7. Existing implementation patterns.
+1. Approved Source of Truth v1.1 addendum: `docs/UX Design Studio — Source of Truth v1.1 Addendum.md` (supersedes v1.0 only where explicit).
+2. Frozen UX Design Studio Source of Truth v1.0: `docs/UX Design Studio — Source of Truth.pdf`.
+3. `docs/UX_Design_Studio_PRD_v1.0.md`.
+4. `docs/UX_Design_Studio_Technical_Architecture_v1.0.md`.
+5. `docs/UX_Design_Studio_Development_Plan_v1.0.md`.
+6. The approved GitHub story and its acceptance criteria.
+7. Engineering tasks and implementation notes.
+8. Existing implementation patterns.
 
 - Do not invent Source of Truth content beyond what that PDF and the controlling Markdown documents establish.
 - Prefer the Markdown PRD, architecture, and development plan for day-to-day implementation detail.

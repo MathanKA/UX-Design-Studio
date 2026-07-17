@@ -4,6 +4,7 @@ import {
   type KeyboardEvent,
   type ReactNode,
 } from "react";
+import { StudioIcon } from "../../ui/icons";
 import styles from "./ReviewSidePanelTabs.module.css";
 
 export type ReviewSidePanelTabId =
@@ -17,6 +18,14 @@ export type ReviewSidePanelTab = {
   id: ReviewSidePanelTabId;
   label: string;
   panel: ReactNode;
+};
+
+const TAB_ICONS: Record<ReviewSidePanelTabId, string> = {
+  decision: "decision",
+  persona: "user",
+  journey: "journey",
+  history: "history",
+  a11y: "a11y",
 };
 
 type ReviewSidePanelTabsProps = {
@@ -112,7 +121,10 @@ export function ReviewSidePanelTabs({
                 onTabKeyDown(event, index);
               }}
             >
-              {tab.label}
+              <span className={styles.tabIcon} aria-hidden="true">
+                <StudioIcon name={TAB_ICONS[tab.id]} size={17} />
+              </span>
+              <span className={styles.tabLabel}>{tab.label}</span>
             </button>
           );
         })}

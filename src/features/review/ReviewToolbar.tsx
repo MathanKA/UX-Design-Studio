@@ -1,8 +1,10 @@
 import type { PreviewBreakpoint } from "../../renderer";
 import { PreviewBreakpointControls } from "../responsive-preview";
+import { StudioIcon } from "../../ui/icons";
 import styles from "./ReviewToolbar.module.css";
 
 type ReviewToolbarProps = {
+  headingId: string;
   screenName: string;
   screenVersionId?: string;
   reviewStatusLabel: string;
@@ -13,6 +15,7 @@ type ReviewToolbarProps = {
 };
 
 export function ReviewToolbar({
+  headingId,
   screenName,
   screenVersionId,
   reviewStatusLabel,
@@ -28,15 +31,25 @@ export function ReviewToolbar({
       data-workbench-region="review-toolbar"
     >
       <div className={styles.identity}>
+        <span className={styles.toolbarMark} aria-hidden="true">
+          <StudioIcon name="monitor" size={16} />
+        </span>
         <nav aria-label="Review breadcrumb" className={styles.breadcrumb}>
           <ol className={styles.breadcrumbList}>
-            <li>Review</li>
+            <li>
+              <h2 id={headingId} className={styles.heading}>
+                Screen review
+              </h2>
+            </li>
             <li aria-current="page">{screenName}</li>
           </ol>
         </nav>
         <div className={styles.chips}>
           {screenVersionId ? (
             <span className={styles.versionChip} data-toolbar="screen-version">
+              <span className={styles.versionPrefix} aria-hidden="true">
+                v.
+              </span>
               {screenVersionId}
             </span>
           ) : null}
@@ -57,6 +70,7 @@ export function ReviewToolbar({
           enableTabletPreview={enableTabletPreview}
         />
       </div>
+
     </div>
   );
 }

@@ -3,6 +3,7 @@ import type { NavigationItem, NavigationSpec, ScreenId } from "../../domain/ux-s
 import type { ScreenReviewStatus } from "../../domain/governance";
 import { cssClass } from "../../renderer/styles/css-class";
 import { screenReviewStatusLabel } from "../governance/status-labels";
+import { StudioIcon } from "../../ui/icons";
 import styles from "./ReviewPage.module.css";
 
 type GeneratedNavigationProps = {
@@ -118,6 +119,9 @@ export function GeneratedNavigation({
                   activeScreenId === item.screenId ? "page" : undefined
                 }
               >
+                <span className={styles.navLinkIcon} aria-hidden="true">
+                  <StudioIcon name={item.icon ?? "fallback"} size={16} />
+                </span>
                 <span className={styles.navLinkLabel}>{item.label}</span>
                 {screenStatuses ? (
                   <span
@@ -126,7 +130,11 @@ export function GeneratedNavigation({
                     data-screen-status={status ?? "not_reviewed"}
                     title={statusLabel}
                     aria-hidden="true"
-                  />
+                  >
+                    {tone === "approved" ? (
+                      <StudioIcon name="check" size={11} />
+                    ) : null}
+                  </span>
                 ) : null}
               </NavLink>
             </li>

@@ -3,14 +3,14 @@
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: var(--studio-space-md);
-  padding: var(--studio-space-md) var(--studio-space-lg);
+  gap: var(--studio-space-md) var(--studio-space-lg);
+  padding: var(--studio-space-sm) var(--studio-space-lg);
   border: 1px solid var(--studio-color-border);
   border-radius: var(--studio-radius-lg);
   background: var(--studio-color-surface);
   box-shadow: var(--studio-shadow-sm);
   position: sticky;
-  top: 0;
+  top: 3.4rem;
   z-index: 2;
 }
 
@@ -22,6 +22,19 @@
   min-width: 0;
 }
 
+.toolbarMark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.9rem;
+  height: 1.9rem;
+  border-radius: var(--studio-radius-md);
+  border: 1px solid var(--studio-color-border);
+  background: var(--studio-color-surface-muted);
+  color: var(--studio-color-text-subtle);
+  flex: 0 0 auto;
+}
+
 .breadcrumb {
   min-width: 0;
 }
@@ -30,7 +43,7 @@
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 0.35rem;
+  gap: 0.4rem;
   margin: 0;
   padding: 0;
   list-style: none;
@@ -38,15 +51,28 @@
   font-weight: 600;
 }
 
+.heading {
+  margin: 0;
+  font-size: var(--studio-font-size-md);
+  font-weight: 600;
+  color: var(--studio-color-text-muted);
+}
+
 .breadcrumbList li:not(:last-child)::after {
   content: "/";
-  margin-left: 0.35rem;
+  margin-left: 0.4rem;
   color: var(--studio-color-text-muted);
   font-weight: 400;
 }
 
+.breadcrumbList li {
+  display: inline-flex;
+  align-items: center;
+}
+
 .breadcrumbList li[aria-current="page"] {
   color: var(--studio-color-text);
+  font-size: 1.02rem;
 }
 
 .chips {
@@ -60,6 +86,7 @@
 .statusChip {
   display: inline-flex;
   align-items: center;
+  gap: 0.25rem;
   max-width: 100%;
   padding: 0.2rem 0.55rem;
   border-radius: 999px;
@@ -73,6 +100,10 @@
   background: var(--studio-color-surface-muted);
   color: var(--studio-color-text-subtle);
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+.versionPrefix {
+  color: var(--studio-color-text-muted);
 }
 
 .statusChip {
@@ -101,18 +132,20 @@
 }
 
 .breakpointSlot {
-  flex: 1 1 16rem;
   display: flex;
   justify-content: flex-end;
+  flex: 1 1 auto;
 }
 
 .breakpointSlot :global(fieldset) {
   margin: 0;
-  width: 100%;
-  max-width: 22rem;
 }
 
 @media (max-width: 959px) {
+  .toolbar {
+    position: static;
+  }
+
   .breakpointSlot {
     justify-content: flex-start;
   }

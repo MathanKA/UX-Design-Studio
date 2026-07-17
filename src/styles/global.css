@@ -33,6 +33,8 @@
   --studio-space-xl: 1.5rem;
   --studio-shadow-sm: 0 1px 2px rgba(20, 33, 61, 0.06);
   --studio-shadow-md: 0 8px 24px rgba(20, 33, 61, 0.1);
+  --studio-shadow-lg: 0 16px 40px rgba(20, 33, 61, 0.16);
+  --studio-canvas-dot: rgba(20, 33, 61, 0.14);
   --studio-font-size-xs: 0.75rem;
   --studio-font-size-sm: 0.85rem;
   --studio-font-size-md: 0.95rem;

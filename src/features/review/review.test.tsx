@@ -185,6 +185,17 @@ describe("US-2.4 five-screen review rendering", () => {
     expect(
       screen.getByRole("button", { name: /approve current version/i }),
     ).toBeInTheDocument();
+
+    const decisionTab = within(tablist).getByRole("tab", { name: "Decision" });
+    decisionTab.focus();
+    await user.keyboard("{ArrowRight}");
+    expect(within(tablist).getByRole("tab", { name: "Persona" })).toHaveAttribute(
+      "aria-selected",
+      "true",
+    );
+    expect(document.activeElement).toBe(
+      within(tablist).getByRole("tab", { name: "Persona" }),
+    );
   });
 
   it("renders required data, form, feedback, and chart nodes on representative screens", () => {
