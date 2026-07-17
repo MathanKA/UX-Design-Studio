@@ -33,7 +33,8 @@
 
 @media (min-width: 960px) {
   .layout {
-    grid-template-columns: 15rem minmax(0, 1fr) 22rem;
+    /* Keep side columns lean so the preview canvas gets the extra width. */
+    grid-template-columns: 14rem minmax(0, 1fr) 19.5rem;
     align-items: stretch;
   }
 }
