@@ -65,7 +65,7 @@ export function listOverviewScreens(spec: UXSpec): readonly OverviewScreenCard[]
       id: screen.id,
       name: screen.name,
       routeKey: screen.routeKey,
-      reviewHref: `/review/${screen.id}`,
+      reviewHref: `review/${screen.id}`,
     };
     if (screen.description !== undefined) {
       card.description = screen.description;

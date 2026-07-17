@@ -1,0 +1,35 @@
+:root {
+  /* Studio chrome tokens — never leak into the preview root. */
+  --studio-color-text: #14213d;
+  --studio-color-text-muted: #5c5c5c;
+  --studio-color-text-subtle: #3d3d3d;
+  --studio-color-surface: #ffffff;
+  --studio-color-surface-muted: #f7f4ef;
+  --studio-color-canvas: #ece9e3;
+  --studio-color-border: #d6d6d6;
+  --studio-color-border-strong: #cfcfcf;
+  --studio-color-accent: #c8102e;
+  --studio-color-accent-hover: #a60d26;
+  --studio-color-accent-soft: rgba(200, 16, 46, 0.08);
+  --studio-color-success: #0b6e4f;
+  --studio-color-success-soft: #e8f4ed;
+  --studio-color-warning: #b8860b;
+  --studio-color-warning-soft: #fff8e8;
+  --studio-color-focus: #0b6e4f;
+  --studio-radius-sm: 0.375rem;
+  --studio-radius-md: 0.5rem;
+  --studio-radius-lg: 0.75rem;
+  --studio-space-xs: 0.25rem;
+  --studio-space-sm: 0.5rem;
+  --studio-space-md: 0.75rem;
+  --studio-space-lg: 1rem;
+  --studio-space-xl: 1.5rem;
+  --studio-shadow-sm: 0 1px 2px rgba(20, 33, 61, 0.06);
+  --studio-shadow-md: 0 8px 24px rgba(20, 33, 61, 0.1);
+  --studio-shadow-lg: 0 16px 40px rgba(20, 33, 61, 0.16);
+  --studio-canvas-dot: rgba(20, 33, 61, 0.14);
+  --studio-font-size-xs: 0.75rem;
+  --studio-font-size-sm: 0.85rem;
+  --studio-font-size-md: 0.95rem;
+  --studio-font-size-lg: 1.5rem;
+}

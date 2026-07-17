@@ -7,6 +7,8 @@ import { ReviewPage } from "../features/review/ReviewPage";
 import { AuditPage } from "../features/audit/AuditPage";
 import { NotFoundPage } from "../features/shell/NotFoundPage";
 import { RouteErrorProbe } from "../features/shell/RouteErrorProbe";
+import type { UxDesignStudioAppMode } from "./UxDesignStudioApp";
+import { useStudioRouting } from "./studio-routing";
 
 function withRouteBoundary(page: ReactNode, title: string, resetKey: string) {
   return (
@@ -16,11 +18,13 @@ function withRouteBoundary(page: ReactNode, title: string, resetKey: string) {
   );
 }
 
-export function AppRoutes() {
+export function AppRoutes({ mode = "standalone" }: { mode?: UxDesignStudioAppMode }) {
+  const { toStudio } = useStudioRouting();
+
   return (
     <Routes>
-      <Route element={<AppShell />}>
-        <Route index element={<Navigate to="/overview" replace />} />
+      <Route element={<AppShell mode={mode} />}>
+        <Route index element={<Navigate to={toStudio("overview")} replace />} />
         <Route
           path="overview"
           element={withRouteBoundary(<OverviewPage />, "Overview failed to render", "overview")}

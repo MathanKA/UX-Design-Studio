@@ -67,7 +67,7 @@ describe("overview selectors", () => {
     expect(screens).toHaveLength(agentPilotSeed.screens.length);
     for (const screen of agentPilotSeed.screens) {
       const card = screens.find((entry) => entry.id === screen.id);
-      expect(card?.reviewHref).toBe(`/review/${screen.id}`);
+      expect(card?.reviewHref).toBe(`review/${screen.id}`);
       expect(card?.routeKey).toBe(screen.routeKey);
     }
   });

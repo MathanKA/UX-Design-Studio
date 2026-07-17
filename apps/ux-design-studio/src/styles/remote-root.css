@@ -1,12 +1,14 @@
-:root {
+.uxdsRemoteRoot {
   color-scheme: light;
   font-family: "Segoe UI", "Helvetica Neue", sans-serif;
   line-height: 1.5;
   font-weight: 400;
   color: #14213d;
   background: #f7f4ef;
+  min-height: 100%;
+  min-width: 0;
+  box-sizing: border-box;
 
-  /* Studio chrome tokens — never leak into the preview root. */
   --studio-color-text: #14213d;
   --studio-color-text-muted: #5c5c5c;
   --studio-color-text-subtle: #3d3d3d;
@@ -41,26 +43,17 @@
   --studio-font-size-lg: 1.5rem;
 }
 
-*,
-*::before,
-*::after {
+.uxdsRemoteRoot *,
+.uxdsRemoteRoot *::before,
+.uxdsRemoteRoot *::after {
   box-sizing: border-box;
 }
 
-body {
-  margin: 0;
-  min-height: 100vh;
-}
-
-a {
+.uxdsRemoteRoot a {
   color: inherit;
 }
 
-#root {
-  min-height: 100vh;
-}
-
-:focus-visible {
+.uxdsRemoteRoot :focus-visible {
   outline: 3px solid var(--studio-color-focus);
   outline-offset: 2px;
 }

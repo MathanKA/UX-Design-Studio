@@ -5,6 +5,19 @@
   background: var(--studio-color-surface-muted);
 }
 
+.shellEmbedded {
+  min-height: 100%;
+  min-width: 0;
+  grid-template-rows: auto 1fr;
+}
+
+.embeddedNav {
+  display: flex;
+  padding: 0.5rem 1rem;
+  background: var(--studio-color-surface);
+  border-bottom: 1px solid var(--studio-color-border);
+}
+
 .skipLink {
   position: absolute;
   left: -9999px;

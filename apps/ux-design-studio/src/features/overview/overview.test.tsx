@@ -85,7 +85,7 @@ describe("US-3.1 specification overview", () => {
       const link = within(cards).getByRole("link", {
         name: `Open ${seedScreen.name} review`,
       });
-      expect(link).toHaveAttribute("href", `/review/${seedScreen.id}`);
+      expect(link).toHaveAttribute("href", `/review/${seedScreen.id}`); // studio-root path
       expect(
         document.querySelector(`[data-review-status="${seedScreen.id}"]`),
       ).toHaveTextContent("Not reviewed");
